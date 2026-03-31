@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DiQualia — Intelligence Services</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&family=Lora:ital,wght@0,400;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0D1B2A;--deep:#101F2E;--surface:#142233;--panel:#182840;
+  --accent:#C8A96E;--accent2:#E2C588;--accent3:#F0D898;
+  --teal:#3A8A7A;--teal2:#4AADA0;--teal-dim:#2A6A5A;
+  --white:#F4F2EE;--off:#E8E4DC;--mid:#7A90A8;--pale:#B0C0D0;
+  --border:rgba(200,169,110,0.12);--grid:rgba(200,169,110,0.05);
+}
+html{scroll-behavior:smooth}
+body{background:var(--ink);color:var(--white);font-family:'DM Mono',monospace;font-weight:300;overflow-x:hidden}
+
+/* CURSOR */
+.cur{position:fixed;width:6px;height:6px;background:var(--accent);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%)}
+.cur-r{position:fixed;width:28px;height:28px;border:1px solid rgba(200,169,110,0.35);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:all 0.14s ease}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:20px 64px;display:flex;justify-content:space-between;align-items:center;transition:all 0.4s;border-bottom:1px solid transparent}
+nav.sc{background:rgba(13,27,42,0.97);backdrop-filter:blur(24px);border-bottom-color:var(--border);padding:13px 64px}
+.nl{display:flex;flex-direction:column;text-decoration:none}
+.n-logo{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;letter-spacing:4px;text-transform:uppercase;color:var(--white)}
+.n-logo span{color:var(--accent)}
+.n-tag{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--mid);margin-top:2px}
+.nv{display:flex;gap:32px;align-items:center}
+.nv a{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--mid);text-decoration:none;transition:color 0.3s}
+.nv a:hover,.nv a.active{color:var(--accent)}
+.nb{border:1px solid var(--accent)!important;color:var(--accent)!important;padding:8px 22px;transition:all 0.3s!important}
+.nb:hover{background:var(--accent)!important;color:var(--ink)!important}
+
+/* PAGE HERO */
+.page-hero{padding:160px 64px 80px;position:relative;overflow:hidden;border-bottom:1px solid var(--border)}
+.ph-grid{position:absolute;inset:0;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:72px 72px}
+.ph-glow{position:absolute;top:-100px;right:-100px;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(200,169,110,0.07) 0%,transparent 65%)}
+.ph-inner{max-width:1200px;margin:0 auto;position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:end}
+.ph-pre{font-size:9px;letter-spacing:5px;text-transform:uppercase;color:var(--accent);margin-bottom:20px;display:flex;align-items:center;gap:12px}
+.ph-pre::before{content:'';width:24px;height:1px;background:var(--accent)}
+.ph-title{font-family:'Syne',sans-serif;font-size:clamp(42px,6vw,80px);font-weight:800;line-height:0.95;letter-spacing:-1px;color:var(--white)}
+.ph-title em{font-family:'Lora',serif;font-style:italic;font-weight:400;color:var(--accent)}
+.ph-right{padding-bottom:8px}
+.ph-desc{font-family:'Lora',serif;font-size:17px;font-style:italic;color:var(--mid);line-height:1.85;margin-bottom:28px}
+.ph-stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border)}
+.ph-stat{background:var(--surface);padding:20px 24px}
+.ph-stat-n{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--accent);line-height:1}
+.ph-stat-l{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--mid);margin-top:4px}
+
+/* SERVICE NAV TABS */
+.svc-tabs{background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:56px;z-index:100;overflow-x:auto}
+.tabs-in{max-width:1200px;margin:0 auto;padding:0 64px;display:flex;gap:0}
+.tab{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--mid);padding:18px 24px;cursor:pointer;transition:all 0.3s;border-bottom:2px solid transparent;white-space:nowrap;text-decoration:none;display:block}
+.tab:hover{color:var(--accent)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* SERVICES GRID SECTION */
+.svc-section{padding:80px 0;border-bottom:1px solid var(--border)}
+.svc-in{max-width:1200px;margin:0 auto;padding:0 64px}
+
+/* Section header */
+.sec-hd{display:grid;grid-template-columns:1fr 2fr;gap:64px;margin-bottom:56px;align-items:start}
+.sec-num{font-family:'Syne',sans-serif;font-size:80px;font-weight:800;color:rgba(200,169,110,0.06);line-height:1;letter-spacing:-2px}
+.sec-label{font-size:9px;letter-spacing:5px;text-transform:uppercase;color:var(--accent);margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.sec-label::before{content:'';width:20px;height:1px;background:var(--accent)}
+.sec-title{font-family:'Syne',sans-serif;font-size:clamp(26px,3.5vw,42px);font-weight:700;color:var(--white);line-height:1.05;margin-bottom:14px;letter-spacing:-0.5px}
+.sec-body{font-family:'Lora',serif;font-size:15px;color:var(--mid);line-height:1.9;font-style:italic}
+
+/* Service cards */
+.svc-cards{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border)}
+.svc-card{background:var(--ink);padding:40px;transition:all 0.3s;position:relative;overflow:hidden}
+.svc-card::after{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--accent);transform:scaleY(0);transform-origin:bottom;transition:transform 0.4s}
+.svc-card:hover::after{transform:scaleY(1)}
+.svc-card:hover{background:var(--deep)}
+.sc-icon{font-size:10px;letter-spacing:4px;text-transform:uppercase;color:rgba(200,169,110,0.2);margin-bottom:20px}
+.sc-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--white);margin-bottom:12px;line-height:1.2}
+.sc-body{font-size:12px;font-weight:300;color:var(--mid);line-height:1.9;margin-bottom:20px}
+.sc-deliverables{border-top:1px solid var(--border);padding-top:16px}
+.sc-del-label{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+.sc-del-item{font-size:11px;color:var(--pale);padding:5px 0;display:flex;align-items:flex-start;gap:8px}
+.sc-del-item::before{content:'→';color:var(--accent);flex-shrink:0;font-size:10px;margin-top:1px}
+
+/* FEATURED CARD — full width */
+.svc-card-full{background:var(--surface);padding:48px;border:1px solid var(--border);position:relative;overflow:hidden;margin-bottom:1px}
+.svc-card-full::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--teal),var(--accent))}
+.scf-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px}
+.scf-left{}
+.scf-right{display:flex;flex-direction:column;gap:16px}
+.scf-point{padding:16px;background:rgba(200,169,110,0.04);border-left:2px solid var(--border);transition:all 0.3s}
+.scf-point:hover{border-left-color:var(--accent);background:rgba(200,169,110,0.07)}
+.scf-pt{font-size:12px;font-weight:500;color:var(--white);margin-bottom:4px;letter-spacing:1px}
+.scf-pb{font-size:11px;font-weight:300;color:var(--mid);line-height:1.7}
+
+/* PROCESS STRIP */
+.process{background:var(--surface);padding:72px 0;border-bottom:1px solid var(--border)}
+.proc-in{max-width:1200px;margin:0 auto;padding:0 64px}
+.proc-steps{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);margin-top:48px}
+.proc-step{background:var(--surface);padding:32px 24px;position:relative}
+.proc-step::after{content:'';position:absolute;top:50%;right:-1px;width:1px;height:40px;background:var(--accent);transform:translateY(-50%);opacity:0}
+.proc-step:hover::after{opacity:1}
+.ps-num{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:rgba(200,169,110,0.1);line-height:1;margin-bottom:16px}
+.ps-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--white);margin-bottom:8px;line-height:1.2}
+.ps-body{font-size:11px;font-weight:300;color:var(--mid);line-height:1.7}
+.ps-tag{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+
+/* PRICING / ENGAGEMENT */
+.engage{background:var(--ink);padding:80px 0;border-bottom:1px solid var(--border)}
+.eng-in{max-width:1200px;margin:0 auto;padding:0 64px}
+.eng-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);margin-top:48px}
+.eng-card{background:var(--ink);padding:40px;transition:all 0.3s;position:relative}
+.eng-card.featured{background:var(--surface);border-top:2px solid var(--accent)}
+.eng-card:not(.featured):hover{background:var(--deep)}
+.ec-tag{font-size:8px;letter-spacing:4px;text-transform:uppercase;color:var(--accent);margin-bottom:16px}
+.ec-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--white);margin-bottom:8px}
+.ec-sub{font-size:12px;font-weight:300;color:var(--mid);line-height:1.7;margin-bottom:24px}
+.ec-items{display:flex;flex-direction:column;gap:0;border-top:1px solid var(--border);padding-top:20px}
+.ec-item{padding:10px 0;border-bottom:1px solid rgba(200,169,110,0.05);font-size:11px;font-weight:300;color:var(--pale);display:flex;align-items:center;gap:8px}
+.ec-item:last-child{border-bottom:none}
+.ec-item::before{content:'✓';color:var(--accent);font-size:10px;flex-shrink:0}
+.ec-cta{margin-top:24px;padding:12px 0;border:1px solid var(--border);text-align:center;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--mid);cursor:pointer;transition:all 0.3s;text-decoration:none;display:block}
+.ec-cta:hover,.eng-card.featured .ec-cta{border-color:var(--accent);color:var(--accent)}
+.eng-card.featured .ec-cta:hover{background:var(--accent);color:var(--ink)}
+.ec-badge{position:absolute;top:20px;right:20px;background:var(--accent);color:var(--ink);font-size:8px;letter-spacing:2px;text-transform:uppercase;padding:4px 10px;font-weight:600}
+
+/* WHY DIQUALIA */
+.why{background:var(--deep);padding:80px 0;border-bottom:1px solid var(--border)}
+.why-in{max-width:1200px;margin:0 auto;padding:0 64px}
+.why-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border);margin-top:48px}
+.why-card{background:var(--deep);padding:36px;transition:all 0.3s}
+.why-card:hover{background:var(--surface)}
+.wc-icon{width:40px;height:40px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;margin-bottom:20px;font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--accent)}
+.wc-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--white);margin-bottom:10px}
+.wc-body{font-size:12px;font-weight:300;color:var(--mid);line-height:1.8}
+
+/* CTA STRIP */
+.cta-strip{background:var(--accent);padding:72px 64px;text-align:center;position:relative;overflow:hidden}
+.cta-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(13,27,42,0.06) 1px,transparent 1px),linear-gradient(90deg,rgba(13,27,42,0.06) 1px,transparent 1px);background-size:64px 64px}
+.cta-in{position:relative;z-index:1}
+.cta-title{font-family:'Syne',sans-serif;font-size:clamp(28px,4vw,52px);font-weight:800;color:var(--ink);line-height:1.05;margin-bottom:12px;letter-spacing:-0.5px}
+.cta-sub{font-family:'Lora',serif;font-size:17px;font-style:italic;color:rgba(13,27,42,0.55);margin-bottom:36px}
+.cta-email{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--ink);text-decoration:none;border-bottom:2px solid rgba(13,27,42,0.2);padding-bottom:3px;transition:all 0.3s;letter-spacing:1px}
+.cta-email:hover{border-bottom-color:var(--ink)}
+
+/* FOOTER */
+footer{background:#060E18;padding:44px 64px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:32px;align-items:center;border-top:1px solid var(--border)}
+.fl{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;letter-spacing:4px;text-transform:uppercase;color:var(--white)}
+.fl span{color:var(--accent)}
+.fl-s{font-size:8px;letter-spacing:3px;text-transform:uppercase;color:var(--mid);margin-top:3px}
+.f-lks{display:flex;gap:24px;justify-content:center;flex-wrap:wrap}
+.f-lks a{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--mid);text-decoration:none;transition:color 0.3s}
+.f-lks a:hover{color:var(--accent)}
+.fc{font-size:9px;letter-spacing:2px;color:rgba(122,144,168,0.3);text-align:right;text-transform:uppercase;line-height:1.9}
+
+/* DIVIDER */
+.divl{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:0}
+
+@keyframes fU{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+@media(max-width:900px){
+  nav,nav.sc{padding:14px 24px}
+  .page-hero{padding:120px 24px 60px}
+  .ph-inner,.sec-hd,.scf-grid,.eng-cards,.why-grid{grid-template-columns:1fr}
+  .svc-in,.proc-in,.eng-in,.why-in{padding:0 24px}
+  .svc-cards{grid-template-columns:1fr}
+  .proc-steps{grid-template-columns:1fr 1fr}
+  .tabs-in{padding:0 24px}
+  .cta-strip{padding:60px 24px}
+  footer{grid-template-columns:1fr;text-align:center;padding:36px 24px}.fc{text-align:center}
+}
+</style>
+</head>
+<body>
+
+<div class="cur" id="c"></div>
+<div class="cur-r" id="cr"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#" class="nl">
+    <div class="n-logo"><span>Di</span>Qualia</div>
+    <div class="n-tag">Marketing Intelligence & Research</div>
+  </a>
+  <div class="nv">
+    <a href="#">Home</a>
+    <a href="#" class="active">Services</a>
+    <a href="#">How We Work</a>
+    <a href="#">Industries</a>
+    <a href="#contact" class="nb">Talk to Us</a>
+  </div>
+</nav>
+
+<!-- PAGE HERO -->
+<section class="page-hero">
+  <div class="ph-grid"></div>
+  <div class="ph-glow"></div>
+  <div class="ph-inner">
+    <div>
+      <p class="ph-pre">Our Intelligence Services</p>
+      <h1 class="ph-title">What We<br>Do for <em>You.</em></h1>
+    </div>
+    <div class="ph-right">
+      <p class="ph-desc">Six core intelligence services — each built on deep research, each designed to move your B2B pipeline from invisible to inevitable.</p>
+      <div class="ph-stats">
+        <div class="ph-stat"><div class="ph-stat-n">6</div><div class="ph-stat-l">Core Services</div></div>
+        <div class="ph-stat"><div class="ph-stat-n">94%</div><div class="ph-stat-l">Lead Quality Rate</div></div>
+        <div class="ph-stat"><div class="ph-stat-n">3.8x</div><div class="ph-stat-l">Pipeline Growth</div></div>
+        <div class="ph-stat"><div class="ph-stat-n">~21d</div><div class="ph-stat-l">First Qualified Lead</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICE TABS -->
+<div class="svc-tabs">
+  <div class="tabs-in">
+    <a href="#s01" class="tab active">Market Research</a>
+    <a href="#s02" class="tab">Buyer Intelligence</a>
+    <a href="#s03" class="tab">Positioning</a>
+    <a href="#s04" class="tab">Lead Generation</a>
+    <a href="#s05" class="tab">Competitive Intel</a>
+    <a href="#s06" class="tab">Sales Enablement</a>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<!-- SERVICE 01 — MARKET RESEARCH -->
+<!-- ════════════════════════════════════════ -->
+<div class="svc-section" id="s01">
+  <div class="svc-in">
+    <div class="sec-hd">
+      <div>
+        <div class="sec-num">01</div>
+      </div>
+      <div>
+        <div class="sec-label">Intelligence Service One</div>
+        <h2 class="sec-title">Market Research & Intelligence</h2>
+        <p class="sec-body">Before we build a single strategy, we map your entire market landscape — demand signals, buyer behavior, emerging trends, and the whitespace your competitors haven't discovered yet. This is the intelligence foundation everything else is built on.</p>
+      </div>
+    </div>
+
+    <!-- Featured card -->
+    <div class="svc-card-full">
+      <div class="scf-grid">
+        <div class="scf-left">
+          <div class="sc-icon">Core Intelligence Service · 01</div>
+          <div class="sc-title" style="font-family:'Syne',sans-serif;font-size:24px;font-weight:700;color:var(--white);margin-bottom:16px">Know Your Market Before Anyone Else Does</div>
+          <p style="font-size:13px;font-weight:300;color:var(--mid);line-height:1.9;margin-bottom:24px">We conduct deep, immersive research into your specific niche — studying who is buying, who is searching, where demand is growing, and where the gaps in your market exist. The result is a complete market intelligence brief that becomes your strategic compass.</p>
+          <div class="sc-deliverables">
+            <div class="sc-del-label">What You Receive</div>
+            <div class="sc-del-item">Full market landscape report — demand, trends, and growth signals</div>
+            <div class="sc-del-item">Buyer segment analysis — who buys, why, and when</div>
+            <div class="sc-del-item">Whitespace mapping — opportunities your competitors are missing</div>
+            <div class="sc-del-item">Market sizing and addressable opportunity assessment</div>
+            <div class="sc-del-item">Industry language guide — how buyers actually speak</div>
+          </div>
+        </div>
+        <div class="scf-right">
+          <div class="scf-point"><div class="scf-pt">Demand Signal Analysis</div><div class="scf-pb">We track where buyers are actively searching, what questions they ask, and what problems they urgently need solved — giving you a live map of market demand.</div></div>
+          <div class="scf-point"><div class="scf-pt">Trend Intelligence</div><div class="scf-pb">We identify emerging patterns in your sector before they become mainstream — so your positioning stays ahead of the market, not behind it.</div></div>
+          <div class="scf-point"><div class="scf-pt">Whitespace Discovery</div><div class="scf-pb">We find the gaps in your market — underserved segments, unmet needs, and positioning angles that no competitor has claimed yet.</div></div>
+          <div class="scf-point"><div class="scf-pt">Sector Language Mapping</div><div class="scf-pb">We decode the exact vocabulary your buyers use — the words that signal urgency, the phrases that build trust, the language that makes them act.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<!-- SERVICE 02 — BUYER INTELLIGENCE -->
+<!-- ════════════════════════════════════════ -->
+<div class="svc-section" id="s02" style="background:var(--deep)">
+  <div class="svc-in">
+    <div class="sec-hd">
+      <div><div class="sec-num">02</div></div>
+      <div>
+        <div class="sec-label">Intelligence Service Two</div>
+        <h2 class="sec-title">Buyer Identification & Profiling</h2>
+        <p class="sec-body">We go beyond demographics. We build precise, research-backed profiles of your ideal buyers — who they are, how they think, what triggers their decisions, and exactly where to find them. Every profile is built from real market data, not assumptions.</p>
+      </div>
+    </div>
+    <div class="svc-cards">
+      <div class="svc-card">
+        <div class="sc-icon">02 · A — Decision Maker Mapping</div>
+        <div class="sc-title">Who Actually Makes the Decision</div>
+        <p class="sc-body">We identify the exact decision-makers in your target organisations — their titles, their roles in the buying process, their priorities, and the pressures they're under. We map the full buying committee, not just the obvious contact.</p>
+        <div class="sc-deliverables">
+          <div class="sc-del-label">Deliverables</div>
+          <div class="sc-del-item">Decision-maker profile database per target segment</div>
+          <div class="sc-del-item">Buying committee map — influencers, gatekeepers, champions</div>
+          <div class="sc-del-item">Role-specific pain point analysis</div>
+        </div>
+      </div>
+      <div class="svc-card">
+        <div class="sc-icon">02 · B — Psychographic Profiling</div>
+        <div class="sc-title">How They Think & What Moves Them</div>
+        <p class="sc-body">Beyond job titles, we study how your buyers think — their risk tolerance, their ambitions, their frustrations, and the emotional triggers that push them from consideration to action. This is the intelligence that makes outreach feel personal.</p>
+        <div class="sc-deliverables">
+          <div class="sc-del-label">Deliverables</div>
+          <div class="sc-del-item">Psychographic buyer profiles per segment</div>
+          <div class="sc-del-item">Trigger event mapping — what makes buyers move now</div>
+          <div class="sc-del-item">Objection library with intelligence-backed responses</div>
+        </div>
+      </div>
+      <div class="svc-card">
+        <div class="sc-icon">02 · C — Buyer Journey Mapping</div>
+        <div class="sc-title">The Path from Problem to Purchase</div>
+        <p class="sc-body">We map every stage of your buyer's journey — from the moment they recognise a problem to the moment they sign a contract. Understanding this path lets us intercept buyers at exactly the right moment with exactly the right message.</p>
+        <div class="sc-deliverables">
+          <div class="sc-del-label">Deliverables</div>
+          <div class="sc-del-item">Full buyer journey map with touchpoint analysis</div>
+          <div class="sc-del-item">Channel preference analysis per buyer stage</div>
+          <div class="sc-del-item">Content and messaging matrix per journey stage</div>
+        </div>
+      </div>
+      <div class="svc-card">
+        <div class="sc-icon">02 · D — ICP Definition</div>
+        <div class="sc-title">Your Ideal Client Profile — Precisely Defined</div>
+        <p class="sc-body">We define your Ideal Client Profile with surgical precision — industry, company size, revenue range, team structure, growth stage, and the specific signals that indicate a prospect is ready and able to buy from you right now.</p>
+        <div class="sc-deliverables">
+          <div class="sc-del-label">Deliverables</div>
+          <div class="sc-del-item">Written ICP document with all qualifying criteria</div>
+          <div class="sc-del-item">Negative ICP — who to deprioritise and why</div>
+          <div class="sc-del-item">Prospect scoring framework for your sales team</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<!-- SERVICE 03 — POSITIONING -->
+<!-- ════════════════════════════════════════ -->
+<div class="svc-section" id="s03">
+  <div class="svc-in">
+    <div class="sec-hd">
+      <div><div class="sec-num">03</div></div>
+      <div>
+        <div class="sec-label">Intelligence Service Three</div>
+        <h2 class="sec-title">Positioning & Messaging Strategy</h2>
+        <p class="sec-body">Most B2B companies are excellent at what they do but invisible in how they communicate it. We translate your technical expertise into sharp, resonant market language that makes decision-makers immediately understand your value — and immediately prefer you.</p>
+      </div>
+    </div>
+    <div class="svc-cards">
+      <div class="svc-card">
+        <div class="sc-icon">03 · A — Market Positioning</div>
+        <div class="sc-title">Where You Stand. Why You Win.</div>
+        <p class="sc-body">We craft a positioning strategy that places you in the ideal spot in your market — differentiated from competitors, aligned with buyer priorities, and occupying territory no one else has claimed. Clear, ownable, and built to last.</p>
+        <div class="sc-deliverables">
+          <div class="sc-del-label">Deliverables</div>
+          <div class="sc-del-item">Positioning statement — clear, distinct, ownable</div>
+          <div class="sc-del-item">Competitive differentiation map</div>
+          <div class="sc-del-item">Market category definition and ownership strategy</div>
+        </div>
+      </div>
+      <div class="svc-card">
+        <div class="sc-icon">03 · B — Messaging Architecture</div>
+        <div class="sc-title">The Right Words for Every Buyer</div>
+        <p class="sc-body">We build a complete messaging architecture — from your core value proposition down to role-specific talking points for every buyer in the purchasing committee. One coherent story, precisely adapted for every audience.</p>
+        <div class="sc-deliverables">
+          <div class="sc-del-label">Deliverables</div>
+          <div class="sc-del-item">Master messaging document — core narrative and proof points</div>
+          <div class="sc-del-item">Role-specific messaging variants per buyer persona</div>
+          <div class="sc-del-item">Tagline and headline options with intelligence rationale</div>
+        </div>
+      </div>
+      <div class="svc-card">
+        <div class="sc-icon">03 · C — Value Proposition</div>
+        <div class="sc-title">Why You. Why Now. Why Not Anyone Else.</div>
+        <p class="sc-body">We build a value proposition that answers the buyer's three hardest questions before they even ask them — grounded in real market research and tested against actual buyer priorities in your sector.</p>
+        <div class="sc-deliverables">
+          <div class="sc-del-label">Deliverables</div>
+          <div class="sc-del-item">Primary value proposition — full and compressed versions</div>
+          <div class="sc-del-item">Supporting proof points and evidence framework</div>
+          <div class="sc-del-item">Website and LinkedIn copy recommendations</div>
+        </div>
+      </div>
+      <div class="svc-card">
+        <div class="sc-icon">03 · D — Brand Voice</div>
+        <div class="sc-title">How You Sound Across Every Channel</div>
+        <p class="sc-body">We define your brand voice — the tone, style, and language that makes all your communications feel consistent, credible, and distinctly yours. From cold emails to LinkedIn posts to proposal documents, one coherent voice.</p>
+        <div class="sc-deliverables">
+          <div class="sc-del-label">Deliverables</div>
+          <div class="sc-del-item">Brand voice guide with do's and don'ts</div>
+          <div class="sc-del-item">Tone spectrum — formal to conversational contexts</div>
+          <div class="sc-del-item">Sample copy examples across key channels</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<!-- SERVICE 04 — LEAD GENERATION -->
+<!-- ════════════════════════════════════════ -->
+<div class="svc-section" id="s04" style="background:var(--deep)">
+  <div class="svc-in">
+    <div class="sec-hd">
+      <div><div class="sec-num">04</div></div>
+      <div>
+        <div class="sec-label">Intelligence Service Four</div>
+        <h2 class="sec-title">B2B Lead Generation</h2>
+        <p class="sec-body">Every lead we generate is pre-qualified by intelligence. We don't spray and pray — we identify buyers who match your ICP precisely, engage them on the channels they actually use, and deliver conversations with people who are genuinely ready to listen.</p>
+      </div>
+    </div>
+    <div class="svc-cards">
+      <div class="svc-card">
+        <div class="sc-icon">04 · A — LinkedIn Outreach</div>
+        <div class="sc-title">LinkedIn — Where B2B Decisions Happen</div>
+        <p class="sc-body">We build and execute targeted LinkedIn outreach campaigns — from profile optimisation and connection strategies to message sequences that open conversations with decision-makers in your exact target market.</p>
+        <div class="sc-deliverables">
+          <div class="sc-del-label">Deliverables</div>
+          <div class="sc-del-item">LinkedIn profile and company page optimisation</div>
+          <div class="sc-del-item">Targeted connection and outreach sequences</div>
+          <div class="sc-del-item">Weekly qualified conversation reports</div>
+        </div>
+      </div>
+      <div class="svc-card">
+        <div class="sc-icon">04 · B — Email Campaigns</div>
+        <div class="sc-title">Cold Email That Doesn't Feel Cold</div>
+        <p class="sc-body">We write and execute email outreach campaigns grounded in buyer research — every sequence is personalised to the recipient's industry, role, and likely pain points. High open rates. High reply rates. Zero spam feel.</p>
+        <div class="sc-deliverables">
+          <div class="sc-del-label">Deliverables</div>
+          <div class="sc-del-item">Research-backed email sequences (5–7 touches)</div>
+          <div class="sc-del-item">A/B tested subject lines and CTAs</div>
+          <div class="sc-del-item">Reply handling scripts and objection responses</div>
+        </div>
+      </div>
+      <div class="svc-card">
+        <div class="sc-icon">04 · C — Prospect Lists</div>
+        <div class="sc-title">Precision-Built Prospect Databases</div>
+        <p class="sc-body">We build hand-verified prospect lists of companies and contacts that match your ICP exactly — no generic data scrapes, no outdated contacts. Every name on the list is a real decision-maker with a real reason to speak with you.</p>
+        <div class="sc-deliverables">
+          <div class="sc-del-label">Deliverables</div>
+          <div class="sc-del-item">Verified prospect database per target segment</div>
+          <div class="sc-del-item">Contact details — name, title, LinkedIn, email</div>
+          <div class="sc-del-item">Personalisation notes per prospect</div>
+        </div>
+      </div>
+      <div class="svc-card">
+        <div class="sc-icon">04 · D — Pipeline Reporting</div>
+        <div class="sc-title">Intelligence You Can Act On — Weekly</div>
+        <p class="sc-body">We deliver weekly pipeline intelligence reports — who opened, who replied, who engaged, what patterns we're seeing, and what we're adjusting. You always know exactly where your pipeline stands and why.</p>
+        <div class="sc-deliverables">
+          <div class="sc-del-label">Deliverables</div>
+          <div class="sc-del-item">Weekly pipeline performance dashboard</div>
+          <div class="sc-del-item">Lead quality scoring and classification</div>
+          <div class="sc-del-item">Strategic adjustments and next-week plan</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<!-- SERVICE 05 — COMPETITIVE INTEL -->
+<!-- ════════════════════════════════════════ -->
+<div class="svc-section" id="s05">
+  <div class="svc-in">
+    <div class="sec-hd">
+      <div><div class="sec-num">05</div></div>
+      <div>
+        <div class="sec-label">Intelligence Service Five</div>
+        <h2 class="sec-title">Competitive Intelligence</h2>
+        <p class="sec-body">Know your competitors better than they know themselves. We track how they position, what they promise, how they price, and where they're winning and losing. This intelligence becomes your unfair advantage in every sales conversation.</p>
+      </div>
+    </div>
+    <div class="svc-cards">
+      <div class="svc-card">
+        <div class="sc-icon">05 · A — Competitor Analysis</div>
+        <div class="sc-title">Full Competitor Landscape Audit</div>
+        <p class="sc-body">We conduct a comprehensive audit of your top competitors — their positioning, messaging, pricing signals, service offerings, client types, and the gaps and weaknesses in their market approach that you can exploit.</p>
+        <div class="sc-deliverables">
+          <div class="sc-del-label">Deliverables</div>
+          <div class="sc-del-item">Competitor profile cards — full analysis per competitor</div>
+          <div class="sc-del-item">Positioning comparison matrix</div>
+          <div class="sc-del-item">Competitor weakness and gap report</div>
+        </div>
+      </div>
+      <div class="svc-card">
+        <div class="sc-icon">05 · B — Win/Loss Intelligence</div>
+        <div class="sc-title">Why Deals Are Won and Lost</div>
+        <p class="sc-body">We analyse patterns in your industry's win/loss dynamics — what makes buyers choose one provider over another, what objections come up most, and what the decisive factors are in competitive shortlisting situations.</p>
+        <div class="sc-deliverables">
+          <div class="sc-del-label">Deliverables</div>
+          <div class="sc-del-item">Win/loss pattern analysis for your sector</div>
+          <div class="sc-del-item">Decision factor ranking by buyer type</div>
+          <div class="sc-del-item">Competitive battle cards for your sales team</div>
+        </div>
+      </div>
+      <div class="svc-card">
+        <div class="sc-icon">05 · C — Pricing Intelligence</div>
+        <div class="sc-title">What the Market Will Bear</div>
+        <p class="sc-body">We research pricing signals, packaging approaches, and value anchoring strategies across your competitive set — giving you the intelligence to price with confidence and position your fees as an investment, not a cost.</p>
+        <div class="sc-deliverables">
+          <div class="sc-del-label">Deliverables</div>
+          <div class="sc-del-item">Competitive pricing signal report</div>
+          <div class="sc-del-item">Packaging and tier structure recommendations</div>
+          <div class="sc-del-item">Value anchoring and pricing language guide</div>
+        </div>
+      </div>
+      <div class="svc-card">
+        <div class="sc-icon">05 · D — Ongoing Monitoring</div>
+        <div class="sc-title">Stay One Step Ahead — Always</div>
+        <p class="sc-body">Markets move. Competitors pivot. We provide ongoing competitive monitoring — tracking changes in your competitive landscape and alerting you to new threats, opportunities, and shifts that require a strategic response.</p>
+        <div class="sc-deliverables">
+          <div class="sc-del-label">Deliverables</div>
+          <div class="sc-del-item">Monthly competitive intelligence briefing</div>
+          <div class="sc-del-item">Alert system for significant competitor moves</div>
+          <div class="sc-del-item">Quarterly landscape reassessment report</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<!-- SERVICE 06 — SALES ENABLEMENT -->
+<!-- ════════════════════════════════════════ -->
+<div class="svc-section" id="s06" style="background:var(--deep)">
+  <div class="svc-in">
+    <div class="sec-hd">
+      <div><div class="sec-num">06</div></div>
+      <div>
+        <div class="sec-label">Intelligence Service Six</div>
+        <h2 class="sec-title">Sales Enablement & Content</h2>
+        <p class="sec-body">Intelligence only creates value when it translates into tools your team can use every day. We build the proposals, pitch decks, case studies, and outreach sequences that arm your sales team with everything they need to close — consistently and confidently.</p>
+      </div>
+    </div>
+    <div class="svc-cards">
+      <div class="svc-card">
+        <div class="sc-icon">06 · A — Proposals</div>
+        <div class="sc-title">Proposals That Win</div>
+        <p class="sc-body">We build proposal templates and custom proposals grounded in buyer research — structured to address the exact concerns of each decision-maker, backed by relevant proof, and designed to make the decision to choose you feel obvious.</p>
+        <div class="sc-deliverables">
+          <div class="sc-del-label">Deliverables</div>
+          <div class="sc-del-item">Master proposal template — fully customisable</div>
+          <div class="sc-del-item">Sector-specific proposal variants</div>
+          <div class="sc-del-item">Proposal review and optimisation service</div>
+        </div>
+      </div>
+      <div class="svc-card">
+        <div class="sc-icon">06 · B — Pitch Decks</div>
+        <div class="sc-title">Decks That Open Doors</div>
+        <p class="sc-body">We design pitch decks that tell a compelling, intelligence-led story — from the problem your client is facing to the precise solution you offer to the proof that you can deliver. Every slide earns its place.</p>
+        <div class="sc-deliverables">
+          <div class="sc-del-label">Deliverables</div>
+          <div class="sc-del-item">Full pitch deck — narrative, design, content</div>
+          <div class="sc-del-item">Short version — 5-slide executive summary</div>
+          <div class="sc-del-item">Leave-behind one-pager</div>
+        </div>
+      </div>
+      <div class="svc-card">
+        <div class="sc-icon">06 · C — Case Studies</div>
+        <div class="sc-title">Proof That Persuades</div>
+        <p class="sc-body">We build case studies that go beyond testimonials — structured as before/after intelligence stories that show the problem, the approach, and the measurable results. The kind of proof that removes a buyer's last objection.</p>
+        <div class="sc-deliverables">
+          <div class="sc-del-label">Deliverables</div>
+          <div class="sc-del-item">Long-form case study — full problem/solution/result</div>
+          <div class="sc-del-item">Compact case study — one-page format</div>
+          <div class="sc-del-item">LinkedIn case study post version</div>
+        </div>
+      </div>
+      <div class="svc-card">
+        <div class="sc-icon">06 · D — Outreach Sequences</div>
+        <div class="sc-title">Words That Start Conversations</div>
+        <p class="sc-body">We write outreach sequences — email and LinkedIn — that feel researched, relevant, and human. Every sequence is built from buyer intelligence, designed to open a real conversation, not trigger an unsubscribe.</p>
+        <div class="sc-deliverables">
+          <div class="sc-del-label">Deliverables</div>
+          <div class="sc-del-item">Full outreach sequence — 5 to 7 touch points</div>
+          <div class="sc-del-item">Follow-up and re-engagement sequences</div>
+          <div class="sc-del-item">Personalisation framework for your team</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROCESS STRIP -->
+<div class="process">
+  <div class="proc-in">
+    <div style="font-size:9px;letter-spacing:5px;text-transform:uppercase;color:var(--accent);margin-bottom:10px;display:flex;align-items:center;gap:12px"><span style="display:inline-block;width:24px;height:1px;background:var(--accent)"></span>How Every Service Begins</div>
+    <h2 style="font-family:'Syne',sans-serif;font-size:clamp(24px,3.5vw,40px);font-weight:700;color:var(--white);letter-spacing:-0.5px">The DiQualia Intelligence Process</h2>
+    <div class="proc-steps">
+      <div class="proc-step">
+        <div class="ps-tag">Step One</div>
+        <div class="ps-num">01</div>
+        <div class="ps-title">Sector Immersion</div>
+        <p class="ps-body">We spend the first week doing nothing but learning your industry — its language, rhythms, buyers, and dynamics. No strategy until we know your market deeply.</p>
+      </div>
+      <div class="proc-step">
+        <div class="ps-tag">Step Two</div>
+        <div class="ps-num">02</div>
+        <div class="ps-title">Buyer Mapping</div>
+        <p class="ps-body">We identify and profile your ideal buyers — building precise, evidence-based profiles that inform every piece of outreach and content we create.</p>
+      </div>
+      <div class="proc-step">
+        <div class="ps-tag">Step Three</div>
+        <div class="ps-num">03</div>
+        <div class="ps-title">Intelligence Brief</div>
+        <p class="ps-body">We compile all research into a strategic intelligence brief — your market, your buyers, your positioning, and your go-to-market plan. The compass for everything that follows.</p>
+      </div>
+      <div class="proc-step">
+        <div class="ps-tag">Step Four</div>
+        <div class="ps-num">04</div>
+        <div class="ps-title">Execution</div>
+        <p class="ps-body">With intelligence in hand, we execute — campaigns, content, outreach, and enablement tools — all grounded in research, all calibrated to your exact market.</p>
+      </div>
+      <div class="proc-step">
+        <div class="ps-tag">Step Five</div>
+        <div class="ps-num">05</div>
+        <div class="ps-title">Optimise & Scale</div>
+        <p class="ps-body">We measure what matters, learn from every signal, and continuously refine the intelligence engine — making your pipeline grow smarter and stronger every week.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ENGAGEMENT MODELS -->
+<div class="engage">
+  <div class="eng-in">
+    <div style="font-size:9px;letter-spacing:5px;text-transform:uppercase;color:var(--accent);margin-bottom:10px;display:flex;align-items:center;gap:12px"><span style="display:inline-block;width:24px;height:1px;background:var(--accent)"></span>How We Engage</div>
+    <h2 style="font-family:'Syne',sans-serif;font-size:clamp(24px,3.5vw,40px);font-weight:700;color:var(--white);letter-spacing:-0.5px">Choose Your Intelligence Model</h2>
+    <div class="eng-cards">
+      <div class="eng-card">
+        <div class="ec-tag">Intelligence Starter</div>
+        <div class="ec-title">Market Intelligence Sprint</div>
+        <p class="ec-sub">A focused 30-day intelligence engagement — ideal for companies entering a new market or needing a complete market picture before making strategic decisions.</p>
+        <div class="ec-items">
+          <div class="ec-item">Full market research & landscape report</div>
+          <div class="ec-item">ICP definition and buyer profiling</div>
+          <div class="ec-item">Positioning and messaging strategy</div>
+          <div class="ec-item">Competitor analysis — top 5 competitors</div>
+          <div class="ec-item">Strategic intelligence brief</div>
+        </div>
+        <a href="#contact" class="ec-cta">Start a Sprint</a>
+      </div>
+      <div class="eng-card featured">
+        <div class="ec-badge">Most Popular</div>
+        <div class="ec-tag">Intelligence Partnership</div>
+        <div class="ec-title">90-Day Growth Engagement</div>
+        <p class="ec-sub">Our full intelligence and execution partnership — research, positioning, lead generation, and sales enablement running together for 90 days of measurable pipeline growth.</p>
+        <div class="ec-items">
+          <div class="ec-item">Everything in Intelligence Starter</div>
+          <div class="ec-item">B2B lead generation — LinkedIn + email</div>
+          <div class="ec-item">Ongoing competitive monitoring</div>
+          <div class="ec-item">Proposals, pitch deck, case studies</div>
+          <div class="ec-item">Weekly pipeline intelligence reports</div>
+          <div class="ec-item">Bi-weekly strategy calls</div>
+          <div class="ec-item">Outreach sequence copywriting</div>
+        </div>
+        <a href="#contact" class="ec-cta">Start Partnership</a>
+      </div>
+      <div class="eng-card">
+        <div class="ec-tag">Ongoing Intelligence</div>
+        <div class="ec-title">Retained Intelligence Partner</div>
+        <p class="ec-sub">A long-term intelligence partnership — we embed as your dedicated market intelligence and research unit, continuously building pipeline and adapting strategy as your market evolves.</p>
+        <div class="ec-items">
+          <div class="ec-item">Everything in 90-Day Engagement</div>
+          <div class="ec-item">Monthly market intelligence updates</div>
+          <div class="ec-item">Quarterly strategic reviews</div>
+          <div class="ec-item">Dedicated intelligence analyst</div>
+          <div class="ec-item">Priority response and execution</div>
+          <div class="ec-item">Custom reporting dashboard</div>
+        </div>
+        <a href="#contact" class="ec-cta">Discuss Retainer</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- WHY DIQUALIA -->
+<div class="why">
+  <div class="why-in">
+    <div style="font-size:9px;letter-spacing:5px;text-transform:uppercase;color:var(--accent);margin-bottom:10px;display:flex;align-items:center;gap:12px"><span style="display:inline-block;width:24px;height:1px;background:var(--accent)"></span>Why DiQualia</div>
+    <h2 style="font-family:'Syne',sans-serif;font-size:clamp(24px,3.5vw,40px);font-weight:700;color:var(--white);letter-spacing:-0.5px">Not a Marketing Agency. A Marketing Intelligence Unit.</h2>
+    <div class="why-grid">
+      <div class="why-card">
+        <div class="wc-icon">R</div>
+        <div class="wc-title">Research Before Everything</div>
+        <p class="wc-body">Every service begins with deep, unhurried research into your market. We never launch a campaign before we understand your sector as well as you do — often better.</p>
+      </div>
+      <div class="why-card">
+        <div class="wc-icon">N</div>
+        <div class="wc-title">Niche B2B Specialists</div>
+        <p class="wc-body">We work exclusively in niche B2B industries — not mass markets, not B2C, not general marketing. Deep specialisation is how we deliver intelligence that actually moves markets.</p>
+      </div>
+      <div class="why-card">
+        <div class="wc-icon">D</div>
+        <div class="wc-title">Data-Driven, Always</div>
+        <p class="wc-body">Every recommendation we make is backed by evidence. Every strategy is grounded in real market data. We don't guess — we research, we verify, then we act.</p>
+      </div>
+      <div class="why-card">
+        <div class="wc-icon">P</div>
+        <div class="wc-title">Precision Over Volume</div>
+        <p class="wc-body">We don't generate hundreds of unqualified leads. We generate a precise number of deeply qualified conversations with buyers who are ready, able, and willing to engage.</p>
+      </div>
+      <div class="why-card">
+        <div class="wc-icon">I</div>
+        <div class="wc-title">Intelligence That Compounds</div>
+        <p class="wc-body">The intelligence we build for you doesn't expire after a campaign. It compounds over time — each engagement making the next one faster, sharper, and more effective.</p>
+      </div>
+      <div class="why-card">
+        <div class="wc-icon">T</div>
+        <div class="wc-title">Transparent Reporting</div>
+        <p class="wc-body">You always know exactly what we're doing and why. Weekly reports, clear metrics, honest assessments. No vanity numbers. Only the metrics that actually matter to your business.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="cta-strip" id="contact">
+  <div class="cta-bg"></div>
+  <div class="cta-in">
+    <p style="font-size:9px;letter-spacing:5px;text-transform:uppercase;color:rgba(13,27,42,0.4);margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:10px"><span style="display:inline-block;width:20px;height:1px;background:rgba(13,27,42,0.2)"></span>Begin With Intelligence<span style="display:inline-block;width:20px;height:1px;background:rgba(13,27,42,0.2)"></span></p>
+    <h2 class="cta-title">Ready to Start?<br>Let's Build Your Intelligence.</h2>
+    <p class="cta-sub">Every engagement begins with a no-cost discovery call — 30 minutes, no pitch, just research.</p>
+    <a href="mailto:intel@diqualia.com" class="cta-email">intel@diqualia.com</a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div>
+    <div class="fl"><span>Di</span>Qualia</div>
+    <div class="fl-s">Marketing Intelligence & Research</div>
+  </div>
+  <div class="f-lks">
+    <a href="#">Home</a>
+    <a href="#">Services</a>
+    <a href="#">How We Work</a>
+    <a href="#">Industries</a>
+    <a href="#contact">Contact</a>
+  </div>
+  <div class="fc">© 2025 DiQualia<br>All rights reserved<br>diqualia.com</div>
+</footer>
+
+<script>
+// Cursor
+const c=document.getElementById('c'),cr=document.getElementById('cr');
+document.addEventListener('mousemove',e=>{
+  c.style.left=e.clientX+'px';c.style.top=e.clientY+'px';
+  setTimeout(()=>{cr.style.left=e.clientX+'px';cr.style.top=e.clientY+'px'},100);
+});
+document.querySelectorAll('a,button').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cr.style.transform='translate(-50%,-50%) scale(2.2)';cr.style.borderColor='rgba(200,169,110,0.7)'});
+  el.addEventListener('mouseleave',()=>{cr.style.transform='translate(-50%,-50%) scale(1)';cr.style.borderColor='rgba(200,169,110,0.35)'});
+});
+
+// Scroll nav
+window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('sc',scrollY>50));
+
+// Active tab tracking
+const tabs=document.querySelectorAll('.tab');
+const sections=document.querySelectorAll('.svc-section');
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      const id=entry.target.id;
+      tabs.forEach(t=>{
+        t.classList.remove('active');
+        if(t.getAttribute('href')==='#'+id)t.classList.add('active');
+      });
+    }
+  });
+},{threshold:0.3,rootMargin:'-60px 0px -40% 0px'});
+sections.forEach(s=>observer.observe(s));
+
+// Smooth tab scroll
+tabs.forEach(tab=>{
+  tab.addEventListener('click',e=>{
+    e.preventDefault();
+    const target=document.querySelector(tab.getAttribute('href'));
+    if(target){
+      const offset=target.getBoundingClientRect().top+window.scrollY-120;
+      window.scrollTo({top:offset,behavior:'smooth'});
+    }
+  });
+});
+</script>
+</body>
+</html>

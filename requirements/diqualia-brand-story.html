@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DiQualia — Our Story</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --ink:       #0D0D0E;
+    --obsidian:  #141416;
+    --slate:     #1E1F24;
+    --mist:      #8A8C96;
+    --fog:       #C2C4CC;
+    --paper:     #F4F2EE;
+    --white:     #FDFCFB;
+    --gold:      #B8933E;
+    --gold-lt:   #D4AD62;
+    --gold-pale: #EDE0C4;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.6rem 4rem;
+    z-index: 100;
+    background: linear-gradient(to bottom, rgba(13,13,14,0.92), transparent);
+  }
+  .logo-mark { display: flex; align-items: center; gap: 0.7rem; text-decoration: none; }
+  .logo-emblem { width: 32px; height: 32px; }
+  .logo-emblem svg { width: 100%; height: 100%; }
+  .logo-text { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 400; letter-spacing: 0.08em; color: var(--paper); }
+  .logo-text span { color: var(--gold); }
+  .nav-back { font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--fog); text-decoration: none; display: flex; align-items: center; gap: 0.5rem; transition: color 0.3s; }
+  .nav-back:hover { color: var(--gold-lt); }
+
+  /* ── HERO CHAPTER ── */
+  .story-hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    padding: 8rem 4rem 6rem;
+    position: relative; overflow: hidden;
+  }
+  .hero-glow {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 700px; height: 500px;
+    background: radial-gradient(ellipse, rgba(184,147,62,0.07) 0%, transparent 65%);
+    pointer-events: none;
+  }
+  .chapter-label {
+    font-size: 0.68rem; letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 2.5rem;
+    display: flex; align-items: center; gap: 1.2rem; justify-content: center;
+  }
+  .chapter-label::before, .chapter-label::after {
+    content: ''; display: block; width: 30px; height: 1px; background: var(--gold);
+  }
+  .story-hero h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(3rem, 6vw, 6.5rem);
+    font-weight: 300; line-height: 1.05;
+    color: var(--white); margin-bottom: 2.5rem;
+    max-width: 900px;
+  }
+  .story-hero h1 em { font-style: italic; color: var(--gold-lt); }
+  .story-hero .lead {
+    font-size: 1.05rem; color: var(--mist);
+    max-width: 580px; line-height: 1.9;
+    margin: 0 auto 4rem;
+  }
+  .scroll-hint {
+    font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: rgba(138,140,150,0.5);
+    display: flex; flex-direction: column; align-items: center; gap: 0.8rem;
+  }
+  .scroll-line {
+    width: 1px; height: 50px;
+    background: linear-gradient(to bottom, var(--gold), transparent);
+    animation: scrollPulse 2s ease-in-out infinite;
+  }
+  @keyframes scrollPulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+
+  /* ── SECTION BASE ── */
+  .story-section { padding: 7rem 4rem; position: relative; }
+  .story-section.alt { background: var(--obsidian); }
+
+  .eyebrow {
+    font-size: 0.68rem; letter-spacing: 0.28em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 1.2rem;
+    display: flex; align-items: center; gap: 1rem;
+  }
+  .eyebrow::before { content: ''; display: block; width: 28px; height: 1px; background: var(--gold); }
+
+  .section-h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.2rem, 3.5vw, 3.4rem);
+    font-weight: 300; line-height: 1.1; color: var(--white);
+    margin-bottom: 1.8rem;
+  }
+  .section-h2 em { font-style: italic; color: var(--gold-lt); }
+
+  .prose {
+    font-size: 0.97rem; color: var(--fog);
+    line-height: 2; max-width: 640px;
+  }
+  .prose p { margin-bottom: 1.4rem; }
+  .prose p:last-child { margin-bottom: 0; }
+  .prose strong { color: var(--paper); font-weight: 400; }
+
+  /* ── TWO-COL LAYOUT ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; align-items: start; }
+  .two-col.reverse .col-text { order: 2; }
+  .two-col.reverse .col-visual { order: 1; }
+
+  /* ── PULL QUOTE ── */
+  .pull-quote {
+    padding: 5rem 4rem;
+    text-align: center;
+    border-top: 1px solid rgba(184,147,62,0.12);
+    border-bottom: 1px solid rgba(184,147,62,0.12);
+    position: relative; overflow: hidden;
+  }
+  .pull-quote::before {
+    content: '\201C';
+    position: absolute; top: -1rem; left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 12rem; line-height: 1;
+    color: rgba(184,147,62,0.06);
+    pointer-events: none;
+  }
+  .pull-quote blockquote {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.8rem, 3vw, 3rem);
+    font-weight: 300; font-style: italic;
+    color: var(--white); line-height: 1.3;
+    max-width: 820px; margin: 0 auto 1.5rem;
+  }
+  .pull-quote blockquote em { color: var(--gold-lt); font-style: normal; }
+  .pull-quote cite {
+    font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--mist); font-style: normal;
+  }
+
+  /* ── DOUBLE EXPERIENCE BLOCK ── */
+  .dex-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 1px; background: rgba(184,147,62,0.1);
+    border: 1px solid rgba(184,147,62,0.1);
+    margin-top: 3.5rem;
+  }
+  .dex-card {
+    background: var(--obsidian);
+    padding: 3rem 2.5rem;
+    transition: background 0.3s;
+  }
+  .dex-card:hover { background: var(--slate); }
+  .dex-number {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 4rem; font-weight: 300; line-height: 1;
+    color: rgba(184,147,62,0.2); margin-bottom: 1.2rem;
+  }
+  .dex-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem; font-weight: 400; color: var(--white);
+    margin-bottom: 0.8rem; line-height: 1.2;
+  }
+  .dex-title em { font-style: italic; color: var(--gold-lt); }
+  .dex-body { font-size: 0.88rem; color: var(--mist); line-height: 1.85; }
+  .dex-plus {
+    grid-column: 1 / -1;
+    background: var(--slate);
+    padding: 2rem; text-align: center;
+    border-top: 1px solid rgba(184,147,62,0.15);
+  }
+  .dex-plus-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.3rem; font-style: italic;
+    color: var(--gold-lt);
+  }
+
+  /* ── AI AGE SECTION ── */
+  .ai-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 1px; background: rgba(255,255,255,0.05);
+    margin-top: 3.5rem;
+  }
+  .ai-card {
+    background: var(--ink);
+    padding: 2.5rem 2rem;
+  }
+  .ai-card-eyebrow {
+    font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 1rem;
+  }
+  .ai-card-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.3rem; color: var(--white);
+    margin-bottom: 0.7rem; line-height: 1.2;
+  }
+  .ai-card-body { font-size: 0.82rem; color: var(--mist); line-height: 1.8; }
+
+  /* ── MANIFESTO ── */
+  .manifesto {
+    padding: 8rem 4rem;
+    background: var(--obsidian);
+    text-align: center;
+  }
+  .manifesto-lines { max-width: 820px; margin: 3rem auto 0; }
+  .manifesto-line {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.3rem, 2.2vw, 2rem);
+    font-weight: 300; color: var(--fog);
+    padding: 1.2rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    transition: color 0.3s;
+    cursor: default;
+    line-height: 1.3;
+  }
+  .manifesto-line:hover { color: var(--white); }
+  .manifesto-line em { color: var(--gold-lt); font-style: italic; }
+  .manifesto-line.strong-line { color: var(--white); }
+  .manifesto-line:last-child { border-bottom: none; }
+
+  /* ── FOUNDING VISION ── */
+  .vision-block {
+    display: grid; grid-template-columns: 1fr 2fr; gap: 5rem; align-items: start;
+  }
+  .vision-sidebar { position: sticky; top: 8rem; }
+  .vision-sidebar-label {
+    font-size: 0.65rem; letter-spacing: 0.25em; text-transform: uppercase;
+    color: var(--mist); margin-bottom: 1rem;
+  }
+  .vision-sidebar-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 5rem; font-weight: 300; line-height: 1;
+    color: rgba(184,147,62,0.15);
+  }
+  .vision-rule {
+    width: 1px; height: 80px;
+    background: linear-gradient(to bottom, var(--gold), transparent);
+    margin: 1.5rem 0;
+  }
+
+  /* ── TAGLINE CLOSER ── */
+  .tagline-closer {
+    padding: 8rem 4rem;
+    text-align: center;
+    position: relative; overflow: hidden;
+  }
+  .tagline-closer::before {
+    content: '';
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px; height: 400px;
+    background: radial-gradient(ellipse, rgba(184,147,62,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .tagline-word {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(3rem, 7vw, 8rem);
+    font-weight: 300; line-height: 1;
+    color: var(--white); display: block;
+  }
+  .tagline-word em { font-style: italic; color: var(--gold); }
+  .tagline-sub {
+    font-size: 0.78rem; letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--mist); margin-top: 2rem;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--obsidian); padding: 2.5rem 4rem;
+    display: flex; align-items: center; justify-content: space-between;
+    border-top: 1px solid rgba(184,147,62,0.1);
+  }
+  .footer-copy { font-size: 0.72rem; color: var(--mist); }
+  .footer-links { display: flex; gap: 2rem; list-style: none; }
+  .footer-links a { font-size: 0.72rem; color: var(--mist); text-decoration: none; transition: color 0.3s; }
+  .footer-links a:hover { color: var(--gold); }
+
+  /* ── FADE IN ── */
+  .fade { opacity: 0; transform: translateY(20px); animation: fadeUp 0.9s ease forwards; }
+  .fade:nth-child(1){animation-delay:0.1s} .fade:nth-child(2){animation-delay:0.25s}
+  .fade:nth-child(3){animation-delay:0.4s} .fade:nth-child(4){animation-delay:0.55s}
+  @keyframes fadeUp { to { opacity:1; transform:translateY(0); } }
+
+  @media(max-width:900px){
+    nav{padding:1.4rem 2rem}
+    .story-hero{padding:7rem 2rem 5rem}
+    .story-section{padding:5rem 2rem}
+    .two-col,.dex-grid,.ai-grid,.vision-block{grid-template-columns:1fr}
+    .two-col.reverse .col-text,.two-col.reverse .col-visual{order:unset}
+    .pull-quote{padding:4rem 2rem}
+    .manifesto{padding:5rem 2rem}
+    .tagline-closer{padding:5rem 2rem}
+    footer{flex-direction:column;gap:1.5rem;text-align:center}
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="logo-mark" href="#">
+    <div class="logo-emblem">
+      <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="34" height="34" stroke="#B8933E" stroke-width="0.8"/>
+        <path d="M8 18C8 12.477 12.477 8 18 8C23.523 8 28 12.477 28 18C28 23.523 23.523 28 18 28" stroke="#B8933E" stroke-width="1.2"/>
+        <path d="M14 18C14 15.791 15.791 14 18 14C20.209 14 22 15.791 22 18C22 20.209 20.209 22 18 22" stroke="#D4AD62" stroke-width="1"/>
+        <circle cx="18" cy="18" r="2" fill="#B8933E"/>
+        <line x1="8" y1="28" x2="18" y2="28" stroke="#B8933E" stroke-width="1.2"/>
+      </svg>
+    </div>
+    <span class="logo-text">Di<span>Q</span>ualia</span>
+  </a>
+  <a class="nav-back" href="#">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    Back to Home
+  </a>
+</nav>
+
+<!-- CHAPTER 1: HERO -->
+<section class="story-hero">
+  <div class="hero-glow"></div>
+  <div class="chapter-label fade">Our Story</div>
+  <h1 class="fade">We did not build<br/>a brand. We built<br/>a <em>point of view.</em></h1>
+  <p class="lead fade">DiQualia was born from a question most agencies are unwilling to ask: in an age when everyone has access to the same tools, what does it truly mean to deliver intelligence?</p>
+  <div class="scroll-hint fade">
+    <div class="scroll-line"></div>
+    Read the story
+  </div>
+</section>
+
+<!-- CHAPTER 2: THE PROBLEM -->
+<section class="story-section">
+  <div class="two-col">
+    <div class="col-text">
+      <div class="eyebrow">The Problem We Saw</div>
+      <h2 class="section-h2">A world full of<br/>data. Starved of<br/><em>real intelligence.</em></h2>
+    </div>
+    <div class="col-prose">
+      <div class="prose">
+        <p>When artificial intelligence arrived in marketing, something unexpected happened. Rather than elevating the quality of insight, it democratised mediocrity. Every agency, every consultant, every freelancer suddenly had access to the same tools — and began producing the same outputs.</p>
+        <p>The market became flooded. Not with intelligence, but with the <strong>appearance of intelligence</strong>. Dashboards that looked authoritative. Reports that read convincingly. Strategies that sounded sophisticated. All of it generated at speed. None of it built on genuine understanding.</p>
+        <p>We watched this happen. And we chose not to participate in it.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PULL QUOTE 1 -->
+<div class="pull-quote">
+  <blockquote>"In the age of AI, the rarest thing you can offer a business is not speed — it is <em>judgement.</em>"</blockquote>
+  <cite>The founding principle of DiQualia</cite>
+</div>
+
+<!-- CHAPTER 3: THE ANSWER -->
+<section class="story-section alt">
+  <div class="two-col reverse">
+    <div class="col-text">
+      <div class="eyebrow">Our Answer</div>
+      <h2 class="section-h2">The Double<br/><em>Experience.</em></h2>
+      <div class="prose" style="margin-top:1.5rem;">
+        <p>DiQualia is built on a philosophy we call the Double Experience — the deliberate convergence of deep human expertise and the precision of intelligent systems.</p>
+        <p>Not one or the other. Not humans pretending AI doesn't exist. Not AI pretending it has wisdom. But both — working in concert, each making the other more powerful than it could ever be alone.</p>
+      </div>
+    </div>
+    <div class="col-visual">
+      <div class="dex-grid">
+        <div class="dex-card">
+          <div class="dex-number">01</div>
+          <div class="dex-title">Human <em>Intelligence</em></div>
+          <p class="dex-body">Years of real market understanding. The ability to read context, sense nuance, and make the kind of judgement calls that no algorithm can replicate. We bring pattern recognition built from genuine experience — not training data.</p>
+        </div>
+        <div class="dex-card">
+          <div class="dex-number">02</div>
+          <div class="dex-title">System <em>Precision</em></div>
+          <p class="dex-body">The power of intelligent tools, applied with intention. Speed without noise. Scale without sacrifice of quality. We use AI as a sharpening instrument — never as a replacement for the thinking that matters.</p>
+        </div>
+        <div class="dex-plus">
+          <div class="dex-plus-text">Together, they produce something neither can achieve alone: intelligence that is both felt and proven.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CHAPTER 4: THE AGE OF AI -->
+<section class="story-section">
+  <div class="eyebrow">Why Now</div>
+  <h2 class="section-h2">Real intelligence<br/>in the age of <em>artificial</em> everything.</h2>
+  <div class="prose" style="margin-bottom:0;">
+    <p>We are living through a paradox. Businesses have never had more data, more tools, or more automated insight available to them. And yet, the number of companies that feel genuinely understood by their marketing partners has never been lower.</p>
+    <p>The reason is simple: intelligence requires context. And context requires the kind of sustained, focused attention that no tool can manufacture on demand.</p>
+  </div>
+  <div class="ai-grid">
+    <div class="ai-card">
+      <div class="ai-card-eyebrow">The Market Reality</div>
+      <div class="ai-card-title">Everyone sounds the same.</div>
+      <p class="ai-card-body">AI has given every agency the ability to produce polished, credible-sounding output — without the expertise to back it up. Clients are increasingly unable to distinguish between insight and imitation.</p>
+    </div>
+    <div class="ai-card">
+      <div class="ai-card-eyebrow">The DiQualia Difference</div>
+      <div class="ai-card-title">We are the human layer.</div>
+      <p class="ai-card-body">Our value is not in the tools we use — it is in the expertise that directs them. We ask better questions, build better frameworks, and deliver conclusions that hold up under scrutiny. Because they are built on understanding, not automation.</p>
+    </div>
+    <div class="ai-card">
+      <div class="ai-card-eyebrow">The Result for Clients</div>
+      <div class="ai-card-title">Clarity in a noisy market.</div>
+      <p class="ai-card-body">When a DiQualia client makes a decision, they make it with confidence. Not because we told them what they wanted to hear — but because we gave them the genuine intelligence to see their market clearly and move with precision.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CHAPTER 5: MANIFESTO -->
+<section class="manifesto">
+  <div class="eyebrow" style="justify-content:center;">
+    <span style="display:flex;align-items:center;gap:1rem;">
+      <span style="display:block;width:28px;height:1px;background:var(--gold)"></span>
+      What We Believe
+      <span style="display:block;width:28px;height:1px;background:var(--gold)"></span>
+    </span>
+  </div>
+  <h2 class="section-h2" style="text-align:center;margin:0 auto 0;max-width:600px;">The DiQualia<br/><em>Manifesto.</em></h2>
+  <div class="manifesto-lines">
+    <div class="manifesto-line">We believe <em>intelligence</em> is the only sustainable competitive advantage.</div>
+    <div class="manifesto-line">We believe AI is a tool, not a substitute for <em>expertise.</em></div>
+    <div class="manifesto-line">We believe the best marketing starts with <em>understanding the market,</em> not performing for it.</div>
+    <div class="manifesto-line">We believe clarity is a service — and <em>noise is a disservice.</em></div>
+    <div class="manifesto-line">We believe human judgement and machine precision are <em>stronger together.</em></div>
+    <div class="manifesto-line">We believe every B2B company deserves to be truly <em>understood</em> by its marketing partner.</div>
+    <div class="manifesto-line strong-line">We believe in <em>intelligence that moves markets.</em></div>
+  </div>
+</section>
+
+<!-- CHAPTER 6: FOUNDING VISION -->
+<section class="story-section alt">
+  <div class="vision-block">
+    <div class="vision-sidebar">
+      <div class="vision-sidebar-label">Chapter Six</div>
+      <div class="vision-sidebar-num">06</div>
+      <div class="vision-rule"></div>
+      <div class="eyebrow" style="margin:0;">Where We Are Going</div>
+    </div>
+    <div>
+      <h2 class="section-h2">Built for the<br/>businesses that<br/><em>cannot afford to guess.</em></h2>
+      <div class="prose">
+        <p>DiQualia was built with a very specific client in mind: the B2B enterprise operating in a niche, high-stakes market — where a wrong positioning decision costs not just a campaign, but a quarter. Where a missed market shift means losing ground that takes years to recover. Where the margin for error is close to zero.</p>
+        <p>These businesses do not need more content. They do not need more impressions. They need <strong>precision.</strong> They need someone who has done the real work of understanding their market — and can translate that understanding into decisions they can act on with confidence.</p>
+        <p>That is the business DiQualia is building. Not the largest marketing agency. Not the loudest. The most precise. The most trusted. The one that clients come back to not because of a retainer — but because the intelligence we deliver continues to prove itself in the results they see.</p>
+        <p>We are not here to do marketing for the sake of marketing. We are here to move markets. For the businesses smart enough to know the difference.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PULL QUOTE 2 -->
+<div class="pull-quote">
+  <blockquote>"We are not the loudest agency in the room. We are the one whose <em>work speaks last</em> — after the noise has cleared."</blockquote>
+  <cite>DiQualia — Brand Positioning Document, 2025</cite>
+</div>
+
+<!-- TAGLINE CLOSER -->
+<section class="tagline-closer">
+  <span class="tagline-word">Intelligence</span>
+  <span class="tagline-word">that <em>moves</em></span>
+  <span class="tagline-word">markets.</span>
+  <p class="tagline-sub">DiQualia — Marketing Intelligence & Research</p>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-copy">© 2025 DiQualia. All rights reserved.</div>
+  <ul class="footer-links">
+    <li><a href="#">Services</a></li>
+    <li><a href="#">Contact</a></li>
+    <li><a href="#">Privacy</a></li>
+  </ul>
+</footer>
+
+</body>
+</html>
