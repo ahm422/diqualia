@@ -13,67 +13,118 @@
   --gold-lt: #d4ad62;
   --gold-pale: #ede0c4;
 
-  /* Theme roles (defaults to dark; overridden by prefers-color-scheme and [data-theme]) */
-  --bg: var(--ink);
-  --bg-elev: var(--obsidian);
-  --panel: var(--slate);
-  --text: var(--paper);
-  --text-muted: var(--mist);
-  --text-faint: var(--fog);
-  --border: rgba(184, 147, 62, 0.14);
-  --shadow: 0 0 0 1px rgba(184, 147, 62, 0.12);
-  --noise-opacity: 0.03;
-}
+  /* Semantic theme tokens (light default; `html.dark` overrides) */
+  color-scheme: light;
 
-@theme inline {
-  --color-background: var(--bg);
-  --color-foreground: var(--text);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --background: var(--paper);
+  --foreground: var(--ink);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: var(--ink);
-    --bg-elev: var(--obsidian);
-    --panel: var(--slate);
-    --text: var(--paper);
-    --text-muted: var(--mist);
-    --text-faint: var(--fog);
-    --border: rgba(184, 147, 62, 0.14);
-    --shadow: 0 0 0 1px rgba(184, 147, 62, 0.12);
-  }
-}
+  --card: var(--white);
+  --card-foreground: var(--ink);
 
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
-}
+  --popover: var(--white);
+  --popover-foreground: var(--ink);
 
-/* Explicit theme override */
-html[data-theme="light"] {
-  --bg: var(--paper);
-  --bg-elev: var(--white);
-  --panel: color-mix(in oklab, var(--paper) 85%, var(--ink));
-  --text: var(--ink);
-  --text-muted: color-mix(in oklab, var(--ink) 55%, var(--paper));
-  --text-faint: color-mix(in oklab, var(--ink) 35%, var(--paper));
-  --border: rgba(13, 13, 14, 0.12);
-  --shadow: 0 0 0 1px rgba(13, 13, 14, 0.1);
+  /* Brand */
+  --primary: var(--gold);
+  --primary-foreground: var(--ink);
+
+  --secondary: color-mix(in oklab, var(--paper) 88%, var(--ink));
+  --secondary-foreground: var(--ink);
+
+  --muted: color-mix(in oklab, var(--paper) 92%, var(--ink));
+  --muted-foreground: color-mix(in oklab, var(--ink) 56%, var(--paper));
+
+  --accent: color-mix(in oklab, var(--gold) 18%, var(--paper));
+  --accent-foreground: var(--ink);
+
+  --destructive: #b91c1c;
+  --destructive-foreground: #ffffff;
+
+  --border: color-mix(in oklab, var(--ink) 14%, transparent);
+  --input: color-mix(in oklab, var(--ink) 18%, transparent);
+  --ring: var(--primary);
+
+  --radius: 12px;
+
+  /* Legacy compat (to be migrated out of components) */
+  --bg: var(--background);
+  --bg-elev: var(--card);
+  --panel: var(--muted);
+  --text: var(--foreground);
+  --text-muted: var(--muted-foreground);
+  --text-faint: color-mix(in oklab, var(--muted-foreground) 78%, var(--background));
+  --shadow: 0 0 0 1px color-mix(in oklab, var(--border) 85%, transparent);
   --noise-opacity: 0.02;
 }
 
-html[data-theme="dark"] {
-  --bg: var(--ink);
-  --bg-elev: var(--obsidian);
-  --panel: var(--slate);
-  --text: var(--paper);
-  --text-muted: var(--mist);
-  --text-faint: var(--fog);
-  --border: rgba(184, 147, 62, 0.14);
-  --shadow: 0 0 0 1px rgba(184, 147, 62, 0.12);
+@theme inline {
+  /* shadcn-style semantic colors */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-lg: var(--radius);
+
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+}
+
+html.dark {
+  color-scheme: dark;
+
+  --background: var(--ink);
+  --foreground: var(--paper);
+
+  --card: var(--obsidian);
+  --card-foreground: var(--paper);
+
+  --popover: var(--obsidian);
+  --popover-foreground: var(--paper);
+
+  --primary: var(--gold);
+  --primary-foreground: var(--ink);
+
+  --secondary: color-mix(in oklab, var(--slate) 86%, var(--ink));
+  --secondary-foreground: var(--paper);
+
+  --muted: color-mix(in oklab, var(--slate) 88%, var(--ink));
+  --muted-foreground: var(--mist);
+
+  --accent: color-mix(in oklab, var(--gold) 14%, var(--slate));
+  --accent-foreground: var(--paper);
+
+  --destructive: #ef4444;
+  --destructive-foreground: #0b0b0c;
+
+  --border: color-mix(in oklab, var(--gold) 16%, transparent);
+  --input: color-mix(in oklab, var(--gold) 22%, transparent);
+  --ring: var(--primary);
+
+  /* Legacy compat */
   --noise-opacity: 0.03;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
 /* Subtle noise overlay like the reference HTML (disabled for reduced transparency users) */

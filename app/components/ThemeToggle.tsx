@@ -7,6 +7,7 @@ type ThemeMode = Theme | "system";
 
 const STORAGE_KEY = "diqualia-theme";
 const THEME_EVENT = "diqualia-theme-change";
+const DARK_CLASS = "dark";
 
 function getSystemTheme(): Theme {
   // On the server we can't know the user's OS theme; return a deterministic value
@@ -16,7 +17,7 @@ function getSystemTheme(): Theme {
 }
 
 function applyThemeToHtml(theme: Theme) {
-  document.documentElement.dataset.theme = theme;
+  document.documentElement.classList.toggle(DARK_CLASS, theme === "dark");
 }
 
 export function ThemeToggle() {
@@ -82,15 +83,10 @@ export function ThemeToggle() {
       onClick={toggle}
       aria-pressed={pressed}
       aria-label={pressed ? "Switch to light theme" : "Switch to dark theme"}
-      className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs tracking-[0.18em] uppercase border"
-      style={{
-        borderColor: "var(--border)",
-        color: "var(--text-muted)",
-        background: "color-mix(in oklab, var(--bg-elev) 75%, transparent)",
-      }}
+      className="inline-flex items-center gap-2 rounded-full border border-border bg-card/70 px-3 py-2 text-xs tracking-[0.18em] uppercase text-muted-foreground backdrop-blur-sm"
     >
       <span className="font-mono">{pressed ? "Dark" : "Light"}</span>
-      <span aria-hidden className="text-[10px]" style={{ color: "var(--gold)" }}>
+      <span aria-hidden className="text-[10px] text-primary">
         {pressed ? "◐" : "◑"}
       </span>
     </button>

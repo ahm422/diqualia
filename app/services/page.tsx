@@ -19,8 +19,8 @@ const tabs: ServiceTab[] = [
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex items-center gap-3 text-[11px] tracking-[0.35em] uppercase" style={{ color: "var(--gold)" }}>
-      <span aria-hidden className="inline-block h-px w-8" style={{ background: "var(--gold)" }} />
+    <div className="flex items-center gap-3 text-[11px] tracking-[0.35em] uppercase text-primary">
+      <span aria-hidden className="inline-block h-px w-8 bg-primary" />
       {children}
     </div>
   );
@@ -29,13 +29,12 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
     <h2
-      className="mt-4"
+      className="mt-4 text-foreground"
       style={{
         fontFamily: "var(--font-display)",
         fontWeight: 300,
         fontSize: "clamp(2rem, 3.6vw, 3.1rem)",
         lineHeight: 1.1,
-        color: "var(--white)",
       }}
     >
       {children}
@@ -68,23 +67,25 @@ export default function ServicesPage() {
           <div>
             <Eyebrow>Our Intelligence Services</Eyebrow>
             <h1
-              className="mt-7"
+              className="mt-7 text-foreground"
               style={{
                 fontFamily: "var(--font-display)",
                 fontWeight: 300,
                 lineHeight: 0.98,
                 fontSize: "clamp(2.8rem, 5.2vw, 4.8rem)",
-                color: "var(--white)",
               }}
             >
               What We
               <br />
-              Do for <em style={{ fontStyle: "italic", color: "var(--gold-lt)" }}>You.</em>
+              Do for{" "}
+              <em className="text-primary" style={{ fontStyle: "italic" }}>
+                You.
+              </em>
             </h1>
           </div>
 
           <div className="pb-2">
-            <p className="text-[15px] leading-8" style={{ color: "var(--text-muted)" }}>
+            <p className="text-[15px] leading-8 text-muted-foreground">
               Six core intelligence services — each built on deep research, each designed to move your B2B pipeline from
               invisible to inevitable.
             </p>
@@ -101,14 +102,14 @@ export default function ServicesPage() {
                 ["3.8x", "Pipeline Growth"],
                 ["~21d", "First Qualified Lead"],
               ].map(([n, l]) => (
-                <div key={l} className="p-6" style={{ background: "var(--bg-elev)" }}>
+                <div key={l} className="bg-card p-6">
                   <div
                     className="text-[28px] leading-none"
-                    style={{ fontFamily: "var(--font-display)", fontWeight: 300, color: "var(--gold)" }}
+                    style={{ fontFamily: "var(--font-display)", fontWeight: 300, color: "var(--primary)" }}
                   >
                     {n}
                   </div>
-                  <div className="mt-2 text-[11px] tracking-[0.18em] uppercase" style={{ color: "var(--text-muted)" }}>
+                  <div className="mt-2 text-[11px] tracking-[0.18em] uppercase text-muted-foreground">
                     {l}
                   </div>
                 </div>
@@ -133,7 +134,7 @@ export default function ServicesPage() {
             <div>
               <Eyebrow>Intelligence Service One</Eyebrow>
               <SectionTitle>Market Research &amp; Intelligence</SectionTitle>
-              <p className="mt-6 text-[15px] leading-8" style={{ color: "var(--text-muted)" }}>
+              <p className="mt-6 text-[15px] leading-8 text-muted-foreground">
                 Before we build a single strategy, we map your entire market landscape — demand signals, buyer behavior,
                 emerging trends, and the whitespace your competitors haven&apos;t discovered yet. This is the intelligence
                 foundation everything else is built on.
@@ -145,7 +146,6 @@ export default function ServicesPage() {
             className="mt-14 overflow-hidden border"
             style={{
               borderColor: "color-mix(in oklab, var(--border) 80%, transparent)",
-              background: "var(--bg-elev)",
             }}
           >
             <div
@@ -153,28 +153,28 @@ export default function ServicesPage() {
               style={{ background: "linear-gradient(90deg, var(--gold), color-mix(in oklab, var(--gold) 35%, transparent), var(--gold))" }}
             />
 
-            <div className="grid grid-cols-1 gap-10 p-10 md:grid-cols-2 md:gap-14 md:p-12">
+            <div className="grid grid-cols-1 gap-10 bg-card p-10 md:grid-cols-2 md:gap-14 md:p-12">
               <div>
                 <div className="text-[11px] tracking-[0.22em] uppercase" style={{ color: "color-mix(in oklab, var(--gold) 35%, transparent)" }}>
                   Core Intelligence Service · 01
                 </div>
                 <div
-                  className="mt-5 text-[26px]"
-                  style={{ fontFamily: "var(--font-display)", fontWeight: 400, color: "var(--white)", lineHeight: 1.2 }}
+                  className="mt-5 text-[26px] text-foreground"
+                  style={{ fontFamily: "var(--font-display)", fontWeight: 400, lineHeight: 1.2 }}
                 >
                   Know Your Market Before Anyone Else Does
                 </div>
-                <p className="mt-4 text-[13px] leading-7" style={{ color: "var(--text-muted)" }}>
+                <p className="mt-4 text-[13px] leading-7 text-muted-foreground">
                   We conduct deep, immersive research into your specific niche — studying who is buying, who is
                   searching, where demand is growing, and where the gaps in your market exist. The result is a complete
                   market intelligence brief that becomes your strategic compass.
                 </p>
 
                 <div className="mt-7 border-t pt-6" style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
-                  <div className="text-[10px] tracking-[0.22em] uppercase" style={{ color: "var(--gold)" }}>
+                  <div className="text-[10px] tracking-[0.22em] uppercase text-primary">
                     What You Receive
                   </div>
-                  <ul className="mt-4 space-y-3 text-[12px]" style={{ color: "color-mix(in oklab, var(--text) 70%, var(--bg))" }}>
+                  <ul className="mt-4 space-y-3 text-[12px] text-muted-foreground">
                     {[
                       "Full market landscape report — demand, trends, and growth signals",
                       "Buyer segment analysis — who buys, why, and when",
@@ -183,7 +183,7 @@ export default function ServicesPage() {
                       "Industry language guide — how buyers actually speak",
                     ].map((x) => (
                       <li key={x} className="flex items-start gap-3">
-                        <span aria-hidden style={{ color: "var(--gold)" }}>
+                        <span aria-hidden className="text-primary">
                           →
                         </span>
                         <span>{x}</span>
@@ -220,10 +220,10 @@ export default function ServicesPage() {
                       borderLeftColor: "color-mix(in oklab, var(--border) 100%, transparent)",
                     }}
                   >
-                    <div className="text-[13px] tracking-[0.06em]" style={{ color: "var(--white)" }}>
+                    <div className="text-[13px] tracking-[0.06em] text-foreground">
                       {t}
                     </div>
-                    <p className="mt-2 text-[12px] leading-7" style={{ color: "var(--text-muted)" }}>
+                    <p className="mt-2 text-[12px] leading-7 text-muted-foreground">
                       {b}
                     </p>
                   </div>
@@ -251,7 +251,7 @@ export default function ServicesPage() {
             <div>
               <Eyebrow>Intelligence Service Two</Eyebrow>
               <SectionTitle>Buyer Identification &amp; Profiling</SectionTitle>
-              <p className="mt-6 text-[15px] leading-8" style={{ color: "var(--text-muted)" }}>
+              <p className="mt-6 text-[15px] leading-8 text-muted-foreground">
                 We go beyond demographics. We build precise, research-backed profiles of your ideal buyers — who they
                 are, how they think, what triggers their decisions, and exactly where to find them. Every profile is
                 built from real market data, not assumptions.
@@ -294,22 +294,22 @@ export default function ServicesPage() {
                   {k}
                 </div>
                 <div
-                  className="mt-4 text-[20px]"
-                  style={{ fontFamily: "var(--font-display)", fontWeight: 400, color: "var(--white)", lineHeight: 1.2 }}
+                  className="mt-4 text-[20px] text-foreground"
+                  style={{ fontFamily: "var(--font-display)", fontWeight: 400, lineHeight: 1.2 }}
                 >
                   {t}
                 </div>
-                <p className="mt-4 text-[12px] leading-7" style={{ color: "var(--text-muted)" }}>
+                <p className="mt-4 text-[12px] leading-7 text-muted-foreground">
                   {b}
                 </p>
                 <div className="mt-6 border-t pt-5" style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
-                  <div className="text-[10px] tracking-[0.22em] uppercase" style={{ color: "var(--gold)" }}>
+                  <div className="text-[10px] tracking-[0.22em] uppercase text-primary">
                     Deliverables
                   </div>
-                  <ul className="mt-3 space-y-2 text-[12px]" style={{ color: "color-mix(in oklab, var(--text) 70%, var(--bg))" }}>
+                  <ul className="mt-3 space-y-2 text-[12px] text-muted-foreground">
                     {(delivs as string[]).map((x) => (
                       <li key={x} className="flex items-start gap-3">
-                        <span aria-hidden style={{ color: "var(--gold)" }}>
+                        <span aria-hidden className="text-primary">
                           →
                         </span>
                         <span>{x}</span>
@@ -336,7 +336,7 @@ export default function ServicesPage() {
             <div>
               <Eyebrow>Intelligence Service Three</Eyebrow>
               <SectionTitle>Positioning &amp; Messaging Strategy</SectionTitle>
-              <p className="mt-6 text-[15px] leading-8" style={{ color: "var(--text-muted)" }}>
+              <p className="mt-6 text-[15px] leading-8 text-muted-foreground">
                 Most B2B companies are excellent at what they do but invisible in how they communicate it. We translate
                 your technical expertise into sharp, resonant market language that makes decision-makers immediately
                 understand your value — and immediately prefer you.
@@ -379,22 +379,22 @@ export default function ServicesPage() {
                   {k}
                 </div>
                 <div
-                  className="mt-4 text-[20px]"
-                  style={{ fontFamily: "var(--font-display)", fontWeight: 400, color: "var(--white)", lineHeight: 1.2 }}
+                  className="mt-4 text-[20px] text-foreground"
+                  style={{ fontFamily: "var(--font-display)", fontWeight: 400, lineHeight: 1.2 }}
                 >
                   {t}
                 </div>
-                <p className="mt-4 text-[12px] leading-7" style={{ color: "var(--text-muted)" }}>
+                <p className="mt-4 text-[12px] leading-7 text-muted-foreground">
                   {b}
                 </p>
                 <div className="mt-6 border-t pt-5" style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
-                  <div className="text-[10px] tracking-[0.22em] uppercase" style={{ color: "var(--gold)" }}>
+                  <div className="text-[10px] tracking-[0.22em] uppercase text-primary">
                     Deliverables
                   </div>
-                  <ul className="mt-3 space-y-2 text-[12px]" style={{ color: "color-mix(in oklab, var(--text) 70%, var(--bg))" }}>
+                  <ul className="mt-3 space-y-2 text-[12px] text-muted-foreground">
                     {(delivs as string[]).map((x) => (
                       <li key={x} className="flex items-start gap-3">
-                        <span aria-hidden style={{ color: "var(--gold)" }}>
+                        <span aria-hidden className="text-primary">
                           →
                         </span>
                         <span>{x}</span>
@@ -425,7 +425,7 @@ export default function ServicesPage() {
             <div>
               <Eyebrow>Intelligence Service Four</Eyebrow>
               <SectionTitle>B2B Lead Generation</SectionTitle>
-              <p className="mt-6 text-[15px] leading-8" style={{ color: "var(--text-muted)" }}>
+              <p className="mt-6 text-[15px] leading-8 text-muted-foreground">
                 Every lead we generate is pre-qualified by intelligence. We don&apos;t spray and pray — we identify buyers who
                 match your ICP precisely, engage them on the channels they actually use, and deliver conversations with
                 people who are genuinely ready to listen.
@@ -468,12 +468,12 @@ export default function ServicesPage() {
                   {k}
                 </div>
                 <div
-                  className="mt-4 text-[20px]"
-                  style={{ fontFamily: "var(--font-display)", fontWeight: 400, color: "var(--white)", lineHeight: 1.2 }}
+                  className="mt-4 text-[20px] text-foreground"
+                  style={{ fontFamily: "var(--font-display)", fontWeight: 400, lineHeight: 1.2 }}
                 >
                   {t}
                 </div>
-                <p className="mt-4 text-[12px] leading-7" style={{ color: "var(--text-muted)" }}>
+                <p className="mt-4 text-[12px] leading-7 text-muted-foreground">
                   {b}
                 </p>
                 <div className="mt-6 border-t pt-5" style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
@@ -553,8 +553,8 @@ export default function ServicesPage() {
                   {k}
                 </div>
                 <div
-                  className="mt-4 text-[20px]"
-                  style={{ fontFamily: "var(--font-display)", fontWeight: 400, color: "var(--white)", lineHeight: 1.2 }}
+                  className="mt-4 text-[20px] text-foreground"
+                  style={{ fontFamily: "var(--font-display)", fontWeight: 400, lineHeight: 1.2 }}
                 >
                   {t}
                 </div>
@@ -642,8 +642,8 @@ export default function ServicesPage() {
                   {k}
                 </div>
                 <div
-                  className="mt-4 text-[20px]"
-                  style={{ fontFamily: "var(--font-display)", fontWeight: 400, color: "var(--white)", lineHeight: 1.2 }}
+                  className="mt-4 text-[20px] text-foreground"
+                  style={{ fontFamily: "var(--font-display)", fontWeight: 400, lineHeight: 1.2 }}
                 >
                   {t}
                 </div>
@@ -676,13 +676,12 @@ export default function ServicesPage() {
         <div className="mx-auto w-full max-w-6xl px-6 py-20">
           <Eyebrow>How Every Service Begins</Eyebrow>
           <h2
-            className="mt-4"
+            className="mt-4 text-foreground"
             style={{
               fontFamily: "var(--font-display)",
               fontWeight: 300,
               fontSize: "clamp(2rem, 3.6vw, 3.1rem)",
               lineHeight: 1.1,
-              color: "var(--white)",
             }}
           >
             The DiQualia Intelligence Process
@@ -706,7 +705,7 @@ export default function ServicesPage() {
                 >
                   {num}
                 </div>
-                <div className="mt-4 text-[13px] tracking-[0.06em]" style={{ color: "var(--white)" }}>
+                <div className="mt-4 text-[13px] tracking-[0.06em] text-foreground">
                   {title}
                 </div>
                 <p className="mt-3 text-[12px] leading-7" style={{ color: "var(--text-muted)" }}>
@@ -723,13 +722,12 @@ export default function ServicesPage() {
         <div className="mx-auto w-full max-w-6xl px-6 py-20">
           <Eyebrow>How We Engage</Eyebrow>
           <h2
-            className="mt-4"
+            className="mt-4 text-foreground"
             style={{
               fontFamily: "var(--font-display)",
               fontWeight: 300,
               fontSize: "clamp(2rem, 3.6vw, 3.1rem)",
               lineHeight: 1.1,
-              color: "var(--white)",
             }}
           >
             Choose Your Intelligence Model
@@ -802,8 +800,8 @@ export default function ServicesPage() {
                   {tag}
                 </div>
                 <div
-                  className="mt-4 text-[22px]"
-                  style={{ fontFamily: "var(--font-display)", fontWeight: 400, color: "var(--white)", lineHeight: 1.2 }}
+                  className="mt-4 text-[22px] text-foreground"
+                  style={{ fontFamily: "var(--font-display)", fontWeight: 400, lineHeight: 1.2 }}
                 >
                   {title}
                 </div>
@@ -843,13 +841,12 @@ export default function ServicesPage() {
         <div className="mx-auto w-full max-w-6xl px-6 py-20">
           <Eyebrow>Why DiQualia</Eyebrow>
           <h2
-            className="mt-4"
+            className="mt-4 text-foreground"
             style={{
               fontFamily: "var(--font-display)",
               fontWeight: 300,
               fontSize: "clamp(2rem, 3.6vw, 3.1rem)",
               lineHeight: 1.1,
-              color: "var(--white)",
             }}
           >
             Not a Marketing Agency. A Marketing Intelligence Unit.
@@ -876,8 +873,8 @@ export default function ServicesPage() {
                   {icon}
                 </div>
                 <div
-                  className="mt-5 text-[16px]"
-                  style={{ fontFamily: "var(--font-display)", fontWeight: 400, color: "var(--white)" }}
+                  className="mt-5 text-[16px] text-foreground"
+                  style={{ fontFamily: "var(--font-display)", fontWeight: 400 }}
                 >
                   {title}
                 </div>

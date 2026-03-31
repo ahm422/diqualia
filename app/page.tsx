@@ -31,21 +31,23 @@ export default function Home() {
             </div>
 
             <h1
-              className="mt-7 text-balance"
+              className="mt-7 text-balance text-foreground"
               style={{
                 fontFamily: "var(--font-display)",
                 fontWeight: 300,
                 lineHeight: 1.02,
                 fontSize: "clamp(3rem, 5.2vw, 5.5rem)",
-                color: "var(--white)",
               }}
             >
               Intelligence that
               <br />
-              <em style={{ fontStyle: "italic", color: "var(--gold-lt)" }}>moves</em> markets.
+              <em className="text-primary" style={{ fontStyle: "italic" }}>
+                moves
+              </em>{" "}
+              markets.
             </h1>
 
-            <p className="mt-7 max-w-[44ch] text-[15px] leading-8" style={{ color: "var(--text-muted)" }}>
+            <p className="mt-7 max-w-[44ch] text-[15px] leading-8 text-muted-foreground">
               DiQualia delivers precision marketing research and strategic intelligence for B2B enterprises
               operating in niche, high-stakes industries.
             </p>
@@ -54,7 +56,7 @@ export default function Home() {
               <a
                 href="/services"
                 className="inline-flex items-center gap-3 px-7 py-4 text-[11px] tracking-[0.22em] uppercase no-underline transition-colors"
-                style={{ background: "var(--gold)", color: "var(--ink)" }}
+                style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
               >
                 Explore Services
                 <span aria-hidden className="inline-block translate-y-[1px]">
@@ -67,10 +69,9 @@ export default function Home() {
                 className="inline-flex items-center gap-3 border-b pb-1 text-[11px] tracking-[0.22em] uppercase no-underline transition-colors"
                 style={{
                   borderColor: "color-mix(in oklab, var(--text-faint) 35%, transparent)",
-                  color: "var(--text-faint)",
                 }}
               >
-                See Our Approach <span aria-hidden>→</span>
+                <span className="text-muted-foreground">See Our Approach</span> <span aria-hidden>→</span>
               </a>
             </div>
           </div>
@@ -132,12 +133,12 @@ export default function Home() {
                   Market Penetration Score
                 </div>
                 <div
-                  className="relative mt-1 text-4xl"
-                  style={{ fontFamily: "var(--font-display)", fontWeight: 300, color: "var(--white)" }}
+                  className="relative mt-1 text-4xl text-foreground"
+                  style={{ fontFamily: "var(--font-display)", fontWeight: 300 }}
                 >
                   87.4%
                 </div>
-                <div className="relative mt-1 text-[12px]" style={{ color: "var(--text-muted)" }}>
+                <div className="relative mt-1 text-[12px] text-muted-foreground">
                   +12.3% vs prior quarter — North America B2B
                 </div>
               </div>
@@ -180,7 +181,7 @@ export default function Home() {
             <div
               key={idx}
               className="flex items-center gap-8 px-12 py-6"
-              style={{ color: "var(--text-muted)" }}
+              style={{ color: "var(--muted-foreground)" }}
             >
               <span className="text-[11px] tracking-[0.26em] uppercase whitespace-nowrap">{label}</span>
               <span
@@ -206,18 +207,19 @@ export default function Home() {
                 What We Do
               </div>
               <h2
-                className="mt-4"
+                className="mt-4 text-foreground"
                 style={{
                   fontFamily: "var(--font-display)",
                   fontWeight: 300,
                   fontSize: "clamp(2.2rem, 4vw, 3.4rem)",
                   lineHeight: 1.1,
-                  color: "var(--white)",
                 }}
               >
                 Built for
                 <br />
-                <em style={{ fontStyle: "italic", color: "var(--gold-lt)" }}>niche B2B</em>
+                <em className="text-primary" style={{ fontStyle: "italic" }}>
+                  niche B2B
+                </em>
                 <br />
                 precision.
               </h2>
@@ -278,17 +280,16 @@ export default function Home() {
                   {num}
                 </div>
                 <div
-                  className="mt-3 text-[22px]"
+                  className="mt-3 text-[22px] text-foreground"
                   style={{
                     fontFamily: "var(--font-display)",
                     fontWeight: 400,
                     lineHeight: 1.2,
-                    color: "var(--white)",
                   }}
                 >
                   {title}
                 </div>
-                <p className="mt-4 text-[13px] leading-7" style={{ color: "var(--text-muted)" }}>
+                <p className="mt-4 text-[13px] leading-7 text-muted-foreground">
                   {desc}
                 </p>
               </div>
@@ -310,21 +311,23 @@ export default function Home() {
                 Why DiQualia
               </div>
               <h2
-                className="mt-4"
+                className="mt-4 text-foreground"
                 style={{
                   fontFamily: "var(--font-display)",
                   fontWeight: 300,
                   fontSize: "clamp(2.2rem, 4vw, 3.4rem)",
                   lineHeight: 1.1,
-                  color: "var(--white)",
                 }}
               >
                 Research built for
                 <br />
-                <em style={{ fontStyle: "italic", color: "var(--gold-lt)" }}>your</em> industry.
+                <em className="text-primary" style={{ fontStyle: "italic" }}>
+                  your
+                </em>{" "}
+                industry.
               </h2>
 
-              <p className="mt-6 max-w-[56ch] text-[15px] leading-8" style={{ color: "var(--text-muted)" }}>
+              <p className="mt-6 max-w-[56ch] text-[15px] leading-8 text-muted-foreground">
                 Generic agencies produce generic results. DiQualia operates at the intersection of rigorous
                 research methodology and deep niche industry understanding — delivering intelligence that
                 actually moves the needle.
@@ -334,10 +337,9 @@ export default function Home() {
                 className="mt-8 inline-flex items-center gap-2 border-b pb-1 text-[11px] tracking-[0.22em] uppercase no-underline"
                 style={{
                   borderColor: "color-mix(in oklab, var(--text-faint) 35%, transparent)",
-                  color: "var(--text-faint)",
                 }}
               >
-                Our Services <span aria-hidden>→</span>
+                <span className="text-muted-foreground">Our Services</span> <span aria-hidden>→</span>
               </a>
             </div>
 
@@ -379,18 +381,19 @@ export default function Home() {
             How We Work
           </div>
           <h2
-            className="mt-4"
+            className="mt-4 text-foreground"
             style={{
               fontFamily: "var(--font-display)",
               fontWeight: 300,
               fontSize: "clamp(2.2rem, 4vw, 3.4rem)",
               lineHeight: 1.1,
-              color: "var(--white)",
             }}
           >
             From brief to
             <br />
-            <em style={{ fontStyle: "italic", color: "var(--gold-lt)" }}>breakthrough.</em>
+            <em className="text-primary" style={{ fontStyle: "italic" }}>
+              breakthrough.
+            </em>
           </h2>
 
           <div className="mt-14 grid grid-cols-1 gap-10 md:grid-cols-4 md:gap-6">
@@ -421,16 +424,15 @@ export default function Home() {
                   {num}
                 </div>
                 <div
-                  className="mt-6 text-[20px]"
+                  className="mt-6 text-[20px] text-foreground"
                   style={{
                     fontFamily: "var(--font-display)",
                     fontWeight: 400,
-                    color: "var(--white)",
                   }}
                 >
                   {title}
                 </div>
-                <p className="mt-3 text-[13px] leading-7" style={{ color: "var(--text-muted)" }}>
+                <p className="mt-3 text-[13px] leading-7 text-muted-foreground">
                   {body}
                 </p>
               </div>
@@ -453,20 +455,21 @@ export default function Home() {
             Get Started
           </div>
           <h2
-            className="mt-5"
+            className="mt-5 text-foreground"
             style={{
               fontFamily: "var(--font-display)",
               fontWeight: 300,
               fontSize: "clamp(2.2rem, 4vw, 3.4rem)",
               lineHeight: 1.1,
-              color: "var(--white)",
             }}
           >
             Ready to build on
             <br />
-            <em style={{ fontStyle: "italic", color: "var(--gold-lt)" }}>real intelligence?</em>
+            <em className="text-primary" style={{ fontStyle: "italic" }}>
+              real intelligence?
+            </em>
           </h2>
-          <p className="mx-auto mt-6 text-[15px] leading-8" style={{ color: "var(--text-muted)" }}>
+          <p className="mx-auto mt-6 text-[15px] leading-8 text-muted-foreground">
             Tell us about your market and what you need to know. We&apos;ll show you what precision research
             can unlock for your business.
           </p>
@@ -474,7 +477,7 @@ export default function Home() {
             <a
               href="mailto:intel@diqualia.com"
               className="inline-flex items-center gap-3 px-7 py-4 text-[11px] tracking-[0.22em] uppercase no-underline"
-              style={{ background: "var(--gold)", color: "var(--ink)" }}
+              style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
             >
               Start a Conversation <span aria-hidden>→</span>
             </a>
@@ -483,10 +486,9 @@ export default function Home() {
               className="inline-flex items-center gap-3 border-b pb-1 text-[11px] tracking-[0.22em] uppercase no-underline"
               style={{
                 borderColor: "color-mix(in oklab, var(--text-faint) 35%, transparent)",
-                color: "var(--text-faint)",
               }}
             >
-              Download Credentials
+              <span className="text-muted-foreground">Download Credentials</span>
             </a>
           </div>
         </div>
