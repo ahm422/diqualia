@@ -4,12 +4,17 @@ import Image from "next/image";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+
 const ThemeToggle = dynamic(() => import("./ThemeToggle").then((m) => m.ThemeToggle), { ssr: false });
 
 const navItems = [
-  { href: "/", label: "Home" },
   { href: "/services", label: "Services" },
-  { href: "/story", label: "Story" },
+  { href: "/story", label: "Approach" },
+  { href: "/services", label: "Industries" },
+  { href: "/story", label: "Insights" },
 ];
 
 export function SiteHeader() {
@@ -23,42 +28,86 @@ export function SiteHeader() {
         backdropFilter: "blur(18px)",
       }}
     >
-      <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-6 py-5">
-        <Link href="/" className="flex items-center gap-3 no-underline">
-          <Image src="/logo.svg" alt="DiQualia" width={76} height={18} priority />
-          <span
-            className="hidden sm:inline text-[13px] tracking-[0.18em] uppercase"
-            style={{ color: "var(--text-muted)" }}
-          >
-            Marketing Intelligence &amp; Research
-          </span>
+      <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+        <Link href="/" className="flex shrink-0 items-center gap-2 no-underline">
+          <Image src="/logo.svg" alt="DiQualia" width={86} height={21} priority />
         </Link>
 
-        <nav className="hidden md:flex items-center gap-8">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="text-[11px] tracking-[0.22em] uppercase no-underline transition-colors"
-              style={{ color: "var(--text-faint)" }}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+        <div className="hidden md:flex flex-1 justify-center">
+          <nav className="flex items-center gap-7">
+            {navItems.map((item) => (
+              <Link
+                key={`${item.href}-${item.label}`}
+                href={item.href}
+                className="text-[10px] tracking-[0.28em] uppercase no-underline transition-colors text-muted-foreground hover:text-foreground"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+        </div>
 
-        <div className="flex items-center gap-3">
-          <a
-            href="mailto:intel@diqualia.com"
-            className="hidden sm:inline-flex items-center rounded-full px-4 py-2 text-[11px] tracking-[0.22em] uppercase no-underline transition-colors"
-            style={{
-              color: "var(--gold)",
-              border: "1px solid color-mix(in oklab, var(--gold) 45%, transparent)",
-            }}
+        <div className="flex shrink-0 items-center gap-2">
+          <Button
+            asChild
+            variant="outline"
+            className="hidden sm:inline-flex rounded-full border-primary/40 text-primary hover:bg-accent hover:text-primary"
           >
-            Enquire
-          </a>
+            <a href="mailto:intel@diqualia.com">Enquire</a>
+          </Button>
           <ThemeToggle />
+
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="rounded-full md:hidden"
+                aria-label="Open navigation menu"
+              >
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden className="text-primary">
+                  <path
+                    d="M4 7h16M4 12h16M4 17h16"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </Button>
+            </SheetTrigger>
+
+            <SheetContent side="right" className="w-[85vw] sm:max-w-sm">
+              <SheetHeader>
+                <SheetTitle className="tracking-[0.16em] uppercase text-xs text-muted-foreground">
+                  Menu
+                </SheetTitle>
+              </SheetHeader>
+
+              <div className="mt-6 grid gap-3">
+                {navItems.map((item) => (
+                  <SheetClose asChild key={`${item.href}-${item.label}`}>
+                    <Link
+                      href={item.href}
+                      className="rounded-lg px-3 py-3 text-sm font-medium text-foreground hover:bg-accent"
+                    >
+                      {item.label}
+                    </Link>
+                  </SheetClose>
+                ))}
+              </div>
+
+              <Separator className="my-6" />
+
+              <div className="grid gap-3">
+                <SheetClose asChild>
+                  <Button asChild className="w-full rounded-full">
+                    <a href="mailto:intel@diqualia.com">Enquire</a>
+                  </Button>
+                </SheetClose>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
     </header>
