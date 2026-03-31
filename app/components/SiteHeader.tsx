@@ -1,7 +1,10 @@
+"use client";
+
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 
-import { ThemeToggle } from "./ThemeToggle";
+const ThemeToggle = dynamic(() => import("./ThemeToggle").then((m) => m.ThemeToggle), { ssr: false });
 
 const navItems = [
   { href: "/", label: "Home" },

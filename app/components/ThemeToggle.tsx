@@ -1,14 +1,17 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useSyncExternalStore } from "react";
 
 type Theme = "light" | "dark";
 type ThemeMode = Theme | "system";
 
 const STORAGE_KEY = "diqualia-theme";
+const THEME_EVENT = "diqualia-theme-change";
 
 function getSystemTheme(): Theme {
-  if (typeof window === "undefined") return "dark";
+  // On the server we can't know the user's OS theme; return a deterministic value
+  // so SSR markup matches the initial client render.
+  if (typeof window === "undefined") return "light";
   return window.matchMedia?.("(prefers-color-scheme: dark)")?.matches ? "dark" : "light";
 }
 
@@ -17,16 +20,28 @@ function applyThemeToHtml(theme: Theme) {
 }
 
 export function ThemeToggle() {
-  const [mode, setMode] = useState<ThemeMode>(() => {
-    if (typeof window === "undefined") return "system";
-    try {
-      const stored = window.localStorage.getItem(STORAGE_KEY);
-      if (stored === "light" || stored === "dark") return stored;
-    } catch {
-      // ignore
-    }
-    return "system";
-  });
+  const mode = useSyncExternalStore(
+    (onStoreChange) => {
+      if (typeof window === "undefined") return () => {};
+      const handler = () => onStoreChange();
+      window.addEventListener("storage", handler);
+      window.addEventListener(THEME_EVENT, handler as EventListener);
+      return () => {
+        window.removeEventListener("storage", handler);
+        window.removeEventListener(THEME_EVENT, handler as EventListener);
+      };
+    },
+    () => {
+      try {
+        const stored = window.localStorage.getItem(STORAGE_KEY);
+        if (stored === "light" || stored === "dark") return stored;
+      } catch {
+        // ignore
+      }
+      return "system";
+    },
+    () => "system"
+  ) as ThemeMode;
 
   const effectiveTheme = useMemo<Theme>(() => {
     if (mode === "system") return getSystemTheme();
@@ -50,9 +65,13 @@ export function ThemeToggle() {
 
   function toggle() {
     const next: Theme = effectiveTheme === "dark" ? "light" : "dark";
-    setMode(next);
-    window.localStorage.setItem(STORAGE_KEY, next);
+    try {
+      window.localStorage.setItem(STORAGE_KEY, next);
+    } catch {
+      // ignore
+    }
     applyThemeToHtml(next);
+    window.dispatchEvent(new Event(THEME_EVENT));
   }
 
   const pressed = effectiveTheme === "dark";
