@@ -50,7 +50,7 @@ export function ServicesTabs({ tabs }: { tabs: ServiceTab[] }) {
     <div
       className="sticky z-[120] top-[72px] overflow-x-auto"
       style={{
-        background: "color-mix(in oklab, var(--bg-elev) 92%, transparent)",
+        background: "color-mix(in oklab, var(--card) 92%, transparent)",
         borderBottom: "1px solid color-mix(in oklab, var(--border) 80%, transparent)",
         backdropFilter: "blur(18px)",
       }}
@@ -65,8 +65,8 @@ export function ServicesTabs({ tabs }: { tabs: ServiceTab[] }) {
               onClick={() => onClick(t.id)}
               className="shrink-0 border-b-2 px-5 py-4 text-[11px] tracking-[0.22em] uppercase transition-colors"
               style={{
-                borderBottomColor: isActive ? "var(--gold)" : "transparent",
-                color: isActive ? "var(--gold)" : "var(--text-muted)",
+                borderBottomColor: isActive ? "var(--primary)" : "transparent",
+                color: isActive ? "var(--primary)" : "var(--muted-foreground)",
               }}
             >
               {t.label}

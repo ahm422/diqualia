@@ -23,13 +23,12 @@ function Eyebrow({ children, center }: { children: React.ReactNode; center?: boo
 function H2({ children }: { children: React.ReactNode }) {
   return (
     <h2
-      className="mt-4"
+      className="mt-4 text-foreground"
       style={{
         fontFamily: "var(--font-display)",
         fontWeight: 300,
         fontSize: "clamp(2rem, 3.6vw, 3.1rem)",
         lineHeight: 1.1,
-        color: "var(--white)",
       }}
     >
       {children}
@@ -68,10 +67,9 @@ function PullQuote({ quote, cite }: { quote: React.ReactNode; cite: string }) {
           fontStyle: "italic",
           fontSize: "clamp(1.6rem, 3vw, 3rem)",
           lineHeight: 1.25,
-          color: "var(--white)",
         }}
       >
-        {quote}
+        <span className="text-foreground">{quote}</span>
       </blockquote>
       <div className="mt-6 text-[11px] tracking-[0.22em] uppercase" style={{ color: "var(--text-muted)" }}>
         {cite}
@@ -107,13 +105,12 @@ export default function StoryPage() {
         <div className="relative mx-auto w-full max-w-4xl">
           <Eyebrow center>Our Story</Eyebrow>
           <h1
-            className="mt-10"
+            className="mt-10 text-foreground"
             style={{
               fontFamily: "var(--font-display)",
               fontWeight: 300,
               fontSize: "clamp(3rem, 6vw, 6.2rem)",
               lineHeight: 1.05,
-              color: "var(--white)",
             }}
           >
             We did not build
@@ -204,7 +201,7 @@ export default function StoryPage() {
                     >
                       {num}
                     </div>
-                    <div className="mt-5 text-[22px]" style={{ fontFamily: "var(--font-display)", fontWeight: 400, color: "var(--white)" }}>
+                    <div className="mt-5 text-[22px] text-foreground" style={{ fontFamily: "var(--font-display)", fontWeight: 400 }}>
                       {title.includes("Human") ? (
                         <>
                           Human <em style={{ fontStyle: "italic", color: "var(--gold-lt)" }}>Intelligence</em>
@@ -304,7 +301,7 @@ export default function StoryPage() {
               <div className="text-[11px] tracking-[0.22em] uppercase" style={{ color: "var(--gold)" }}>
                 {ey}
               </div>
-              <div className="mt-4 text-[20px]" style={{ fontFamily: "var(--font-display)", fontWeight: 400, color: "var(--white)" }}>
+              <div className="mt-4 text-[20px] text-foreground" style={{ fontFamily: "var(--font-display)", fontWeight: 400 }}>
                 {title}
               </div>
               <p className="mt-3 text-[13px] leading-7" style={{ color: "var(--text-muted)" }}>
@@ -320,18 +317,19 @@ export default function StoryPage() {
         <div className="mx-auto w-full max-w-5xl px-6 py-24 text-center">
           <Eyebrow center>What We Believe</Eyebrow>
           <h2
-            className="mx-auto mt-8 max-w-[680px]"
+            className="mx-auto mt-8 max-w-[680px] text-foreground"
             style={{
               fontFamily: "var(--font-display)",
               fontWeight: 300,
               fontSize: "clamp(2.2rem, 4vw, 3.6rem)",
               lineHeight: 1.1,
-              color: "var(--white)",
             }}
           >
             The DiQualia
             <br />
-            <em style={{ fontStyle: "italic", color: "var(--gold-lt)" }}>Manifesto.</em>
+            <em className="text-primary" style={{ fontStyle: "italic" }}>
+              Manifesto.
+            </em>
           </h2>
 
           <div className="mx-auto mt-12 max-w-3xl">
@@ -351,7 +349,7 @@ export default function StoryPage() {
                   fontFamily: "var(--font-display)",
                   fontWeight: 300,
                   fontSize: "clamp(1.2rem, 2.2vw, 2rem)",
-                  color: line.includes("moves markets") ? "var(--white)" : "var(--text-faint)",
+                  color: line.includes("moves markets") ? "var(--foreground)" : "var(--muted-foreground)",
                   borderBottom: "1px solid color-mix(in oklab, var(--text) 6%, transparent)",
                 }}
               >
@@ -444,12 +442,12 @@ export default function StoryPage() {
           ].map(([word, emphasize]) => (
             <div
               key={String(word)}
+              className="text-foreground"
               style={{
                 fontFamily: "var(--font-display)",
                 fontWeight: 300,
                 fontSize: "clamp(3rem, 7vw, 7.8rem)",
                 lineHeight: 1,
-                color: "var(--white)",
               }}
             >
               {emphasize ? (
