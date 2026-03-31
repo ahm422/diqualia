@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DiQualia — Brand Kit 2025</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --ink:      #0D0D0E;
+  --obsidian: #141416;
+  --slate:    #1E1F24;
+  --mist:     #8A8C96;
+  --fog:      #C2C4CC;
+  --paper:    #F4F2EE;
+  --white:    #FDFCFB;
+  --gold:     #B8933E;
+  --gold-lt:  #D4AD62;
+  --gold-pale:#EDE0C4;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--ink);color:var(--paper);font-family:'DM Sans',sans-serif;font-weight:300;line-height:1.7;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");opacity:0.03;pointer-events:none;z-index:9999;}
+
+/* ── NAV ── */
+.kit-nav{position:fixed;top:0;left:0;right:0;z-index:200;background:rgba(13,13,14,0.96);border-bottom:1px solid rgba(184,147,62,0.1);display:flex;align-items:center;justify-content:space-between;padding:1rem 3rem;}
+.logo-mark{display:flex;align-items:center;gap:0.6rem;text-decoration:none;}
+.logo-emblem{width:28px;height:28px;}
+.logo-emblem svg{width:100%;height:100%;}
+.logo-text{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:400;letter-spacing:0.08em;color:var(--paper);}
+.logo-text span{color:var(--gold);}
+.nav-links{display:flex;gap:0;list-style:none;}
+.nav-links a{font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--mist);text-decoration:none;padding:0.4rem 1rem;transition:color 0.2s;border-right:1px solid rgba(255,255,255,0.05);}
+.nav-links a:first-child{border-left:1px solid rgba(255,255,255,0.05);}
+.nav-links a:hover{color:var(--gold);}
+.nav-tag{font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(184,147,62,0.5);border:1px solid rgba(184,147,62,0.2);padding:0.3rem 0.8rem;}
+
+/* ── SECTION WRAPPER ── */
+.kit-section{padding:7rem 4rem;position:relative;}
+.kit-section.dark{background:var(--obsidian);}
+.kit-section.slate-bg{background:var(--slate);}
+
+/* ── COVER ── */
+.cover{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:8rem 4rem 5rem;position:relative;overflow:hidden;}
+.cover-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:700px;height:500px;background:radial-gradient(ellipse,rgba(184,147,62,0.08) 0%,transparent 65%);pointer-events:none;}
+.cover-badge{font-size:0.65rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(184,147,62,0.25);padding:0.5rem 1.4rem;margin-bottom:3rem;display:inline-block;}
+.cover h1{font-family:'Cormorant Garamond',serif;font-size:clamp(3.5rem,7vw,7.5rem);font-weight:300;line-height:1;color:var(--white);margin-bottom:1rem;}
+.cover h1 em{font-style:italic;color:var(--gold);}
+.cover-sub{font-size:0.8rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--mist);margin-bottom:3rem;}
+.cover-tagline{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-style:italic;color:var(--fog);margin-bottom:4rem;}
+.cover-meta{display:flex;gap:3rem;justify-content:center;flex-wrap:wrap;}
+.cover-meta-item{text-align:center;}
+.cover-meta-label{font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(138,140,150,0.5);display:block;margin-bottom:0.3rem;}
+.cover-meta-value{font-size:0.78rem;color:var(--mist);}
+
+/* ── SECTION HEADER ── */
+.eyebrow{font-size:0.65rem;letter-spacing:0.28em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;display:flex;align-items:center;gap:1rem;}
+.eyebrow::before{content:'';display:block;width:24px;height:1px;background:var(--gold);}
+.section-h2{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,3vw,3rem);font-weight:300;line-height:1.1;color:var(--white);margin-bottom:0.6rem;}
+.section-h2 em{font-style:italic;color:var(--gold-lt);}
+.section-lead{font-size:0.88rem;color:var(--mist);max-width:560px;line-height:1.9;margin-bottom:3rem;}
+
+/* ── LOGO GRID ── */
+.logo-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:2.5rem;}
+.logo-card{border-radius:3px;overflow:hidden;}
+.logo-display{display:flex;align-items:center;justify-content:center;padding:3rem 2rem;min-height:160px;}
+.logo-display.on-dark{background:var(--ink);}
+.logo-display.on-light{background:var(--white);border:1px solid rgba(0,0,0,0.07);}
+.logo-display.on-gold{background:var(--gold);}
+.logo-display.on-slate{background:#2A2B32;}
+.logo-meta{background:rgba(255,255,255,0.03);padding:0.8rem 1.2rem;display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(255,255,255,0.05);}
+.logo-name{font-size:0.65rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--mist);}
+.dl-btn{font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);cursor:pointer;border:1px solid rgba(184,147,62,0.3);padding:0.3rem 0.7rem;background:none;transition:all 0.2s;font-family:'DM Sans',sans-serif;}
+.dl-btn:hover{background:var(--gold);color:var(--ink);}
+
+/* ── COLORS ── */
+.color-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:rgba(255,255,255,0.04);margin-top:2.5rem;}
+.color-card{background:var(--obsidian);}
+.color-swatch{height:90px;position:relative;}
+.color-swatch::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.04) 0%,transparent 60%);}
+.color-info{padding:1rem 1.2rem;}
+.color-name{font-size:0.7rem;font-weight:500;color:var(--paper);display:block;margin-bottom:0.25rem;letter-spacing:0.03em;}
+.color-hex{font-size:0.68rem;color:var(--mist);letter-spacing:0.06em;font-family:monospace;}
+.color-use{font-size:0.62rem;color:rgba(138,140,150,0.6);margin-top:0.3rem;display:block;}
+
+/* ── TYPOGRAPHY ── */
+.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:2.5rem;}
+.type-card{background:var(--obsidian);padding:2.5rem;border:1px solid rgba(255,255,255,0.04);}
+.type-specimen{margin-bottom:1.5rem;}
+.type-meta{border-top:1px solid rgba(255,255,255,0.06);padding-top:1rem;}
+.type-meta-row{display:flex;justify-content:space-between;margin-bottom:0.4rem;}
+.type-meta-label{font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:rgba(138,140,150,0.5);}
+.type-meta-value{font-size:0.72rem;color:var(--mist);}
+.type-scale{margin-top:2.5rem;background:var(--obsidian);padding:2.5rem;border:1px solid rgba(255,255,255,0.04);}
+.type-scale-row{display:flex;align-items:baseline;gap:2rem;padding:0.8rem 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+.type-scale-row:last-child{border-bottom:none;}
+.type-scale-label{font-size:0.62rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(138,140,150,0.4);min-width:100px;}
+
+/* ── BRAND STORY STRIP ── */
+.story-strip{margin-top:2.5rem;}
+.story-chapter{display:grid;grid-template-columns:200px 1fr;gap:3rem;padding:2.5rem 0;border-bottom:1px solid rgba(255,255,255,0.05);}
+.story-chapter:last-child{border-bottom:none;}
+.chapter-num{font-family:'Cormorant Garamond',serif;font-size:3.5rem;font-weight:300;color:rgba(184,147,62,0.15);line-height:1;}
+.chapter-tag{font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-top:0.4rem;}
+.chapter-title{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:300;color:var(--white);margin-bottom:0.7rem;line-height:1.2;}
+.chapter-title em{font-style:italic;color:var(--gold-lt);}
+.chapter-body{font-size:0.85rem;color:var(--mist);line-height:1.9;}
+
+/* ── DOUBLE EXPERIENCE ── */
+.dex-block{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(184,147,62,0.1);margin-top:2.5rem;}
+.dex-card{background:var(--obsidian);padding:2.5rem 2rem;}
+.dex-n{font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:300;color:rgba(184,147,62,0.15);line-height:1;margin-bottom:1rem;}
+.dex-t{font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:var(--white);margin-bottom:0.7rem;}
+.dex-t em{font-style:italic;color:var(--gold-lt);}
+.dex-b{font-size:0.83rem;color:var(--mist);line-height:1.85;}
+.dex-plus{grid-column:1/-1;background:var(--slate);padding:1.8rem;text-align:center;font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-style:italic;color:var(--gold-lt);}
+
+/* ── MANIFESTO ── */
+.manifesto-lines{margin-top:2.5rem;}
+.m-line{font-family:'Cormorant Garamond',serif;font-size:clamp(1.2rem,1.8vw,1.7rem);font-weight:300;color:var(--fog);padding:1.2rem 0;border-bottom:1px solid rgba(255,255,255,0.05);cursor:default;transition:color 0.3s;}
+.m-line:hover{color:var(--white);}
+.m-line em{color:var(--gold-lt);font-style:italic;}
+.m-line.highlight{color:var(--white);}
+.m-line:last-child{border-bottom:none;}
+
+/* ── VOICE & TONE ── */
+.voice-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,0.04);margin-top:2.5rem;}
+.voice-card{background:var(--obsidian);padding:2rem 1.8rem;}
+.voice-icon{font-size:1.4rem;margin-bottom:1rem;color:var(--gold);}
+.voice-title{font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--white);margin-bottom:0.6rem;}
+.voice-body{font-size:0.8rem;color:var(--mist);line-height:1.8;}
+.voice-do,.voice-dont{margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,0.05);}
+.voice-do-label{font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);margin-bottom:0.4rem;}
+.voice-dont-label{font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:#C0464A;margin-bottom:0.4rem;}
+.voice-example{font-size:0.78rem;color:var(--fog);font-style:italic;}
+
+/* ── USAGE RULES ── */
+.rules-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:2.5rem;}
+.rule-card{background:var(--obsidian);padding:2rem;border-left:2px solid var(--gold);}
+.rule-card.dont{border-left-color:#C0464A;}
+.rule-label{font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);margin-bottom:0.8rem;}
+.rule-card.dont .rule-label{color:#C0464A;}
+.rule-title{font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--white);margin-bottom:0.6rem;}
+.rule-body{font-size:0.8rem;color:var(--mist);line-height:1.8;}
+
+/* ── PULL QUOTE ── */
+.kit-pull{padding:4rem;text-align:center;border-top:1px solid rgba(184,147,62,0.1);border-bottom:1px solid rgba(184,147,62,0.1);position:relative;overflow:hidden;}
+.kit-pull::before{content:'\201C';position:absolute;top:-2rem;left:50%;transform:translateX(-50%);font-family:'Cormorant Garamond',serif;font-size:10rem;line-height:1;color:rgba(184,147,62,0.05);pointer-events:none;}
+.kit-pull blockquote{font-family:'Cormorant Garamond',serif;font-size:clamp(1.5rem,2.5vw,2.5rem);font-weight:300;font-style:italic;color:var(--white);max-width:760px;margin:0 auto 1rem;line-height:1.3;}
+.kit-pull blockquote em{color:var(--gold-lt);font-style:normal;}
+.kit-pull cite{font-size:0.68rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--mist);font-style:normal;}
+
+/* ── TAGLINE CLOSER ── */
+.kit-closer{padding:7rem 4rem;text-align:center;position:relative;overflow:hidden;}
+.kit-closer::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:400px;background:radial-gradient(ellipse,rgba(184,147,62,0.08) 0%,transparent 70%);pointer-events:none;}
+.closer-word{font-family:'Cormorant Garamond',serif;font-size:clamp(2.5rem,6vw,7rem);font-weight:300;line-height:1;color:var(--white);display:block;}
+.closer-word em{font-style:italic;color:var(--gold);}
+.closer-sub{font-size:0.7rem;letter-spacing:0.28em;text-transform:uppercase;color:var(--mist);margin-top:2rem;}
+.closer-doc{font-size:0.65rem;color:rgba(138,140,150,0.35);margin-top:0.5rem;letter-spacing:0.1em;}
+
+/* ── FOOTER ── */
+footer{background:var(--obsidian);padding:2rem 4rem;display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(184,147,62,0.1);}
+.footer-copy{font-size:0.68rem;color:var(--mist);}
+.footer-links{display:flex;gap:2rem;list-style:none;}
+.footer-links a{font-size:0.68rem;color:var(--mist);text-decoration:none;transition:color 0.3s;}
+.footer-links a:hover{color:var(--gold);}
+
+/* ── UTILITIES ── */
+.gold-rule{height:1px;background:linear-gradient(to right,transparent,rgba(184,147,62,0.35),transparent);margin:0;}
+.prose{font-size:0.93rem;color:var(--fog);line-height:2;}
+.prose p{margin-bottom:1.3rem;}
+.prose p:last-child{margin-bottom:0;}
+.prose strong{color:var(--paper);font-weight:400;}
+.mt-sm{margin-top:1.5rem;}
+.mt-md{margin-top:2.5rem;}
+
+@media(max-width:900px){
+  .kit-nav{padding:1rem 1.5rem;}
+  .nav-links{display:none;}
+  .kit-section{padding:5rem 2rem;}
+  .logo-grid,.type-grid,.dex-block,.voice-grid,.rules-grid,.color-grid{grid-template-columns:1fr;}
+  .story-chapter{grid-template-columns:1fr;}
+  .kit-pull{padding:3rem 2rem;}
+  .kit-closer{padding:5rem 2rem;}
+  footer{flex-direction:column;gap:1rem;text-align:center;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="kit-nav">
+  <a class="logo-mark" href="#">
+    <div class="logo-emblem">
+      <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="34" height="34" stroke="#B8933E" stroke-width="0.8"/>
+        <path d="M8 18C8 12.477 12.477 8 18 8C23.523 8 28 12.477 28 18C28 23.523 23.523 28 18 28" stroke="#B8933E" stroke-width="1.2"/>
+        <path d="M14 18C14 15.791 15.791 14 18 14C20.209 14 22 15.791 22 18C22 20.209 20.209 22 18 22" stroke="#D4AD62" stroke-width="1"/>
+        <circle cx="18" cy="18" r="2" fill="#B8933E"/>
+        <line x1="8" y1="28" x2="18" y2="28" stroke="#B8933E" stroke-width="1.2"/>
+      </svg>
+    </div>
+    <span class="logo-text">Di<span>Q</span>ualia</span>
+  </a>
+  <ul class="nav-links">
+    <a href="#logos">Logo</a>
+    <a href="#colors">Colors</a>
+    <a href="#typography">Type</a>
+    <a href="#story">Story</a>
+    <a href="#manifesto">Manifesto</a>
+    <a href="#voice">Voice</a>
+    <a href="#usage">Usage</a>
+  </ul>
+  <span class="nav-tag">Brand Kit 2025</span>
+</nav>
+
+<!-- ═══════════════════════════════════ COVER -->
+<section class="cover">
+  <div class="cover-glow"></div>
+  <span class="cover-badge">Confidential — Internal Brand Document</span>
+  <h1>Di<em>Q</em>ualia<br/>Brand Kit</h1>
+  <div class="cover-sub">Marketing Intelligence &amp; Research — 2025</div>
+  <div class="cover-tagline">"Intelligence that moves markets."</div>
+  <div class="cover-meta">
+    <div class="cover-meta-item"><span class="cover-meta-label">Entity Type</span><span class="cover-meta-value">Standalone Enterprise</span></div>
+    <div class="cover-meta-item"><span class="cover-meta-label">Version</span><span class="cover-meta-value">1.0 — Launch Edition</span></div>
+    <div class="cover-meta-item"><span class="cover-meta-label">Positioning</span><span class="cover-meta-value">B2B Marketing Intelligence</span></div>
+    <div class="cover-meta-item"><span class="cover-meta-label">Web</span><span class="cover-meta-value">www.diqualia.com</span></div>
+  </div>
+</section>
+
+<div class="gold-rule"></div>
+
+<!-- ═══════════════════════════════════ LOGO SUITE -->
+<section class="kit-section dark" id="logos">
+  <div class="eyebrow">01 — Logo System</div>
+  <h2 class="section-h2">The DiQualia <em>mark.</em></h2>
+  <p class="section-lead">The logo comprises the geometric radial emblem and the DiQualia wordmark. The emblem represents a focal point of intelligence — concentric arcs converging on a centre. Use together as the primary lockup; the emblem alone only at small sizes or in contexts where the full wordmark would be impractical.</p>
+
+  <div class="logo-grid">
+    <!-- Primary Dark -->
+    <div class="logo-card">
+      <div class="logo-display on-dark">
+        <svg id="svg-pd" viewBox="0 0 260 72" xmlns="http://www.w3.org/2000/svg" width="260" height="72">
+          <svg x="0" y="8" width="52" height="52" viewBox="0 0 36 36" fill="none">
+            <rect x="1" y="1" width="34" height="34" stroke="#B8933E" stroke-width="0.8"/>
+            <path d="M8 18C8 12.477 12.477 8 18 8C23.523 8 28 12.477 28 18C28 23.523 23.523 28 18 28" stroke="#B8933E" stroke-width="1.2"/>
+            <path d="M14 18C14 15.791 15.791 14 18 14C20.209 14 22 15.791 22 18C22 20.209 20.209 22 18 22" stroke="#D4AD62" stroke-width="1"/>
+            <circle cx="18" cy="18" r="2" fill="#B8933E"/>
+            <line x1="8" y1="28" x2="18" y2="28" stroke="#B8933E" stroke-width="1.2"/>
+          </svg>
+          <text x="62" y="38" font-family="'Cormorant Garamond',Georgia,serif" font-size="30" font-weight="300" fill="#FDFCFB" letter-spacing="1">Di</text>
+          <text x="90" y="38" font-family="'Cormorant Garamond',Georgia,serif" font-size="30" font-weight="400" fill="#B8933E" letter-spacing="1">Q</text>
+          <text x="109" y="38" font-family="'Cormorant Garamond',Georgia,serif" font-size="30" font-weight="300" fill="#FDFCFB" letter-spacing="1">ualia</text>
+          <text x="62" y="54" font-family="'DM Sans',Arial,sans-serif" font-size="7.5" fill="#8A8C96" letter-spacing="2">Intelligence that moves markets.</text>
+        </svg>
+      </div>
+      <div class="logo-meta"><span class="logo-name">Primary — Dark bg</span><button class="dl-btn" onclick="dlSVG('svg-pd','diqualia-primary-dark')">↓ SVG</button></div>
+    </div>
+
+    <!-- Primary Light -->
+    <div class="logo-card">
+      <div class="logo-display on-light">
+        <svg id="svg-pl" viewBox="0 0 260 72" xmlns="http://www.w3.org/2000/svg" width="260" height="72">
+          <svg x="0" y="8" width="52" height="52" viewBox="0 0 36 36" fill="none">
+            <rect x="1" y="1" width="34" height="34" stroke="#B8933E" stroke-width="0.8"/>
+            <path d="M8 18C8 12.477 12.477 8 18 8C23.523 8 28 12.477 28 18C28 23.523 23.523 28 18 28" stroke="#B8933E" stroke-width="1.2"/>
+            <path d="M14 18C14 15.791 15.791 14 18 14C20.209 14 22 15.791 22 18C22 20.209 20.209 22 18 22" stroke="#D4AD62" stroke-width="1"/>
+            <circle cx="18" cy="18" r="2" fill="#B8933E"/>
+            <line x1="8" y1="28" x2="18" y2="28" stroke="#B8933E" stroke-width="1.2"/>
+          </svg>
+          <text x="62" y="38" font-family="'Cormorant Garamond',Georgia,serif" font-size="30" font-weight="300" fill="#0D0D0E" letter-spacing="1">Di</text>
+          <text x="90" y="38" font-family="'Cormorant Garamond',Georgia,serif" font-size="30" font-weight="400" fill="#B8933E" letter-spacing="1">Q</text>
+          <text x="109" y="38" font-family="'Cormorant Garamond',Georgia,serif" font-size="30" font-weight="300" fill="#0D0D0E" letter-spacing="1">ualia</text>
+          <text x="62" y="54" font-family="'DM Sans',Arial,sans-serif" font-size="7.5" fill="#8A8C96" letter-spacing="2">Intelligence that moves markets.</text>
+        </svg>
+      </div>
+      <div class="logo-meta"><span class="logo-name">Primary — Light bg</span><button class="dl-btn" onclick="dlSVG('svg-pl','diqualia-primary-light')">↓ SVG</button></div>
+    </div>
+
+    <!-- Emblem only -->
+    <div class="logo-card">
+      <div class="logo-display on-dark">
+        <svg id="svg-em" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" width="90" height="90">
+          <rect x="1" y="1" width="34" height="34" stroke="#B8933E" stroke-width="0.8"/>
+          <path d="M8 18C8 12.477 12.477 8 18 8C23.523 8 28 12.477 28 18C28 23.523 23.523 28 18 28" stroke="#B8933E" stroke-width="1.2"/>
+          <path d="M14 18C14 15.791 15.791 14 18 14C20.209 14 22 15.791 22 18C22 20.209 20.209 22 18 22" stroke="#D4AD62" stroke-width="1"/>
+          <circle cx="18" cy="18" r="2" fill="#B8933E"/>
+          <line x1="8" y1="28" x2="18" y2="28" stroke="#B8933E" stroke-width="1.2"/>
+        </svg>
+      </div>
+      <div class="logo-meta"><span class="logo-name">Emblem — Dark</span><button class="dl-btn" onclick="dlSVG('svg-em','diqualia-emblem-dark')">↓ SVG</button></div>
+    </div>
+
+    <!-- Gold bg -->
+    <div class="logo-card">
+      <div class="logo-display on-gold">
+        <svg id="svg-pg" viewBox="0 0 260 72" xmlns="http://www.w3.org/2000/svg" width="260" height="72">
+          <svg x="0" y="8" width="52" height="52" viewBox="0 0 36 36" fill="none">
+            <rect x="1" y="1" width="34" height="34" stroke="#0D0D0E" stroke-width="0.8"/>
+            <path d="M8 18C8 12.477 12.477 8 18 8C23.523 8 28 12.477 28 18C28 23.523 23.523 28 18 28" stroke="#0D0D0E" stroke-width="1.2"/>
+            <path d="M14 18C14 15.791 15.791 14 18 14C20.209 14 22 15.791 22 18C22 20.209 20.209 22 18 22" stroke="rgba(13,13,14,0.6)" stroke-width="1"/>
+            <circle cx="18" cy="18" r="2" fill="#0D0D0E"/>
+            <line x1="8" y1="28" x2="18" y2="28" stroke="#0D0D0E" stroke-width="1.2"/>
+          </svg>
+          <text x="62" y="38" font-family="'Cormorant Garamond',Georgia,serif" font-size="30" font-weight="300" fill="#0D0D0E" letter-spacing="1">Di</text>
+          <text x="90" y="38" font-family="'Cormorant Garamond',Georgia,serif" font-size="30" font-weight="600" fill="#0D0D0E" letter-spacing="1">Q</text>
+          <text x="109" y="38" font-family="'Cormorant Garamond',Georgia,serif" font-size="30" font-weight="300" fill="#0D0D0E" letter-spacing="1">ualia</text>
+          <text x="62" y="54" font-family="'DM Sans',Arial,sans-serif" font-size="7.5" fill="rgba(13,13,14,0.55)" letter-spacing="2">Intelligence that moves markets.</text>
+        </svg>
+      </div>
+      <div class="logo-meta"><span class="logo-name">Primary — Gold bg</span><button class="dl-btn" onclick="dlSVG('svg-pg','diqualia-primary-gold')">↓ SVG</button></div>
+    </div>
+  </div>
+</section>
+
+<div class="gold-rule"></div>
+
+<!-- ═══════════════════════════════════ COLORS -->
+<section class="kit-section" id="colors">
+  <div class="eyebrow">02 — Color System</div>
+  <h2 class="section-h2">The DiQualia <em>palette.</em></h2>
+  <p class="section-lead">Five colours. Each has a fixed role. Do not introduce additional brand colours without approval. Digital use: hex values as listed. Print: request CMYK/Pantone conversion from brand owner.</p>
+
+  <div class="color-grid">
+    <div class="color-card">
+      <div class="color-swatch" style="background:#0D0D0E;"></div>
+      <div class="color-info"><span class="color-name">Ink Black</span><span class="color-hex">#0D0D0E</span><span class="color-use">Primary background · Dominant tone</span></div>
+    </div>
+    <div class="color-card">
+      <div class="color-swatch" style="background:#B8933E;"></div>
+      <div class="color-info"><span class="color-name">Brand Gold</span><span class="color-hex">#B8933E</span><span class="color-use">Logo · CTA · Accents · Rules</span></div>
+    </div>
+    <div class="color-card">
+      <div class="color-swatch" style="background:#D4AD62;"></div>
+      <div class="color-info"><span class="color-name">Gold Light</span><span class="color-hex">#D4AD62</span><span class="color-use">Italic highlights · Secondary accent</span></div>
+    </div>
+    <div class="color-card">
+      <div class="color-swatch" style="background:#F4F2EE;border:1px solid #ddd;"></div>
+      <div class="color-info"><span class="color-name">Paper White</span><span class="color-hex">#F4F2EE</span><span class="color-use">Body text · Light background</span></div>
+    </div>
+    <div class="color-card">
+      <div class="color-swatch" style="background:#8A8C96;"></div>
+      <div class="color-info"><span class="color-name">Mist</span><span class="color-hex">#8A8C96</span><span class="color-use">Secondary text · Captions · Tags</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="gold-rule"></div>
+
+<!-- ═══════════════════════════════════ TYPOGRAPHY -->
+<section class="kit-section dark" id="typography">
+  <div class="eyebrow">03 — Typography</div>
+  <h2 class="section-h2">Two typefaces.<br/><em>One voice.</em></h2>
+  <p class="section-lead">Cormorant Garamond carries the brand's premium, editorial character. DM Sans provides the clean, functional counterweight for body copy and UI. Never substitute either with system fonts in brand communications.</p>
+
+  <div class="type-grid">
+    <div class="type-card">
+      <div class="type-specimen">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:300;color:var(--white);line-height:1;">Di<em style="color:var(--gold);font-style:italic;">Q</em>ualia</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-style:italic;color:var(--mist);margin-top:0.5rem;">Intelligence that moves markets.</div>
+      </div>
+      <div class="type-meta">
+        <div class="type-meta-row"><span class="type-meta-label">Family</span><span class="type-meta-value">Cormorant Garamond</span></div>
+        <div class="type-meta-row"><span class="type-meta-label">Weights</span><span class="type-meta-value">Light 300 · Regular 400</span></div>
+        <div class="type-meta-row"><span class="type-meta-label">Use</span><span class="type-meta-value">Headings · Display · Logo · Quotes</span></div>
+        <div class="type-meta-row"><span class="type-meta-label">Source</span><span class="type-meta-value">Google Fonts (free)</span></div>
+      </div>
+    </div>
+    <div class="type-card">
+      <div class="type-specimen">
+        <div style="font-family:'DM Sans',sans-serif;font-size:1.6rem;font-weight:300;color:var(--white);line-height:1.2;margin-bottom:0.5rem;">Marketing Intelligence</div>
+        <div style="font-family:'DM Sans',sans-serif;font-size:0.85rem;font-weight:300;color:var(--mist);line-height:1.8;">We deliver precision marketing research and strategic intelligence for B2B enterprises operating in niche, high-stakes industries.</div>
+      </div>
+      <div class="type-meta">
+        <div class="type-meta-row"><span class="type-meta-label">Family</span><span class="type-meta-value">DM Sans</span></div>
+        <div class="type-meta-row"><span class="type-meta-label">Weights</span><span class="type-meta-value">Light 300 · Regular 400 · Medium 500</span></div>
+        <div class="type-meta-row"><span class="type-meta-label">Use</span><span class="type-meta-value">Body · UI · Captions · Navigation</span></div>
+        <div class="type-meta-row"><span class="type-meta-label">Source</span><span class="type-meta-value">Google Fonts (free)</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="type-scale mt-md">
+    <div class="eyebrow" style="margin-bottom:1.5rem;">Type Scale</div>
+    <div class="type-scale-row"><span class="type-scale-label">Display</span><span style="font-family:'Cormorant Garamond',serif;font-size:clamp(2.5rem,4vw,4rem);font-weight:300;color:var(--white);line-height:1;">Intelligence</span></div>
+    <div class="type-scale-row"><span class="type-scale-label">H1</span><span style="font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:300;color:var(--white);line-height:1;">Marketing Intelligence</span></div>
+    <div class="type-scale-row"><span class="type-scale-label">H2</span><span style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300;color:var(--white);">B2B Strategy & Research</span></div>
+    <div class="type-scale-row"><span class="type-scale-label">H3</span><span style="font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:400;color:var(--white);">Competitive Intelligence</span></div>
+    <div class="type-scale-row"><span class="type-scale-label">Body</span><span style="font-family:'DM Sans',sans-serif;font-size:0.95rem;font-weight:300;color:var(--fog);">Precision research and strategic clarity for niche B2B markets.</span></div>
+    <div class="type-scale-row"><span class="type-scale-label">Caption</span><span style="font-family:'DM Sans',sans-serif;font-size:0.75rem;font-weight:300;color:var(--mist);">Intelligence that moves markets. — DiQualia 2025</span></div>
+    <div class="type-scale-row"><span class="type-scale-label">Label</span><span style="font-family:'DM Sans',sans-serif;font-size:0.65rem;font-weight:400;letter-spacing:0.2em;text-transform:uppercase;color:var(--gold);">Marketing Intelligence</span></div>
+  </div>
+</section>
+
+<div class="gold-rule"></div>
+
+<!-- ═══════════════════════════════════ BRAND STORY -->
+<section class="kit-section" id="story">
+  <div class="eyebrow">04 — Brand Story</div>
+  <h2 class="section-h2">The story behind<br/>the <em>intelligence.</em></h2>
+  <p class="section-lead">Six chapters that define who DiQualia is, why it exists, and where it is headed. Use this narrative in pitches, onboarding, and any context where you need to explain the brand to someone encountering it for the first time.</p>
+
+  <div class="story-strip">
+    <div class="story-chapter">
+      <div><div class="chapter-num">01</div><div class="chapter-tag">The Origin</div></div>
+      <div>
+        <div class="chapter-title">We did not build a brand. We built a <em>point of view.</em></div>
+        <p class="chapter-body">DiQualia was born from a question most agencies are unwilling to ask: in an age when everyone has access to the same tools, what does it truly mean to deliver intelligence? We chose not to answer that question with more automation. We chose to answer it with more expertise.</p>
+      </div>
+    </div>
+    <div class="story-chapter">
+      <div><div class="chapter-num">02</div><div class="chapter-tag">The Problem</div></div>
+      <div>
+        <div class="chapter-title">A world full of data. Starved of <em>real intelligence.</em></div>
+        <p class="chapter-body">When AI arrived in marketing, it democratised mediocrity. Every agency now produces the same outputs — dashboards that look authoritative, reports that read convincingly, strategies that sound sophisticated. None of it built on genuine understanding. The market became flooded not with intelligence, but with the appearance of intelligence. We watched this happen. And we chose not to participate in it.</p>
+      </div>
+    </div>
+    <div class="story-chapter">
+      <div><div class="chapter-num">03</div><div class="chapter-tag">The Answer</div></div>
+      <div>
+        <div class="chapter-title">The <em>Double Experience.</em></div>
+        <p class="chapter-body">DiQualia is built on the Double Experience — the deliberate convergence of deep human expertise and the precision of intelligent systems. Not one or the other. Not humans pretending AI doesn't exist. Not AI pretending it has wisdom. Both — working in concert, each making the other more powerful than it could ever be alone.</p>
+      </div>
+    </div>
+    <div class="story-chapter">
+      <div><div class="chapter-num">04</div><div class="chapter-tag">Why Now</div></div>
+      <div>
+        <div class="chapter-title">Real intelligence in the age of <em>artificial everything.</em></div>
+        <p class="chapter-body">We are living through a paradox. Businesses have never had more data, more tools, or more automated insight. Yet the number of companies that feel genuinely understood by their marketing partners has never been lower. The reason is simple: intelligence requires context. Context requires the kind of sustained, focused attention that no tool can manufacture on demand. That is the gap DiQualia fills.</p>
+      </div>
+    </div>
+    <div class="story-chapter">
+      <div><div class="chapter-num">05</div><div class="chapter-tag">The Client</div></div>
+      <div>
+        <div class="chapter-title">Built for the businesses that cannot <em>afford to guess.</em></div>
+        <p class="chapter-body">DiQualia was built with a specific client in mind: the B2B enterprise in a niche, high-stakes market. Where a wrong positioning decision costs not just a campaign, but a quarter. Where the margin for error is close to zero. These businesses do not need more content. They need precision. They need someone who has done the real work of understanding their market.</p>
+      </div>
+    </div>
+    <div class="story-chapter">
+      <div><div class="chapter-num">06</div><div class="chapter-tag">The Promise</div></div>
+      <div>
+        <div class="chapter-title">We are not the loudest. We are the most <em>trusted.</em></div>
+        <p class="chapter-body">We are not here to be the largest agency. We are here to be the most precise. The most trusted. The one that clients return to not because of a retainer — but because the intelligence we deliver continues to prove itself in the results they see. We are not here to do marketing for the sake of marketing. We are here to move markets. For the businesses smart enough to know the difference.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- THE DOUBLE EXPERIENCE -->
+<section class="kit-section dark">
+  <div class="eyebrow">04a — The Double Experience</div>
+  <h2 class="section-h2">The core <em>philosophy.</em></h2>
+  <p class="section-lead">This is the central idea that separates DiQualia from every other marketing agency. Use it in all pitches, proposals, and brand introductions. Never reduce it to a bullet point.</p>
+  <div class="dex-block">
+    <div class="dex-card">
+      <div class="dex-n">01</div>
+      <div class="dex-t">Human <em>Intelligence</em></div>
+      <p class="dex-b">Years of real market understanding. The ability to read context, sense nuance, and make the kind of judgement calls that no algorithm can replicate. We bring pattern recognition built from genuine experience — not training data.</p>
+    </div>
+    <div class="dex-card">
+      <div class="dex-n">02</div>
+      <div class="dex-t">System <em>Precision</em></div>
+      <p class="dex-b">The power of intelligent tools, applied with intention. Speed without noise. Scale without sacrifice of quality. We use AI as a sharpening instrument — never as a replacement for the thinking that matters.</p>
+    </div>
+    <div class="dex-plus">Together, they produce something neither can achieve alone: intelligence that is both felt and proven.</div>
+  </div>
+</section>
+
+<div class="gold-rule"></div>
+
+<!-- ═══════════════════════════════════ MANIFESTO -->
+<section class="kit-section" id="manifesto">
+  <div class="eyebrow">05 — Manifesto</div>
+  <h2 class="section-h2">What we <em>believe.</em></h2>
+  <p class="section-lead">The DiQualia manifesto. Read this to understand the values behind the brand. Share it when the brand needs to stand for something more than a service offering.</p>
+  <div class="manifesto-lines">
+    <div class="m-line">We believe <em>intelligence</em> is the only sustainable competitive advantage.</div>
+    <div class="m-line">We believe AI is a tool — not a substitute for <em>expertise.</em></div>
+    <div class="m-line">We believe the best marketing starts with <em>understanding the market,</em> not performing for it.</div>
+    <div class="m-line">We believe clarity is a service — and <em>noise is a disservice.</em></div>
+    <div class="m-line">We believe human judgement and machine precision are <em>stronger together.</em></div>
+    <div class="m-line">We believe every B2B company deserves to be truly <em>understood</em> by its marketing partner.</div>
+    <div class="m-line highlight">We believe in <em>intelligence that moves markets.</em></div>
+  </div>
+</section>
+
+<div class="kit-pull">
+  <blockquote>"In the age of AI, the rarest thing you can offer a business is not speed — it is <em>judgement.</em>"</blockquote>
+  <cite>The founding principle of DiQualia</cite>
+</div>
+
+<!-- ═══════════════════════════════════ VOICE & TONE -->
+<section class="kit-section dark" id="voice">
+  <div class="eyebrow">06 — Voice & Tone</div>
+  <h2 class="section-h2">How DiQualia <em>speaks.</em></h2>
+  <p class="section-lead">Every word written under the DiQualia name must reflect the brand's intelligence, precision, and premium character. These three principles govern all written communication.</p>
+
+  <div class="voice-grid">
+    <div class="voice-card">
+      <div class="voice-icon">◈</div>
+      <div class="voice-title">Precise</div>
+      <p class="voice-body">Say exactly what you mean. No filler words, no inflated language. DiQualia does not try to impress with volume — it impresses with clarity.</p>
+      <div class="voice-do"><div class="voice-do-label">Do</div><div class="voice-example">"We identify where your brand sits and how to reposition it for maximum resonance."</div></div>
+      <div class="voice-dont"><div class="voice-dont-label">Don't</div><div class="voice-example">"We leverage synergistic frameworks to optimise your brand touchpoints holistically."</div></div>
+    </div>
+    <div class="voice-card">
+      <div class="voice-icon">◈</div>
+      <div class="voice-title">Confident</div>
+      <p class="voice-body">DiQualia does not hedge. It does not say "might" or "possibly" or "could potentially." When we make a claim, we stand behind it. Authority is earned through precision, not volume.</p>
+      <div class="voice-do"><div class="voice-do-label">Do</div><div class="voice-example">"This is what the data shows. Here is what it means for your market."</div></div>
+      <div class="voice-dont"><div class="voice-dont-label">Don't</div><div class="voice-example">"Our research suggests that there may possibly be opportunities in this space."</div></div>
+    </div>
+    <div class="voice-card">
+      <div class="voice-icon">◈</div>
+      <div class="voice-title">Human</div>
+      <p class="voice-body">Intelligence without warmth is cold data. DiQualia is rigorous but never clinical. Write as someone who genuinely understands the stakes — not as someone performing expertise.</p>
+      <div class="voice-do"><div class="voice-do-label">Do</div><div class="voice-example">"We know what it costs to make the wrong call in a market like this."</div></div>
+      <div class="voice-dont"><div class="voice-dont-label">Don't</div><div class="voice-example">"Our methodology ensures optimised outcomes across all strategic verticals."</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="gold-rule"></div>
+
+<!-- ═══════════════════════════════════ USAGE RULES -->
+<section class="kit-section" id="usage">
+  <div class="eyebrow">07 — Usage Rules</div>
+  <h2 class="section-h2">How to use the<br/><em>brand correctly.</em></h2>
+  <p class="section-lead">These rules exist to protect the brand's integrity. Inconsistent application dilutes the premium character DiQualia has been built to project.</p>
+
+  <div class="rules-grid">
+    <div class="rule-card">
+      <div class="rule-label">✓ Always</div>
+      <div class="rule-title">Spell it right — DiQualia</div>
+      <p class="rule-body">Always capital D, always capital Q. Never "Diqualia", "diQualia", "DI QUALIA", or any other variation. The Q is the mark — it must be respected.</p>
+    </div>
+    <div class="rule-card dont">
+      <div class="rule-label">✗ Never</div>
+      <div class="rule-title">Do not stretch or distort the logo</div>
+      <p class="rule-body">Never scale the logo non-proportionally. Never apply drop shadows, outlines, or glow effects. Never place the dark logo on a dark background without contrast adjustment.</p>
+    </div>
+    <div class="rule-card">
+      <div class="rule-label">✓ Always</div>
+      <div class="rule-title">Use the tagline with purpose</div>
+      <p class="rule-body">"Intelligence that moves markets." — always with the full stop. Use in brand introductions, email signatures, pitch decks, and anywhere the brand makes its first impression.</p>
+    </div>
+    <div class="rule-card dont">
+      <div class="rule-label">✗ Never</div>
+      <div class="rule-title">Do not use unauthorised colours</div>
+      <p class="rule-body">The five-colour palette is fixed. Do not introduce new colours in brand communications. Do not use the gold on gold, or white on light backgrounds without sufficient contrast.</p>
+    </div>
+    <div class="rule-card">
+      <div class="rule-label">✓ Always</div>
+      <div class="rule-title">Position as a standalone enterprise</div>
+      <p class="rule-body">DiQualia is not a department of QTO Solutions. It is a separate, standalone enterprise. Never refer to it as "our marketing team" or "QTO's marketing arm" in external communications.</p>
+    </div>
+    <div class="rule-card dont">
+      <div class="rule-label">✗ Never</div>
+      <div class="rule-title">Do not dilute the Double Experience</div>
+      <p class="rule-body">The Double Experience is DiQualia's core differentiator. Never reduce it to a tagline or a bullet point. When you use it, explain it — human expertise plus intelligent systems, together.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TAGLINE CLOSER -->
+<section class="kit-closer">
+  <span class="closer-word">Intelligence</span>
+  <span class="closer-word">that <em>moves</em></span>
+  <span class="closer-word">markets.</span>
+  <p class="closer-sub">DiQualia — Brand Kit 2025</p>
+  <p class="closer-doc">Confidential. For internal use only. Not for distribution.</p>
+</section>
+
+<footer>
+  <span class="footer-copy">© 2025 DiQualia. All rights reserved.</span>
+  <ul class="footer-links">
+    <li><a href="#">www.diqualia.com</a></li>
+    <li><a href="#">Contact</a></li>
+  </ul>
+</footer>
+
+<script>
+function dlSVG(id, filename) {
+  const svg = document.getElementById(id);
+  const clone = svg.cloneNode(true);
+  clone.setAttribute('xmlns','http://www.w3.org/2000/svg');
+  const blob = new Blob([clone.outerHTML],{type:'image/svg+xml'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename + '.svg';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>

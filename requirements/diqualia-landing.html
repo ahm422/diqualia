@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DiQualia — Marketing Intelligence & Research</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --ink:       #0D0D0E;
+    --obsidian:  #141416;
+    --slate:     #1E1F24;
+    --mist:      #8A8C96;
+    --fog:       #C2C4CC;
+    --paper:     #F4F2EE;
+    --white:     #FDFCFB;
+    --gold:      #B8933E;
+    --gold-lt:   #D4AD62;
+    --gold-pale: #EDE0C4;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ─── NOISE OVERLAY ─── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ─── NAVBAR ─── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.6rem 4rem;
+    z-index: 100;
+    background: linear-gradient(to bottom, rgba(13,13,14,0.9), transparent);
+  }
+
+  .logo-mark {
+    display: flex; align-items: center; gap: 0.7rem;
+    text-decoration: none;
+  }
+
+  .logo-emblem {
+    width: 36px; height: 36px;
+    position: relative;
+  }
+  .logo-emblem svg { width: 100%; height: 100%; }
+
+  .logo-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.35rem;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    color: var(--paper);
+  }
+  .logo-text span { color: var(--gold); }
+
+  nav ul {
+    display: flex; gap: 2.5rem;
+    list-style: none;
+  }
+  nav ul a {
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--fog);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  nav ul a:hover { color: var(--gold-lt); }
+
+  .nav-cta {
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid rgba(184,147,62,0.4);
+    padding: 0.55rem 1.4rem;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+  .nav-cta:hover {
+    background: var(--gold);
+    color: var(--ink);
+  }
+
+  /* ─── HERO ─── */
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-left {
+    display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 8rem 3rem 6rem 4rem;
+    position: relative; z-index: 2;
+  }
+
+  .hero-eyebrow {
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1.8rem;
+    display: flex; align-items: center; gap: 1rem;
+  }
+  .hero-eyebrow::before {
+    content: '';
+    display: block; width: 40px; height: 1px;
+    background: var(--gold);
+  }
+
+  .hero-h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(3.2rem, 5vw, 5.5rem);
+    font-weight: 300;
+    line-height: 1.05;
+    color: var(--white);
+    margin-bottom: 2rem;
+  }
+  .hero-h1 em {
+    font-style: italic;
+    color: var(--gold-lt);
+  }
+
+  .hero-sub {
+    font-size: 0.95rem;
+    color: var(--mist);
+    max-width: 420px;
+    margin-bottom: 3rem;
+    line-height: 1.8;
+  }
+
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 0.8rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink);
+    background: var(--gold);
+    padding: 1rem 2.2rem;
+    text-decoration: none;
+    transition: all 0.3s;
+    width: fit-content;
+  }
+  .btn-primary:hover { background: var(--gold-lt); }
+  .btn-primary svg { transition: transform 0.3s; }
+  .btn-primary:hover svg { transform: translateX(4px); }
+
+  .btn-ghost {
+    display: inline-flex; align-items: center; gap: 0.8rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--fog);
+    border-bottom: 1px solid rgba(194,196,204,0.3);
+    padding-bottom: 0.2rem;
+    text-decoration: none;
+    transition: all 0.3s;
+  }
+  .btn-ghost:hover { color: var(--gold-lt); border-color: var(--gold-lt); }
+
+  .hero-actions {
+    display: flex; align-items: center; gap: 2.5rem;
+    flex-wrap: wrap;
+  }
+
+  .hero-right {
+    position: relative; z-index: 2;
+    display: flex; align-items: center; justify-content: center;
+    padding: 8rem 4rem 6rem 2rem;
+  }
+
+  .hero-visual {
+    width: 100%;
+    max-width: 460px;
+    aspect-ratio: 3/4;
+    position: relative;
+  }
+
+  .hero-card {
+    position: absolute;
+    background: var(--slate);
+    border: 1px solid rgba(184,147,62,0.15);
+  }
+
+  .hero-card-main {
+    inset: 0;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 2.5rem;
+    overflow: hidden;
+  }
+  .hero-card-main::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 60%;
+    background: linear-gradient(135deg, rgba(184,147,62,0.08) 0%, transparent 60%);
+  }
+
+  .card-chart {
+    display: flex; align-items: flex-end; gap: 8px;
+    height: 80px; margin-bottom: 2rem;
+    position: relative;
+  }
+  .bar {
+    flex: 1;
+    background: linear-gradient(to top, var(--gold), rgba(184,147,62,0.2));
+    border-radius: 2px 2px 0 0;
+    animation: growBar 1.5s ease forwards;
+    transform-origin: bottom;
+  }
+  .bar:nth-child(1) { height: 45%; animation-delay: 0.1s; }
+  .bar:nth-child(2) { height: 70%; animation-delay: 0.2s; }
+  .bar:nth-child(3) { height: 55%; animation-delay: 0.3s; }
+  .bar:nth-child(4) { height: 90%; animation-delay: 0.4s; }
+  .bar:nth-child(5) { height: 65%; animation-delay: 0.5s; }
+  .bar:nth-child(6) { height: 80%; animation-delay: 0.6s; }
+  .bar:nth-child(7) { height: 100%; animation-delay: 0.7s; background: linear-gradient(to top, var(--gold-lt), rgba(212,173,98,0.3)); }
+  @keyframes growBar {
+    from { transform: scaleY(0); opacity: 0; }
+    to { transform: scaleY(1); opacity: 1; }
+  }
+
+  .card-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.4rem;
+  }
+  .card-stat {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.2rem;
+    color: var(--white);
+    line-height: 1;
+  }
+  .card-caption {
+    font-size: 0.72rem;
+    color: var(--mist);
+    margin-top: 0.3rem;
+  }
+
+  .hero-card-pill {
+    position: absolute;
+    top: -20px; right: -20px;
+    background: var(--gold);
+    color: var(--ink);
+    padding: 0.8rem 1.2rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  /* Gradient blob */
+  .hero-blob {
+    position: absolute;
+    top: 50%; right: -10%;
+    transform: translateY(-50%);
+    width: 500px; height: 500px;
+    background: radial-gradient(ellipse, rgba(184,147,62,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* ─── DIVIDER ─── */
+  .divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(184,147,62,0.3), transparent);
+    margin: 0 4rem;
+  }
+
+  /* ─── TICKER ─── */
+  .ticker-wrap {
+    overflow: hidden;
+    padding: 1.4rem 0;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .ticker {
+    display: flex; gap: 0;
+    animation: ticker 30s linear infinite;
+    width: max-content;
+  }
+  @keyframes ticker {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  .ticker-item {
+    display: flex; align-items: center; gap: 2rem;
+    padding: 0 3rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--mist);
+    white-space: nowrap;
+  }
+  .ticker-dot {
+    width: 4px; height: 4px;
+    background: var(--gold);
+    border-radius: 50%;
+  }
+
+  /* ─── SECTION BASE ─── */
+  section { padding: 7rem 4rem; }
+  .section-eyebrow {
+    font-size: 0.68rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 1rem;
+  }
+  .section-eyebrow::before {
+    content: ''; display: block;
+    width: 30px; height: 1px; background: var(--gold);
+  }
+  .section-h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.4rem, 4vw, 3.6rem);
+    font-weight: 300;
+    line-height: 1.1;
+    color: var(--white);
+    margin-bottom: 1.5rem;
+  }
+  .section-h2 em { font-style: italic; color: var(--gold-lt); }
+  .section-lead {
+    font-size: 0.95rem;
+    color: var(--mist);
+    max-width: 520px;
+    line-height: 1.9;
+  }
+
+  /* ─── SERVICES ─── */
+  .services { background: var(--obsidian); }
+  .services-header {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 4rem; margin-bottom: 5rem;
+    align-items: end;
+  }
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: rgba(184,147,62,0.1);
+    border: 1px solid rgba(184,147,62,0.1);
+  }
+  .service-card {
+    background: var(--obsidian);
+    padding: 2.8rem 2.2rem;
+    transition: background 0.4s;
+    cursor: default;
+  }
+  .service-card:hover { background: var(--slate); }
+  .service-icon {
+    width: 44px; height: 44px;
+    border: 1px solid rgba(184,147,62,0.3);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 1.8rem;
+  }
+  .service-icon svg { color: var(--gold); }
+  .service-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    color: rgba(184,147,62,0.4);
+    margin-bottom: 0.8rem;
+  }
+  .service-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem;
+    font-weight: 400;
+    color: var(--white);
+    margin-bottom: 0.8rem;
+    line-height: 1.2;
+  }
+  .service-desc {
+    font-size: 0.82rem;
+    color: var(--mist);
+    line-height: 1.8;
+  }
+
+  /* ─── WHY ─── */
+  .why {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 6rem; align-items: center;
+  }
+  .why-stats {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    background: rgba(184,147,62,0.08);
+  }
+  .why-stat {
+    background: var(--obsidian);
+    padding: 2.5rem 2rem;
+  }
+  .why-stat-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3rem;
+    font-weight: 300;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 0.4rem;
+  }
+  .why-stat-label {
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    color: var(--mist);
+    text-transform: uppercase;
+  }
+
+  /* ─── PROCESS ─── */
+  .process { background: var(--obsidian); }
+  .process-steps {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 0; margin-top: 4rem;
+    position: relative;
+  }
+  .process-steps::before {
+    content: '';
+    position: absolute;
+    top: 22px; left: 4%; right: 4%;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(184,147,62,0.3), transparent);
+  }
+  .process-step { padding: 0 1.5rem; }
+  .step-circle {
+    width: 44px; height: 44px;
+    border: 1px solid rgba(184,147,62,0.4);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    color: var(--gold);
+    background: var(--obsidian);
+    margin-bottom: 2rem;
+    position: relative; z-index: 1;
+  }
+  .step-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.25rem;
+    color: var(--white);
+    margin-bottom: 0.8rem;
+  }
+  .step-desc {
+    font-size: 0.8rem;
+    color: var(--mist);
+    line-height: 1.8;
+  }
+
+  /* ─── CTA SECTION ─── */
+  .cta-section {
+    text-align: center;
+    padding: 8rem 4rem;
+    position: relative; overflow: hidden;
+  }
+  .cta-section::before {
+    content: '';
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    width: 600px; height: 400px;
+    background: radial-gradient(ellipse, rgba(184,147,62,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .cta-section .section-eyebrow { justify-content: center; }
+  .cta-section .section-eyebrow::before { display: none; }
+  .cta-section .section-h2 { margin: 0 auto 1.5rem; }
+  .cta-section .section-lead { margin: 0 auto 3rem; text-align: center; }
+  .cta-actions { display: flex; justify-content: center; gap: 2rem; align-items: center; }
+
+  /* ─── FOOTER ─── */
+  footer {
+    background: var(--obsidian);
+    padding: 3rem 4rem;
+    display: flex; align-items: center; justify-content: space-between;
+    border-top: 1px solid rgba(184,147,62,0.1);
+  }
+  .footer-copy {
+    font-size: 0.72rem;
+    color: var(--mist);
+    letter-spacing: 0.05em;
+  }
+  .footer-links {
+    display: flex; gap: 2rem; list-style: none;
+  }
+  .footer-links a {
+    font-size: 0.72rem;
+    color: var(--mist);
+    text-decoration: none;
+    letter-spacing: 0.1em;
+    transition: color 0.3s;
+  }
+  .footer-links a:hover { color: var(--gold); }
+
+  /* ─── ANIMATION ENTRANCES ─── */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(24px);
+    animation: fadeUp 0.9s ease forwards;
+  }
+  .fade-in:nth-child(1) { animation-delay: 0.1s; }
+  .fade-in:nth-child(2) { animation-delay: 0.25s; }
+  .fade-in:nth-child(3) { animation-delay: 0.4s; }
+  .fade-in:nth-child(4) { animation-delay: 0.55s; }
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 900px) {
+    nav { padding: 1.4rem 2rem; }
+    nav ul { display: none; }
+    .hero { grid-template-columns: 1fr; }
+    .hero-right { display: none; }
+    .hero-left { padding: 7rem 2rem 5rem; }
+    section { padding: 5rem 2rem; }
+    .services-header { grid-template-columns: 1fr; }
+    .services-grid { grid-template-columns: 1fr; }
+    .why { grid-template-columns: 1fr; }
+    .process-steps { grid-template-columns: 1fr 1fr; }
+    footer { flex-direction: column; gap: 1.5rem; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <a class="logo-mark" href="#">
+    <div class="logo-emblem">
+      <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="34" height="34" stroke="#B8933E" stroke-width="0.8"/>
+        <path d="M8 18C8 12.477 12.477 8 18 8C23.523 8 28 12.477 28 18C28 23.523 23.523 28 18 28" stroke="#B8933E" stroke-width="1.2"/>
+        <path d="M14 18C14 15.791 15.791 14 18 14C20.209 14 22 15.791 22 18C22 20.209 20.209 22 18 22" stroke="#D4AD62" stroke-width="1"/>
+        <circle cx="18" cy="18" r="2" fill="#B8933E"/>
+        <line x1="8" y1="28" x2="18" y2="28" stroke="#B8933E" stroke-width="1.2"/>
+      </svg>
+    </div>
+    <span class="logo-text">Di<span>Q</span>ualia</span>
+  </a>
+  <ul>
+    <li><a href="#">Services</a></li>
+    <li><a href="#">Approach</a></li>
+    <li><a href="#">Industries</a></li>
+    <li><a href="#">Insights</a></li>
+  </ul>
+  <a class="nav-cta" href="#">Enquire</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero" style="padding:0;">
+  <div class="hero-blob"></div>
+  <div class="hero-left">
+    <div class="hero-eyebrow fade-in">Marketing Intelligence & Research</div>
+    <h1 class="hero-h1 fade-in">
+      Intelligence that<br/><em>moves</em> markets.
+    </h1>
+    <p class="hero-sub fade-in">
+      DiQualia delivers precision marketing research and strategic intelligence for B2B enterprises operating in niche, high-stakes industries.
+    </p>
+    <div class="hero-actions fade-in">
+      <a class="btn-primary" href="#">
+        Explore Services
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+      <a class="btn-ghost" href="#">See Our Approach</a>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="hero-visual">
+      <div class="hero-card hero-card-main">
+        <div class="hero-card-pill">Live Intelligence</div>
+        <div class="card-chart">
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+        </div>
+        <div class="card-label">Market Penetration Score</div>
+        <div class="card-stat">87.4%</div>
+        <div class="card-caption">+12.3% vs prior quarter — North America B2B</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker">
+    <div class="ticker-item"><span>Marketing Intelligence</span><span class="ticker-dot"></span></div>
+    <div class="ticker-item"><span>Competitive Research</span><span class="ticker-dot"></span></div>
+    <div class="ticker-item"><span>B2B Strategy</span><span class="ticker-dot"></span></div>
+    <div class="ticker-item"><span>Niche Industry Analysis</span><span class="ticker-dot"></span></div>
+    <div class="ticker-item"><span>Brand Positioning</span><span class="ticker-dot"></span></div>
+    <div class="ticker-item"><span>Market Entry Intelligence</span><span class="ticker-dot"></span></div>
+    <div class="ticker-item"><span>Data-Driven Growth</span><span class="ticker-dot"></span></div>
+    <div class="ticker-item"><span>Sales Enablement</span><span class="ticker-dot"></span></div>
+    <!-- Duplicate for seamless loop -->
+    <div class="ticker-item"><span>Marketing Intelligence</span><span class="ticker-dot"></span></div>
+    <div class="ticker-item"><span>Competitive Research</span><span class="ticker-dot"></span></div>
+    <div class="ticker-item"><span>B2B Strategy</span><span class="ticker-dot"></span></div>
+    <div class="ticker-item"><span>Niche Industry Analysis</span><span class="ticker-dot"></span></div>
+    <div class="ticker-item"><span>Brand Positioning</span><span class="ticker-dot"></span></div>
+    <div class="ticker-item"><span>Market Entry Intelligence</span><span class="ticker-dot"></span></div>
+    <div class="ticker-item"><span>Data-Driven Growth</span><span class="ticker-dot"></span></div>
+    <div class="ticker-item"><span>Sales Enablement</span><span class="ticker-dot"></span></div>
+  </div>
+</div>
+
+<!-- SERVICES -->
+<section class="services">
+  <div class="services-header">
+    <div>
+      <div class="section-eyebrow">What We Do</div>
+      <h2 class="section-h2">Built for<br/><em>niche B2B</em><br/>precision.</h2>
+    </div>
+    <p class="section-lead">
+      We specialize in marketing intelligence for industries where generic research falls short. Every insight we deliver is built for decision-makers who can't afford noise.
+    </p>
+  </div>
+  <div class="services-grid">
+    <div class="service-card">
+      <div class="service-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </div>
+      <div class="service-num">01</div>
+      <div class="service-title">Market Intelligence & Research</div>
+      <p class="service-desc">Deep-dive analysis of your target markets, competitive landscape, and buyer behaviour patterns unique to your niche sector.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <div class="service-num">02</div>
+      <div class="service-title">Data-Driven Campaign Strategy</div>
+      <p class="service-desc">Marketing strategies grounded in real market data — not assumptions. From positioning to channel selection to message architecture.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+      </div>
+      <div class="service-num">03</div>
+      <div class="service-title">Brand Intelligence & Positioning</div>
+      <p class="service-desc">We identify where your brand sits in the market and how to reposition it for maximum resonance with your ideal buyer profile.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div class="service-num">04</div>
+      <div class="service-title">Audience & Buyer Research</div>
+      <p class="service-desc">Precise profiling of who your buyers are, what drives their decisions, and how to reach them through the right channels.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      </div>
+      <div class="service-num">05</div>
+      <div class="service-title">Competitive Intelligence</div>
+      <p class="service-desc">Systematic tracking of competitor activity, messaging, and strategy to keep your team one step ahead at every stage.</p>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      </div>
+      <div class="service-num">06</div>
+      <div class="service-title">Sales Enablement Intelligence</div>
+      <p class="service-desc">Arming your sales teams with insight-backed tools, scripts, and collateral that convert conversations into contracts.</p>
+    </div>
+  </div>
+</section>
+
+<!-- WHY DIQUALIA -->
+<section>
+  <div class="why">
+    <div>
+      <div class="section-eyebrow">Why DiQualia</div>
+      <h2 class="section-h2">Research built for<br/><em>your</em> industry.</h2>
+      <p class="section-lead" style="margin-bottom:2.5rem;">
+        Generic agencies produce generic results. DiQualia operates at the intersection of rigorous research methodology and deep niche industry understanding — delivering intelligence that actually moves the needle.
+      </p>
+      <a class="btn-ghost" href="#">
+        Our Approach
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+    <div class="why-stats">
+      <div class="why-stat">
+        <div class="why-stat-num">B2B</div>
+        <div class="why-stat-label">Exclusive Focus</div>
+      </div>
+      <div class="why-stat">
+        <div class="why-stat-num">Niche</div>
+        <div class="why-stat-label">Industry Depth</div>
+      </div>
+      <div class="why-stat">
+        <div class="why-stat-num">Data</div>
+        <div class="why-stat-label">First Philosophy</div>
+      </div>
+      <div class="why-stat">
+        <div class="why-stat-num">ROI</div>
+        <div class="why-stat-label">Intelligence Driven</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section class="process">
+  <div class="section-eyebrow">How We Work</div>
+  <h2 class="section-h2">From brief to<br/><em>breakthrough.</em></h2>
+  <div class="process-steps">
+    <div class="process-step">
+      <div class="step-circle">01</div>
+      <div class="step-title">Discovery</div>
+      <p class="step-desc">We immerse ourselves in your market, your goals, and the competitive forces shaping your niche.</p>
+    </div>
+    <div class="process-step">
+      <div class="step-circle">02</div>
+      <div class="step-title">Intelligence Gathering</div>
+      <p class="step-desc">Primary and secondary research executed with rigour — from buyer interviews to digital signal analysis.</p>
+    </div>
+    <div class="process-step">
+      <div class="step-circle">03</div>
+      <div class="step-title">Strategy Synthesis</div>
+      <p class="step-desc">Raw data becomes actionable intelligence — clear, decisive recommendations your team can act on immediately.</p>
+    </div>
+    <div class="process-step">
+      <div class="step-circle">04</div>
+      <div class="step-title">Execution Support</div>
+      <p class="step-desc">We don't just hand off reports. We partner with your team to implement, measure, and iterate.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="section-eyebrow">Get Started</div>
+  <h2 class="section-h2" style="max-width:680px;">Ready to build on<br/><em>real intelligence?</em></h2>
+  <p class="section-lead">
+    Tell us about your market and what you need to know. We'll show you what precision research can unlock for your business.
+  </p>
+  <div class="cta-actions">
+    <a class="btn-primary" href="#">
+      Start a Conversation
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </a>
+    <a class="btn-ghost" href="#">Download Credentials</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-copy">© 2025 DiQualia. Marketing Intelligence & Research.</div>
+  <ul class="footer-links">
+    <li><a href="#">Privacy</a></li>
+    <li><a href="#">Terms</a></li>
+    <li><a href="#">Contact</a></li>
+  </ul>
+</footer>
+
+</body>
+</html>
