@@ -84,7 +84,8 @@ export function SiteHeader() {
   return (
     <>
       <nav id="nav" className="diq-nav">
-        <div className="diq-navRow">
+        <div className="diq-navInner">
+          <div className="diq-navRow">
           <Link href="/" aria-label="Diqualia home" className="diq-navLogo">
             <span className="diq-logo diq-logoLight">
               <BrandLogo variant="black" width={132} decorative />
@@ -134,6 +135,7 @@ export function SiteHeader() {
             <div className="diq-themeToggle diq-themeToggleDesktop">
               <ThemeToggle />
             </div>
+          </div>
           </div>
         </div>
       </nav>

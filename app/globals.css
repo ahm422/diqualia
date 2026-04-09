@@ -240,6 +240,12 @@ body:has(a:hover) .diq-curR {
   transition: all 0.5s ease;
 }
 
+.diq-navInner {
+  width: 100%;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
 .diq-nav.scrolled {
   background: var(--diq_nav_scrolled_bg);
   backdrop-filter: blur(28px);
@@ -263,7 +269,7 @@ body:has(a:hover) .diq-curR {
 
 .diq-navLinks {
   display: flex;
-  gap: 40px;
+  gap: clamp(18px, 3vw, 34px);
   align-items: center;
 }
 
@@ -424,30 +430,35 @@ html.dark .diq-logoDark {
 
 .diq-navLink {
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: clamp(11px, 1.1vw, 12px);
-  letter-spacing: clamp(2px, 0.5vw, 3px);
+  font-size: clamp(11px, 1vw, 12px);
+  letter-spacing: clamp(1.5px, 0.4vw, 2.5px);
   text-transform: uppercase;
-  color: var(--diq_mid);
+  color: color-mix(in oklab, var(--foreground) 66%, transparent);
   text-decoration: none;
-  transition: color 0.3s;
+  transition: color 0.25s ease;
+  padding: 10px 2px;
+  border-bottom: 1px solid transparent;
 }
 .diq-navLink:hover {
   color: var(--gold);
+  border-bottom-color: color-mix(in oklab, var(--gold) 55%, transparent);
 }
 .diq-navLink.active {
   color: var(--gold);
+  border-bottom-color: color-mix(in oklab, var(--gold) 70%, transparent);
 }
 
 .diq-navCta {
   border: 1px solid var(--gold);
   color: var(--gold);
-  padding: 9px 26px;
+  padding: 10px 22px;
   text-decoration: none;
   transition: all 0.3s;
   font-family: var(--font-mono), ui-monospace, monospace;
   font-size: clamp(11px, 1.1vw, 12px);
   letter-spacing: clamp(2px, 0.5vw, 3px);
   text-transform: uppercase;
+  border-radius: 999px;
 }
 .diq-navCta:hover {
   background: var(--gold);
