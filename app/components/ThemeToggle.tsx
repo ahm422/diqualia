@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 
@@ -23,28 +23,34 @@ function applyThemeToHtml(theme: Theme) {
 }
 
 export function ThemeToggle() {
-  const mode = useSyncExternalStore(
-    (onStoreChange) => {
-      if (typeof window === "undefined") return () => {};
-      const handler = () => onStoreChange();
-      window.addEventListener("storage", handler);
-      window.addEventListener(THEME_EVENT, handler as EventListener);
-      return () => {
-        window.removeEventListener("storage", handler);
-        window.removeEventListener(THEME_EVENT, handler as EventListener);
-      };
-    },
-    () => {
+  // SSR/initial client render must be deterministic to avoid hydration mismatches.
+  // We start at "system" and then sync from storage after mount.
+  const [mode, setMode] = useState<ThemeMode>("system");
+
+  useEffect(() => {
+    function syncFromStorage() {
       try {
         const stored = window.localStorage.getItem(STORAGE_KEY);
-        if (stored === "light" || stored === "dark") return stored;
+        if (stored === "light" || stored === "dark") {
+          setMode(stored);
+          return;
+        }
       } catch {
         // ignore
       }
-      return "system";
-    },
-    () => "system"
-  ) as ThemeMode;
+      setMode("system");
+    }
+
+    const handler = () => syncFromStorage();
+    window.addEventListener("storage", handler);
+    window.addEventListener(THEME_EVENT, handler as EventListener);
+    syncFromStorage();
+
+    return () => {
+      window.removeEventListener("storage", handler);
+      window.removeEventListener(THEME_EVENT, handler as EventListener);
+    };
+  }, []);
 
   const effectiveTheme = useMemo<Theme>(() => {
     if (mode === "system") return getSystemTheme();
