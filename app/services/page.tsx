@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { ServicesTabs, type ServiceTab } from "./ServicesTabs";
 
@@ -821,7 +822,7 @@ export default function ServicesPage() {
                   </ul>
                 </div>
                 <a
-                  href="#contact"
+                  href="/contact"
                   className="mt-8 block border px-4 py-3 text-center text-[11px] tracking-[0.22em] uppercase no-underline transition-colors"
                   style={{
                     borderColor: featured ? "var(--gold)" : "color-mix(in oklab, var(--border) 80%, transparent)",
@@ -918,19 +919,24 @@ export default function ServicesPage() {
           <p className="mx-auto mt-4 max-w-[62ch] text-[15px] leading-8" style={{ color: "color-mix(in oklab, var(--ink) 55%, transparent)" }}>
             Every engagement begins with a no-cost discovery call — 30 minutes, no pitch, just research.
           </p>
-          <a
-            href="mailto:intel@diqualia.com"
-            className="mt-10 inline-block border-b-2 pb-1 text-[22px] no-underline"
-            style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 400,
-              letterSpacing: "0.04em",
-              color: "var(--ink)",
-              borderBottomColor: "color-mix(in oklab, var(--ink) 30%, transparent)",
-            }}
-          >
-            intel@diqualia.com
-          </a>
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+            <Link href="/contact" className="diq-btnGold" style={{ padding: "15px 32px" }}>
+              Contact
+            </Link>
+            <a
+              href="mailto:intel@diqualia.com"
+              className="inline-block border-b-2 pb-1 text-[22px] no-underline"
+              style={{
+                fontFamily: "var(--font-display)",
+                fontWeight: 400,
+                letterSpacing: "0.04em",
+                color: "var(--ink)",
+                borderBottomColor: "color-mix(in oklab, var(--ink) 30%, transparent)",
+              }}
+            >
+              intel@diqualia.com
+            </a>
+          </div>
         </div>
       </section>
     </div>
