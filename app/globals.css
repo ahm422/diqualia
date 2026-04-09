@@ -6,6 +6,7 @@
   --white: #ffffff;
   --gold: #caa84b;
   --green: #3a8a7a;
+  --gold-lt: color-mix(in oklab, var(--gold) 86%, var(--white));
 
   /* Fluid layout primitives */
   --diq-gutter: clamp(18px, 5vw, 72px);
@@ -177,7 +178,7 @@ body {
     position: fixed;
     inset: 0;
     pointer-events: none;
-    z-index: 9999;
+    z-index: 20;
     opacity: var(--noise-opacity);
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
   }
@@ -253,6 +254,13 @@ body:has(a:hover) .diq-curR {
   text-decoration: none;
 }
 
+.diq-navRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
 .diq-navLinks {
   display: flex;
   gap: 40px;
@@ -263,6 +271,130 @@ body:has(a:hover) .diq-curR {
   display: flex;
   align-items: center;
   gap: 18px;
+}
+
+.diq-navMobile {
+  display: none;
+  align-items: center;
+  gap: 10px;
+}
+
+.diq-themeToggleMobile {
+  display: none;
+}
+
+.diq-themeToggleDesktop {
+  display: block;
+}
+
+.diq-navMenuBtn {
+  border: 1px solid color-mix(in oklab, var(--gold) 35%, transparent);
+  background: transparent;
+  color: var(--gold);
+  height: 36px;
+  width: 42px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.25s ease;
+}
+.diq-navMenuBtn:hover {
+  background: color-mix(in oklab, var(--gold) 16%, transparent);
+}
+
+.diq-hamburger {
+  display: grid;
+  gap: 4px;
+}
+.diq-hamburger span {
+  display: block;
+  width: 16px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.9;
+}
+
+.diq-sheetOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 240;
+  background: rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.diq-sheet {
+  width: min(92vw, 420px);
+  height: 100%;
+  background: var(--card);
+  color: var(--card-foreground);
+  border-left: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
+  padding: 18px 18px 22px;
+  display: flex;
+  flex-direction: column;
+}
+
+.diq-sheetTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 14px;
+  border-bottom: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
+}
+.diq-sheetTitle {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+.diq-sheetClose {
+  border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
+  background: transparent;
+  color: var(--foreground);
+  height: 34px;
+  width: 34px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  line-height: 1;
+}
+.diq-sheetClose:hover {
+  background: color-mix(in oklab, var(--border) 18%, transparent);
+}
+
+.diq-sheetLinks {
+  padding-top: 16px;
+  display: grid;
+  gap: 8px;
+}
+.diq-sheetLink {
+  padding: 12px 12px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: var(--foreground);
+  border: 1px solid color-mix(in oklab, var(--border) 70%, transparent);
+  background: color-mix(in oklab, var(--card) 92%, transparent);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+.diq-sheetLink:hover {
+  border-color: color-mix(in oklab, var(--gold) 55%, transparent);
+}
+.diq-sheetLink.active {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.diq-sheetCta {
+  margin-top: auto;
+  padding-top: 16px;
 }
 
 .diq-themeToggle :where(button) {
@@ -292,8 +424,8 @@ html.dark .diq-logoDark {
 
 .diq-navLink {
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 10px;
-  letter-spacing: 3px;
+  font-size: clamp(11px, 1.1vw, 12px);
+  letter-spacing: clamp(2px, 0.5vw, 3px);
   text-transform: uppercase;
   color: var(--diq_mid);
   text-decoration: none;
@@ -313,8 +445,8 @@ html.dark .diq-logoDark {
   text-decoration: none;
   transition: all 0.3s;
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 10px;
-  letter-spacing: 3px;
+  font-size: clamp(11px, 1.1vw, 12px);
+  letter-spacing: clamp(2px, 0.5vw, 3px);
   text-transform: uppercase;
 }
 .diq-navCta:hover {
@@ -341,15 +473,15 @@ html.dark .diq-logoDark {
 }
 
 .diq-fTag {
-  font-size: 8px;
-  letter-spacing: 3px;
+  font-size: clamp(10px, 2.4vw, 11px);
+  letter-spacing: clamp(2px, 0.55vw, 3px);
   color: var(--gold);
   margin-top: 4px;
 }
 
 .diq-fSub {
-  font-size: 8px;
-  letter-spacing: 2px;
+  font-size: clamp(10px, 2.4vw, 11px);
+  letter-spacing: clamp(1.5px, 0.5vw, 2px);
   color: var(--gold);
   margin-top: 2px;
 }
@@ -363,8 +495,8 @@ html.dark .diq-logoDark {
 
 .diq-fLinks a {
   font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 9px;
-  letter-spacing: 3px;
+  font-size: clamp(10px, 2.2vw, 11px);
+  letter-spacing: clamp(2px, 0.55vw, 3px);
   text-transform: uppercase;
   color: var(--diq_mid);
   text-decoration: none;
@@ -375,8 +507,8 @@ html.dark .diq-logoDark {
 }
 
 .diq-fCopy {
-  font-size: 9px;
-  letter-spacing: 2px;
+  font-size: clamp(10px, 2.2vw, 11px);
+  letter-spacing: clamp(1.5px, 0.5vw, 2px);
   color: var(--gold);
   text-align: right;
   line-height: 1.9;
@@ -427,6 +559,18 @@ html.dark .diq-logoDark {
   }
   .diq-navLinks {
     display: none;
+  }
+  .diq-navMobile {
+    display: inline-flex;
+  }
+  .diq-navLogo {
+    gap: 12px;
+  }
+  .diq-themeToggleDesktop {
+    display: none;
+  }
+  .diq-themeToggleMobile {
+    display: block;
   }
   .diq-footer {
     grid-template-columns: 1fr;
@@ -493,15 +637,18 @@ html.dark .diq-logoDark {
 .diq-btnGold {
   background: var(--gold);
   color: var(--diq_ink);
-  padding: 15px 44px;
+  padding: 14px clamp(22px, 6vw, 44px);
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
-  font-size: 11px;
+  font-size: clamp(11px, 1.1vw, 12px);
   font-weight: 500;
-  letter-spacing: 3px;
+  letter-spacing: clamp(2px, 0.5vw, 3px);
   text-transform: uppercase;
   text-decoration: none;
   transition: all 0.35s;
   display: inline-block;
+  min-height: 44px;
+  line-height: 1;
+  border-radius: 999px;
 }
 .diq-btnGold:hover {
   background: color-mix(in oklab, var(--gold) 70%, #ffffff);
@@ -512,15 +659,18 @@ html.dark .diq-logoDark {
 .diq-btnGhost {
   border: 1px solid color-mix(in oklab, var(--diq_ivory) 20%, transparent);
   color: var(--diq_pale);
-  padding: 15px 44px;
+  padding: 14px clamp(22px, 6vw, 44px);
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
-  font-size: 11px;
+  font-size: clamp(11px, 1.1vw, 12px);
   font-weight: 300;
-  letter-spacing: 3px;
+  letter-spacing: clamp(2px, 0.5vw, 3px);
   text-transform: uppercase;
   text-decoration: none;
   transition: all 0.35s;
   display: inline-block;
+  min-height: 44px;
+  line-height: 1;
+  border-radius: 999px;
 }
 .diq-btnGhost:hover {
   border-color: var(--gold);
@@ -531,6 +681,9 @@ html.dark .diq-logoDark {
 .diq-btnGhost:focus-visible,
 .diq-navLink:focus-visible,
 .diq-navCta:focus-visible,
+.diq-navMenuBtn:focus-visible,
+.diq-sheetLink:focus-visible,
+.diq-sheetClose:focus-visible,
 .diq-fLinks a:focus-visible,
 .diq-ctaEmail:focus-visible {
   outline: 2px solid color-mix(in oklab, var(--gold) 70%, #ffffff);
@@ -539,7 +692,7 @@ html.dark .diq-logoDark {
 
 .diq-ctaEmail {
   font-family: var(--font-display), ui-serif, serif;
-  font-size: 26px;
+  font-size: clamp(20px, 4.2vw, 28px);
   font-weight: 600;
   color: var(--gold);
   text-decoration: none;

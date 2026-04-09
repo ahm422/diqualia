@@ -19,11 +19,14 @@ export function SiteFooter() {
       </div>
 
       <nav className="diq-fLinks" aria-label="Footer">
-        <a href="#about">About</a>
-        <a href="#services">Services</a>
-        <a href="#process">How We Work</a>
-        <a href="#industries">Industries</a>
-        <a href="#contact">Contact</a>
+        <Link href="/about">About</Link>
+        <Link href="/services">Services</Link>
+        <Link href="/process">How We Work</Link>
+        <Link href="/industries">Industries</Link>
+        <Link href="/story">Story</Link>
+        <Link href="/contact">Contact</Link>
+        <Link href="/privacy">Privacy</Link>
+        <Link href="/terms">Terms</Link>
       </nav>
 
       <div className="diq-fCopy">
