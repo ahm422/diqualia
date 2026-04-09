@@ -484,7 +484,7 @@ export default function Home() {
             ["3.8x", "Pipeline Growth", "Average per engagement"],
             ["21d", "First Qualified Lead", "Post-research phase"],
             ["100%", "Research First", "No guesswork. Ever."],
-          ].map(([n, l, s], idx) => (
+          ].map(([n, l, s]) => (
             <div
               key={l}
               className="diq-numbersItem text-center"
