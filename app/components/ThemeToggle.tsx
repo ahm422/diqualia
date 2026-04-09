@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { Moon, Sun } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -26,8 +27,11 @@ export function ThemeToggle() {
   // SSR/initial client render must be deterministic to avoid hydration mismatches.
   // We start at "system" and then sync from storage after mount.
   const [mode, setMode] = useState<ThemeMode>("system");
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+
     function syncFromStorage() {
       try {
         const stored = window.localStorage.getItem(STORAGE_KEY);
@@ -53,9 +57,11 @@ export function ThemeToggle() {
   }, []);
 
   const effectiveTheme = useMemo<Theme>(() => {
-    if (mode === "system") return getSystemTheme();
+    // Keep SSR and the *first* client render identical.
+    // After mount, we can safely read OS theme.
+    if (mode === "system") return mounted ? getSystemTheme() : "light";
     return mode;
-  }, [mode]);
+  }, [mode, mounted]);
 
   useEffect(() => {
     applyThemeToHtml(effectiveTheme);
@@ -95,29 +101,7 @@ export function ThemeToggle() {
       size="icon"
       className="rounded-full"
     >
-      {pressed ? (
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden className="text-primary">
-          <path
-            d="M12 3a9 9 0 1 0 9 9c0-.35-.02-.7-.06-1.04A7 7 0 0 1 12 3Z"
-            stroke="currentColor"
-            strokeWidth="1.6"
-          />
-        </svg>
-      ) : (
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden className="text-primary">
-          <path
-            d="M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z"
-            stroke="currentColor"
-            strokeWidth="1.6"
-          />
-          <path
-            d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32 1.41-1.41"
-            stroke="currentColor"
-            strokeWidth="1.6"
-            strokeLinecap="round"
-          />
-        </svg>
-      )}
+      {pressed ? <Moon aria-hidden className="text-primary" /> : <Sun aria-hidden className="text-primary" />}
       <span className="sr-only">{pressed ? "Dark theme" : "Light theme"}</span>
     </Button>
   );

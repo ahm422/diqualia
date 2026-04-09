@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { DM_Mono, Jost, Playfair_Display } from "next/font/google";
 import "./globals.css";
-import { ThemeScript } from "./components/ThemeScript";
+import { ThemeInit } from "./components/ThemeInit";
 import { SiteFooter } from "./components/SiteFooter";
 import { SiteHeader } from "./components/SiteHeader";
 import { ReferenceInteractions } from "./components/ReferenceInteractions";
@@ -52,9 +52,9 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        <ThemeScript />
       </head>
       <body className="min-h-full flex flex-col">
+        <ThemeInit />
         <div className="diq-cur" id="cur" aria-hidden="true" />
         <div className="diq-curR" id="cur-r" aria-hidden="true" />
         <ReferenceInteractions />
