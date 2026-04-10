@@ -1,0 +1,30 @@
+// https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Lead {
+  id        String   @id @default(uuid()) @db.Uuid
+  email     String?
+  name      String?
+  message   String?
+  source    String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("leads")
+}
+
+/// id matches Supabase auth.users.id
+model Profile {
+  id        String   @id @db.Uuid
+  email     String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("profiles")
+}
