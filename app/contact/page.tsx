@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ContactLeadForm } from "../components/ContactLeadForm";
 
 export const metadata: Metadata = {
   title: "Contact — DiQualia",
@@ -80,6 +81,9 @@ export default function ContactPage() {
           </div>
 
           <div>
+            <ContactLeadForm />
+
+            <div className="mt-14">
             <Eyebrow>What to include</Eyebrow>
             <div
               className="mt-4 text-foreground"
@@ -118,6 +122,7 @@ export default function ContactPage() {
               <Link href="/process" className="diq-btnGhost">
                 How We Work
               </Link>
+            </div>
             </div>
           </div>
         </div>
