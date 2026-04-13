@@ -3,6 +3,24 @@
 import "dotenv/config";
 import { defineConfig, env } from "prisma/config";
 
+/** `prisma generate` never connects to the DB, but Prisma still loads this URL from config during install/CI. */
+const PRISMA_GENERATE_PLACEHOLDER_URL =
+  "postgresql://prisma_generate_placeholder:placeholder@127.0.0.1:5432/postgres";
+
+function directDatabaseUrlForConfig(): string {
+  if (process.env.DIRECT_DATABASE_URL) {
+    return process.env.DIRECT_DATABASE_URL;
+  }
+  const inCiLikeEnvironment =
+    process.env.CF_PAGES === "1" ||
+    process.env.CF_PAGES === "true" ||
+    process.env.CI === "true";
+  if (inCiLikeEnvironment) {
+    return PRISMA_GENERATE_PLACEHOLDER_URL;
+  }
+  return env("DIRECT_DATABASE_URL");
+}
+
 export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
@@ -11,6 +29,6 @@ export default defineConfig({
   // Session pooler (5432): `prisma migrate` / introspection use prepared statements and break on transaction pooler (6543).
   // Runtime still uses `DATABASE_URL` (6543) via `lib/prisma.ts`.
   datasource: {
-    url: env("DIRECT_DATABASE_URL"),
+    url: directDatabaseUrlForConfig(),
   },
 });
