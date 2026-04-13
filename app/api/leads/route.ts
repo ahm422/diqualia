@@ -1,8 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 
-import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rateLimit";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+
+export const runtime = "edge";
 
 const LeadBodySchema = z
   .object({
@@ -58,16 +60,28 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid submission" }, { status: 400 });
   }
 
-  const lead = await prisma.lead.create({
-    data: {
+  let supabase;
+  try {
+    supabase = createSupabaseAdminClient();
+  } catch {
+    return NextResponse.json({ error: "Server misconfigured" }, { status: 503 });
+  }
+
+  const { data, error } = await supabase
+    .from("leads")
+    .insert({
       email: email?.trim() ? email.trim() : null,
       name: name?.trim() ? name.trim() : null,
       message: message?.trim() ? message.trim() : null,
       source: source?.trim() ? source.trim() : null,
-    },
-    select: { id: true },
-  });
+    })
+    .select("id")
+    .single();
 
-  return NextResponse.json({ ok: true, id: lead.id });
+  if (error) {
+    return NextResponse.json({ error: "Failed to save lead" }, { status: 500 });
+  }
+
+  return NextResponse.json({ ok: true, id: data.id });
 }
 

@@ -82,7 +82,7 @@ Logged in: this endpoint relies on Supabase auth cookies set by your app (SSR he
 ## Database + security notes
 
 - **Supabase is PostgreSQL.** Prisma connects to Supabase Postgres via `DATABASE_URL` / `DIRECT_DATABASE_URL`.
-- `leads` has **RLS enabled** and **no client policies** — write happens only through the Next.js API using Prisma.
+- `leads` has **RLS enabled** and **no client policies** — writes use the server-only **service role** key from `POST /api/leads` (Edge-safe HTTP to Supabase, not direct TCP/`pg`).
 - `profiles` has RLS enabled with policies for authenticated users to access their own row (`auth.uid() = id`).
 
 ## Optional: auto-create `profiles` on sign-up
