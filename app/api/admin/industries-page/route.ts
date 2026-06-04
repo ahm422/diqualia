@@ -1,0 +1,69 @@
+import "server-only";
+
+import { NextResponse } from "next/server";
+import { z } from "zod";
+
+import { requireAdminApi } from "@/lib/auth/require-admin-api";
+import { prisma } from "@/lib/prisma";
+
+const PatchSchema = z.object({
+  eyebrow: z.string().min(1).max(200).optional(),
+  headlineLine1: z.string().min(1).max(200).optional(),
+  headlineLine2: z.string().min(1).max(200).optional(),
+  body: z.string().min(1).max(2000).optional(),
+  sectorsLabel: z.string().min(1).max(200).optional(),
+  sectorsDescription: z.string().min(1).max(2000).optional(),
+  sidebarLabel: z.string().min(1).max(200).optional(),
+  sidebarCopy: z.string().min(1).max(2000).optional(),
+  whereNextEyebrow: z.string().min(1).max(200).optional(),
+  whereNextTitle1: z.string().min(1).max(200).optional(),
+  whereNextTitle2: z.string().min(1).max(200).optional(),
+  whereNextBody: z.string().min(1).max(2000).optional(),
+});
+
+export async function GET() {
+  const session = await requireAdminApi();
+  if (session instanceof NextResponse) return session;
+
+  const page = await prisma.industriesPage.findUnique({ where: { id: 1 } });
+  return NextResponse.json(page);
+}
+
+export async function PATCH(request: Request) {
+  const session = await requireAdminApi();
+  if (session instanceof NextResponse) return session;
+
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  const parsed = PatchSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Invalid input" }, { status: 400 });
+  }
+
+  const page = await prisma.industriesPage.upsert({
+    where: { id: 1 },
+    create: {
+      id: 1,
+      eyebrow: parsed.data.eyebrow ?? "",
+      headlineLine1: parsed.data.headlineLine1 ?? "",
+      headlineLine2: parsed.data.headlineLine2 ?? "",
+      body: parsed.data.body ?? "",
+      sectorsLabel: parsed.data.sectorsLabel ?? "",
+      sectorsDescription: parsed.data.sectorsDescription ?? "",
+      sidebarLabel: parsed.data.sidebarLabel ?? "",
+      sidebarCopy: parsed.data.sidebarCopy ?? "",
+      whereNextEyebrow: parsed.data.whereNextEyebrow ?? "",
+      whereNextTitle1: parsed.data.whereNextTitle1 ?? "",
+      whereNextTitle2: parsed.data.whereNextTitle2 ?? "",
+      whereNextBody: parsed.data.whereNextBody ?? "",
+    },
+    update: parsed.data,
+  });
+
+  return NextResponse.json(page);
+}
