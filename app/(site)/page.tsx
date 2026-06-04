@@ -1,6 +1,25 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 
-export default function Home() {
+import { prisma } from "@/lib/prisma";
+
+export default async function Home() {
+  const [hero, marqueeItems, exploreSection, exploreCards, whereNext] = await Promise.all([
+    prisma.homeHero.findUnique({ where: { id: 1 } }),
+    prisma.homeMarqueeItem.findMany({ orderBy: { order: "asc" } }),
+    prisma.homeExploreSection.findUnique({ where: { id: 1 } }),
+    prisma.homeExploreCard.findMany({ where: { visible: true }, orderBy: { order: "asc" } }),
+    prisma.homeWhereNext.findUnique({ where: { id: 1 } }),
+  ]);
+
+  if (!hero) notFound();
+
+  // Duplicate marquee items for seamless infinite scroll
+  const ticker = [...marqueeItems, ...marqueeItems];
+
+  // Split whereNext headline on " Better " to preserve <em>Better</em> styling
+  const headlineParts = whereNext?.headline?.split(" Better ") ?? [];
+
   return (
     <div style={{ background: "var(--diq_ink)" }}>
       {/* HERO */}
@@ -91,7 +110,7 @@ export default function Home() {
           </svg>
         </div>
 
-        {/* Hero stat box */}
+        {/* Hero stat box — "[ Intelligence Panel ]" is fixed chrome, not CMS-editable */}
         <div
           className="absolute top-[160px] hidden w-[224px] border md:block"
           style={{
@@ -115,9 +134,9 @@ export default function Home() {
             [ Intelligence Panel ]
           </div>
           {[
-            ["Lead Quality", "94%"],
-            ["Pipeline Growth", "3.8x"],
-            ["First Lead", "~21d"],
+            [hero.stat1Label, hero.stat1Value],
+            [hero.stat2Label, hero.stat2Value],
+            [hero.stat3Label, hero.stat3Value],
           ].map(([l, v]) => (
             <div
               key={l}
@@ -164,7 +183,7 @@ export default function Home() {
             }}
           >
             <span aria-hidden className="inline-block h-px w-7" style={{ background: "var(--green)" }} />
-            Marketing Intelligence &amp; Research
+            {hero.eyebrow}
           </p>
           <h1
             style={{
@@ -179,10 +198,21 @@ export default function Home() {
               maxWidth: 820,
             }}
           >
-            Intelligence
+            {hero.headlineLine1}
             <br />
-            That <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Moves</em>
+            {/* headlineLine2: last word rendered in italic gold (e.g. "That Moves" → "That <em>Moves</em>") */}
+            {(() => {
+              const words = hero.headlineLine2.split(" ");
+              const last = words.pop();
+              return (
+                <>
+                  {words.join(" ")}{" "}
+                  <em style={{ fontStyle: "italic", color: "var(--gold)" }}>{last}</em>
+                </>
+              );
+            })()}
             <br />
+            {/* headlineLine3: ghost/stroke style */}
             <span
               aria-hidden
               style={{
@@ -190,9 +220,9 @@ export default function Home() {
                 color: "transparent",
               }}
             >
-              Markets.
+              {hero.headlineLine3}
             </span>
-            <span className="sr-only">Markets.</span>
+            <span className="sr-only">{hero.headlineLine3}</span>
           </h1>
           <p
             style={{
@@ -207,25 +237,23 @@ export default function Home() {
               animation: "diq_fadeUp .8s ease .55s forwards",
             }}
           >
-            DiQualia is a marketing intelligence and research unit for niche B2B companies. We research your market
-            deeply, map your buyers precisely, and build intelligence-led strategies that create real, lasting pipeline
-            growth.
+            {hero.body}
           </p>
           <div
             className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center sm:gap-4"
             style={{ opacity: 0, animation: "diq_fadeUp .8s ease .75s forwards" }}
           >
-            <Link href="/services" className="diq-btnGold w-full text-center sm:w-auto">
-              Our Services
+            <Link href={hero.btn1Href} className="diq-btnGold w-full text-center sm:w-auto">
+              {hero.btn1Label}
             </Link>
-            <Link href="/contact" className="diq-btnGhost w-full text-center sm:w-auto">
-              Talk to Us
+            <Link href={hero.btn2Href} className="diq-btnGhost w-full text-center sm:w-auto">
+              {hero.btn2Label}
             </Link>
           </div>
         </div>
       </section>
 
-      {/* TICKER */}
+      {/* TICKER — items duplicated for seamless infinite scroll; split on " — " to bold first part */}
       <div
         className="overflow-hidden border-y"
         style={{
@@ -236,35 +264,27 @@ export default function Home() {
         }}
       >
         <div className="inline-flex" style={{ animation: "diq_ticker 36s linear infinite" }}>
-          {[
-            ["Market Research", "Niche B2B Intelligence"],
-            ["Buyer Mapping", "Decision Maker Profiling"],
-            ["Competitive Intel", "Precision Positioning"],
-            ["Lead Generation", "Qualified & Targeted"],
-            ["Sales Enablement", "Data-Backed Strategy"],
-            ["Sector Research", "Deep Industry Expertise"],
-            ["Market Research", "Niche B2B Intelligence"],
-            ["Buyer Mapping", "Decision Maker Profiling"],
-            ["Competitive Intel", "Precision Positioning"],
-            ["Lead Generation", "Qualified & Targeted"],
-            ["Sales Enablement", "Data-Backed Strategy"],
-            ["Sector Research", "Deep Industry Expertise"],
-          ].map(([b, rest], idx) => (
-            <div
-              key={`${b}-${idx}`}
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: 9,
-                letterSpacing: "3px",
-                textTransform: "uppercase",
-                color: "var(--diq_mid)",
-                padding: "0 44px",
-                borderRight: "1px solid var(--diq_border)",
-              }}
-            >
-              <b style={{ color: "var(--gold)", fontWeight: 400 }}>{b}</b> — {rest}
-            </div>
-          ))}
+          {ticker.map((item, idx) => {
+            const dashIdx = item.text.indexOf(" — ");
+            const bold = dashIdx >= 0 ? item.text.slice(0, dashIdx) : item.text;
+            const rest = dashIdx >= 0 ? item.text.slice(dashIdx) : "";
+            return (
+              <div
+                key={`${item.id}-${idx}`}
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 9,
+                  letterSpacing: "3px",
+                  textTransform: "uppercase",
+                  color: "var(--diq_mid)",
+                  padding: "0 44px",
+                  borderRight: "1px solid var(--diq_border)",
+                }}
+              >
+                <b style={{ color: "var(--gold)", fontWeight: 400 }}>{bold}</b>{rest}
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -284,7 +304,7 @@ export default function Home() {
                 }}
               >
                 <span aria-hidden className="inline-block h-px w-8" style={{ background: "var(--primary)" }} />
-                Explore
+                {exploreSection?.eyebrow ?? "Explore"}
               </div>
               <h2
                 className="mt-6"
@@ -297,42 +317,35 @@ export default function Home() {
                   letterSpacing: "-0.5px",
                 }}
               >
-                A multi-page site
+                {exploreSection?.headlineLine1 ?? "A multi-page site"}
                 <br />
-                built for clarity.
+                {exploreSection?.headlineLine2 ?? "built for clarity."}
               </h2>
             </div>
             <p style={{ fontFamily: "var(--font-display)", fontSize: 18, fontStyle: "italic", color: "var(--muted-foreground)", lineHeight: 1.8 }}>
-              Jump into the pages below — each one keeps navigation consistent across mobile and desktop.
+              {exploreSection?.body ?? ""}
             </p>
           </div>
 
           <div className="mt-12 grid grid-cols-1 gap-px md:grid-cols-3" style={{ background: "var(--diq_border2)" }}>
-            {[
-              ["/about", "About", "What DiQualia is — and why intelligence-first beats tactics."],
-              ["/services", "Services", "Six core intelligence services designed to move pipeline."],
-              ["/process", "How We Work", "The research-first process that makes results repeatable."],
-              ["/industries", "Industries", "Where we operate — and how we build depth quickly in new niches."],
-              ["/story", "Story", "The point of view behind DiQualia and the Double Experience."],
-              ["/contact", "Contact", "Start with a discovery call. No pitch — just research."],
-            ].map(([href, title, body]) => (
+            {exploreCards.map((card) => (
               <Link
-                key={href}
-                href={href}
+                key={card.id}
+                href={card.href}
                 className="group block p-10 no-underline"
                 style={{ background: "var(--diq_deep)" }}
               >
                 <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--primary)" }}>
-                  {title}
+                  {card.sectionLabel ?? card.title}
                 </div>
                 <div
                   className="mt-4 text-[20px] text-foreground"
                   style={{ fontFamily: "var(--font-display)", fontWeight: 600, lineHeight: 1.2, color: "var(--diq_ivory)" }}
                 >
-                  {title}
+                  {card.title}
                 </div>
                 <p className="mt-4 text-[13px] leading-7" style={{ color: "var(--muted-foreground)" }}>
-                  {body}
+                  {card.body}
                 </p>
                 <div className="mt-6 text-[11px] tracking-[0.22em] uppercase" style={{ color: "var(--primary)" }}>
                   Open →
@@ -344,63 +357,72 @@ export default function Home() {
       </section>
 
       {/* CTA */}
-      <section className="diq-cta relative overflow-hidden text-center" style={{ background: "var(--diq_ink)" }}>
-        <div
-          aria-hidden
-          className="absolute inset-0"
-          style={{
-            backgroundImage:
-              "linear-gradient(var(--diq_grid) 1px, transparent 1px), linear-gradient(90deg, var(--diq_grid) 1px, transparent 1px)",
-            backgroundSize: "80px 80px",
-          }}
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute left-1/2 top-1/2 h-[50vw] w-[80vw] -translate-x-1/2 -translate-y-1/2 rounded-full"
-          style={{
-            background: "radial-gradient(ellipse, rgba(202,168,75,.05) 0%, transparent 65%)",
-          }}
-        />
-        <div className="diq-reveal relative z-[1] mx-auto max-w-[860px]">
-          <p
-            className="mb-[18px] flex items-center justify-center gap-3"
+      {whereNext && (
+        <section className="diq-cta relative overflow-hidden text-center" style={{ background: "var(--diq_ink)" }}>
+          <div
+            aria-hidden
+            className="absolute inset-0"
             style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: "clamp(10px, 2.8vw, 11px)",
-              letterSpacing: "0.35em",
-              textTransform: "uppercase",
-              color: "var(--primary)",
+              backgroundImage:
+                "linear-gradient(var(--diq_grid) 1px, transparent 1px), linear-gradient(90deg, var(--diq_grid) 1px, transparent 1px)",
+              backgroundSize: "80px 80px",
             }}
-          >
-            <span aria-hidden className="inline-block h-px w-5" style={{ background: "var(--primary)" }} />
-            Begin With Intelligence
-            <span aria-hidden className="inline-block h-px w-5" style={{ background: "var(--primary)" }} />
-          </p>
-          <h2
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute left-1/2 top-1/2 h-[50vw] w-[80vw] -translate-x-1/2 -translate-y-1/2 rounded-full"
             style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "clamp(34px,5.5vw,72px)",
-              fontWeight: 700,
-              color: "var(--diq_ivory)",
-              lineHeight: 1.0,
-              letterSpacing: "-1px",
-              marginBottom: 16,
+              background: "radial-gradient(ellipse, rgba(202,168,75,.05) 0%, transparent 65%)",
             }}
-          >
-            Ready to Know
-            <br />
-            Your Market <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Better</em>
-            <br />
-            Than Anyone?
-          </h2>
-          <p style={{ fontFamily: "var(--font-display)", fontSize: 18, fontStyle: "italic", color: "var(--muted-foreground)", marginBottom: 40, lineHeight: 1.7 }}>
-            Every engagement begins with a no-cost discovery call — 30 minutes, no pitch, just research.
-          </p>
-          <Link href="/contact" className="diq-btnGold">
-            Contact
-          </Link>
-        </div>
-      </section>
+          />
+          <div className="diq-reveal relative z-[1] mx-auto max-w-[860px]">
+            <p
+              className="mb-[18px] flex items-center justify-center gap-3"
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: "clamp(10px, 2.8vw, 11px)",
+                letterSpacing: "0.35em",
+                textTransform: "uppercase",
+                color: "var(--primary)",
+              }}
+            >
+              <span aria-hidden className="inline-block h-px w-5" style={{ background: "var(--primary)" }} />
+              {whereNext.eyebrow}
+              <span aria-hidden className="inline-block h-px w-5" style={{ background: "var(--primary)" }} />
+            </p>
+            <h2
+              style={{
+                fontFamily: "var(--font-display)",
+                fontSize: "clamp(34px,5.5vw,72px)",
+                fontWeight: 700,
+                color: "var(--diq_ivory)",
+                lineHeight: 1.0,
+                letterSpacing: "-1px",
+                marginBottom: 16,
+              }}
+            >
+              {/* Split headline on " Better " to preserve italic gold styling */}
+              {headlineParts.length === 2 ? (
+                <>
+                  {headlineParts[0]}
+                  <br />
+                  <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Better</em>
+                  <br />
+                  {headlineParts[1]}
+                </>
+              ) : (
+                whereNext.headline
+              )}
+            </h2>
+            <p style={{ fontFamily: "var(--font-display)", fontSize: 18, fontStyle: "italic", color: "var(--muted-foreground)", marginBottom: 40, lineHeight: 1.7 }}>
+              {whereNext.body}
+            </p>
+            <Link href={whereNext.btnHref} className="diq-btnGold">
+              {whereNext.btnLabel}
+            </Link>
+          </div>
+        </section>
+      )}
     </div>
   );
 }

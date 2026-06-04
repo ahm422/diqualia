@@ -89,15 +89,34 @@ export async function seedCms(prisma: PrismaClient): Promise<void> {
   await prisma.homeExploreCard.deleteMany();
   await prisma.homeExploreCard.createMany({
     data: [
-      { href: "/about", title: "About", sectionLabel: "About", body: "What DiQualia is — and why intelligence-first beats tactics.", order: 0 },
-      { href: "/services", title: "Services", sectionLabel: "Services", body: "Six core intelligence services designed to move pipeline.", order: 1 },
-      { href: "/process", title: "How We Work", sectionLabel: "How We Work", body: "The research-first process that makes results repeatable.", order: 2 },
-      { href: "/industries", title: "Industries", sectionLabel: "Industries", body: "Where we operate — and how we build depth quickly in new niches.", order: 3 },
-      { href: "/story", title: "Story", sectionLabel: "Story", body: "The point of view behind DiQualia and the Double Experience.", order: 4 },
-      { href: "/contact", title: "Contact", sectionLabel: "Contact", body: "Start with a discovery call. No pitch — just research.", order: 5 },
+      { href: "/about", title: "About", sectionLabel: "About", body: "What DiQualia is — and why intelligence-first beats tactics.", order: 0, visible: true },
+      { href: "/services", title: "Services", sectionLabel: "Services", body: "Six core intelligence services designed to move pipeline.", order: 1, visible: true },
+      { href: "/process", title: "How We Work", sectionLabel: "How We Work", body: "The research-first process that makes results repeatable.", order: 2, visible: true },
+      { href: "/industries", title: "Industries", sectionLabel: "Industries", body: "Where we operate — and how we build depth quickly in new niches.", order: 3, visible: true },
+      { href: "/story", title: "Story", sectionLabel: "Story", body: "The point of view behind DiQualia and the Double Experience.", order: 4, visible: true },
+      { href: "/contact", title: "Contact", sectionLabel: "Contact", body: "Start with a discovery call. No pitch — just research.", order: 5, visible: true },
     ],
   });
   console.log("HomeExploreCard ready (6)");
+
+  // ─── HomeExploreSection ───────────────────────────────────────────────────
+  await prisma.homeExploreSection.upsert({
+    where: { id: 1 },
+    create: {
+      id: 1,
+      eyebrow: "Explore",
+      headlineLine1: "A multi-page site",
+      headlineLine2: "built for clarity.",
+      body: "Jump into the pages below — each one keeps navigation consistent across mobile and desktop.",
+    },
+    update: {
+      eyebrow: "Explore",
+      headlineLine1: "A multi-page site",
+      headlineLine2: "built for clarity.",
+      body: "Jump into the pages below — each one keeps navigation consistent across mobile and desktop.",
+    },
+  });
+  console.log("HomeExploreSection ready");
 
   // ─── HomeWhereNext ────────────────────────────────────────────────────────
   await prisma.homeWhereNext.upsert({
