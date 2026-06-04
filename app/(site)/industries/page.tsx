@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
+
+import { prisma } from "@/lib/prisma";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Industries — DiQualia",
@@ -32,21 +37,13 @@ function H1({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function IndustriesPage() {
-  const industries: Array<{ name: string; active: boolean }> = [
-    { name: "Construction & Built Environment", active: true },
-    { name: "Technical Services", active: true },
-    { name: "Engineering & Infrastructure", active: true },
-    { name: "Real Estate", active: false },
-    { name: "Industrial & Manufacturing", active: false },
-    { name: "Professional Services", active: false },
-    { name: "Energy & Utilities", active: false },
-    { name: "Logistics & Supply Chain", active: false },
-    { name: "Healthcare Services", active: false },
-    { name: "Legal & Compliance", active: false },
-    { name: "Financial Services", active: false },
-    { name: "SaaS & Technology", active: false },
-  ];
+export default async function IndustriesPage() {
+  const [page, sectors] = await Promise.all([
+    prisma.industriesPage.findUnique({ where: { id: 1 } }),
+    prisma.industrySector.findMany({ orderBy: { order: "asc" } }),
+  ]);
+
+  if (!page) notFound();
 
   return (
     <div>
@@ -62,17 +59,16 @@ export default function IndustriesPage() {
           }}
         />
         <div className="mx-auto w-full max-w-6xl px-6 pb-16 pt-20 md:pb-20 md:pt-28">
-          <Eyebrow>Industries</Eyebrow>
+          <Eyebrow>{page.eyebrow}</Eyebrow>
           <H1>
-            Deep expertise.
+            {page.headlineLine1}
             <br />
             <em className="text-primary" style={{ fontStyle: "italic" }}>
-              Broad reach.
+              {page.headlineLine2}
             </em>
           </H1>
           <p className="mt-8 max-w-[72ch] text-[15px] leading-8 text-muted-foreground">
-            We operate across a growing range of niche B2B sectors — with dedicated research practices built for each
-            industry we enter.
+            {page.body}
           </p>
           <div className="mt-10 flex flex-wrap items-center gap-4">
             <Link href="/services" className="diq-btnGhost">
@@ -89,11 +85,10 @@ export default function IndustriesPage() {
         <div className="grid grid-cols-1 gap-12 md:grid-cols-[1fr_320px] md:items-start">
           <div>
             <div className="text-[13px] tracking-[0.06em] text-foreground" style={{ fontFamily: "var(--font-display)", fontWeight: 400 }}>
-              Sectors we actively research
+              {page.sectorsLabel}
             </div>
             <p className="mt-3 max-w-[70ch] text-[13px] leading-7 text-muted-foreground">
-              Highlighted industries represent where we currently have active research practices and up-to-date market
-              intelligence frameworks.
+              {page.sectorsDescription}
             </p>
           </div>
           <div
@@ -103,27 +98,29 @@ export default function IndustriesPage() {
               background: "var(--bg-elev)",
             }}
           >
-            <div className="text-[10px] tracking-[0.22em] uppercase text-primary">Active research</div>
+            <div className="text-[10px] tracking-[0.22em] uppercase text-primary">{page.sidebarLabel}</div>
             <p className="mt-3 text-[12px] leading-7 text-muted-foreground">
-              If your niche isn’t listed, that’s okay — we can build the same depth quickly via immersion.
+              {page.sidebarCopy}
             </p>
           </div>
         </div>
 
         <div className="mt-12 flex flex-wrap gap-2">
-          {industries.map((x) => (
+          {sectors.map((sector) => (
             <div
-              key={x.name}
+              key={sector.id}
               className="border px-4 py-3 text-[11px] tracking-[0.18em] uppercase"
               style={{
-                borderColor: x.active
+                borderColor: sector.visible
                   ? "color-mix(in oklab, var(--green) 65%, transparent)"
                   : "color-mix(in oklab, var(--border) 80%, transparent)",
                 background: "var(--bg-elev)",
-                color: x.active ? "color-mix(in oklab, var(--green) 85%, var(--foreground))" : "var(--muted-foreground)",
+                color: sector.visible
+                  ? "color-mix(in oklab, var(--green) 85%, var(--foreground))"
+                  : "var(--muted-foreground)",
               }}
             >
-              {x.name}
+              {sector.name}
             </div>
           ))}
         </div>
@@ -133,7 +130,7 @@ export default function IndustriesPage() {
         <div className="mx-auto w-full max-w-6xl px-6 py-20">
           <div className="grid grid-cols-1 gap-12 md:grid-cols-2 md:items-center">
             <div>
-              <Eyebrow>Start here</Eyebrow>
+              <Eyebrow>{page.whereNextEyebrow}</Eyebrow>
               <div
                 className="mt-4 text-foreground"
                 style={{
@@ -143,13 +140,12 @@ export default function IndustriesPage() {
                   lineHeight: 1.1,
                 }}
               >
-                Tell us your niche —
+                {page.whereNextTitle1}
                 <br />
-                we’ll map your buyers.
+                {page.whereNextTitle2}
               </div>
               <p className="mt-6 max-w-[62ch] text-[15px] leading-8 text-muted-foreground">
-                A no-cost discovery call: 30 minutes, no pitch, just research. We’ll clarify your market, your buyers,
-                and what intelligence-led growth would look like.
+                {page.whereNextBody}
               </p>
             </div>
             <div className="flex flex-wrap gap-4 md:justify-end">
@@ -166,4 +162,3 @@ export default function IndustriesPage() {
     </div>
   );
 }
-
