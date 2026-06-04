@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import { DM_Mono, Jost } from "next/font/google";
 import "../../globals.css";
 import { ThemeInit } from "../../components/ThemeInit";
-import { AdminSidebar } from "./AdminSidebar";
-import { requireAdmin } from "@/lib/auth/require-admin";
 
 const jost = Jost({
   variable: "--font-sans",
@@ -22,9 +20,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  await requireAdmin();
-
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="en"
@@ -32,10 +28,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       suppressHydrationWarning
     >
       <head />
-      <body className="min-h-full flex bg-[var(--background)] text-[var(--foreground)]">
+      <body className="min-h-full bg-[var(--background)] text-[var(--foreground)]">
         <ThemeInit />
-        <AdminSidebar />
-        <main className="flex-1 min-h-screen overflow-y-auto p-8">{children}</main>
+        {children}
       </body>
     </html>
   );
