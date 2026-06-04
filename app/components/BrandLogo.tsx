@@ -9,13 +9,15 @@ export function BrandLogo({
   decorative,
   className,
   width = 140,
+  src: customSrc,
 }: {
   variant: BrandLogoVariant;
   decorative?: boolean;
   className?: string;
   width?: number;
+  src?: string | null;
 }) {
-  const src = variant === "white" ? "/Di Qualia svg white.svg" : "/Di Qualia Svg Black.svg";
+  const src = customSrc ?? (variant === "white" ? "/Di Qualia svg white.svg" : "/Di Qualia Svg Black.svg");
 
   return (
     <Image
