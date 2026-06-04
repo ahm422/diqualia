@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
+
+import { prisma } from "@/lib/prisma";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "How We Work — DiQualia",
@@ -32,7 +37,14 @@ function H1({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function ProcessPage() {
+export default async function ProcessPage() {
+  const [page, steps] = await Promise.all([
+    prisma.processPage.findUnique({ where: { id: 1 } }),
+    prisma.processStep.findMany({ orderBy: { order: "asc" } }),
+  ]);
+
+  if (!page) notFound();
+
   return (
     <div>
       <section className="relative overflow-hidden border-b" style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
@@ -47,18 +59,17 @@ export default function ProcessPage() {
           }}
         />
         <div className="mx-auto w-full max-w-6xl px-6 pb-16 pt-20 md:pb-20 md:pt-28">
-          <Eyebrow>How We Work</Eyebrow>
+          <Eyebrow>{page.eyebrow}</Eyebrow>
           <H1>
-            Research.
+            {page.headlineLine1}
             <br />
             <em className="text-primary" style={{ fontStyle: "italic" }}>
-              Precision.
+              {page.headlineLine2}
             </em>{" "}
-            Results.
+            {page.headlineLine3}
           </H1>
           <p className="mt-8 max-w-[70ch] text-[15px] leading-8 text-muted-foreground">
-            We don’t start with tactics. We start with intelligence — then build everything on top of it. Here’s the
-            process we follow to ensure your positioning, outreach, and pipeline growth are evidence-led.
+            {page.body}
           </p>
 
           <div className="mt-10 flex flex-wrap items-center gap-4">
@@ -74,40 +85,9 @@ export default function ProcessPage() {
 
       <section className="mx-auto w-full max-w-6xl px-6 py-20">
         <div className="grid grid-cols-1 gap-px md:grid-cols-5" style={{ background: "color-mix(in oklab, var(--border) 100%, transparent)" }}>
-          {[
-            [
-              "Step One",
-              "01",
-              "Sector Immersion",
-              "We start by learning your industry — language, buying cycles, competitive dynamics, and decision drivers. No strategy until we know the market.",
-            ],
-            [
-              "Step Two",
-              "02",
-              "Buyer Mapping",
-              "We identify and profile your ideal buyers — roles, triggers, objections, and what moves them from interest to action.",
-            ],
-            [
-              "Step Three",
-              "03",
-              "Intelligence Brief",
-              "We compile research into a clear intelligence brief — market map, ICP, positioning, and a plan that prioritizes what will move pipeline.",
-            ],
-            [
-              "Step Four",
-              "04",
-              "Precision Execution",
-              "Outreach, content, enablement, and campaigns are designed around the intelligence — calibrated to your buyers and your category.",
-            ],
-            [
-              "Step Five",
-              "05",
-              "Refine & Scale",
-              "We track signals, report with clarity, and refine the system — so each cycle improves the next and growth compounds over time.",
-            ],
-          ].map(([tag, num, title, body]) => (
-            <div key={num} className="p-8" style={{ background: "var(--bg-elev)" }}>
-              <div className="text-[10px] tracking-[0.22em] uppercase text-primary">{tag}</div>
+          {steps.map((step) => (
+            <div key={step.id} className="p-8" style={{ background: "var(--bg-elev)" }}>
+              <div className="text-[10px] tracking-[0.22em] uppercase text-primary">{step.stepLabel}</div>
               <div
                 className="mt-4 text-[36px] leading-none"
                 style={{
@@ -116,10 +96,10 @@ export default function ProcessPage() {
                   color: "color-mix(in oklab, var(--gold) 18%, transparent)",
                 }}
               >
-                {num}
+                {step.stepNumber}
               </div>
-              <div className="mt-4 text-[13px] tracking-[0.06em] text-foreground">{title}</div>
-              <p className="mt-3 text-[12px] leading-7 text-muted-foreground">{body}</p>
+              <div className="mt-4 text-[13px] tracking-[0.06em] text-foreground">{step.title}</div>
+              <p className="mt-3 text-[12px] leading-7 text-muted-foreground">{step.body}</p>
             </div>
           ))}
         </div>
@@ -129,7 +109,7 @@ export default function ProcessPage() {
         <div className="mx-auto w-full max-w-6xl px-6 py-20">
           <div className="grid grid-cols-1 gap-12 md:grid-cols-2 md:items-center">
             <div>
-              <Eyebrow>Next</Eyebrow>
+              <Eyebrow>{page.whereNextEyebrow}</Eyebrow>
               <div
                 className="mt-4 text-foreground"
                 style={{
@@ -139,13 +119,12 @@ export default function ProcessPage() {
                   lineHeight: 1.1,
                 }}
               >
-                See what this looks like
+                {page.whereNextTitle1}
                 <br />
-                in your market.
+                {page.whereNextTitle2}
               </div>
               <p className="mt-6 max-w-[60ch] text-[15px] leading-8 text-muted-foreground">
-                We’ll run a short discovery call, learn your niche, and outline what an intelligence-first engagement
-                would produce for your pipeline.
+                {page.whereNextBody}
               </p>
             </div>
             <div className="flex flex-wrap gap-4 md:justify-end">
@@ -162,4 +141,3 @@ export default function ProcessPage() {
     </div>
   );
 }
-
