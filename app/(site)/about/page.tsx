@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
+
+import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = {
   title: "About — DiQualia",
@@ -48,7 +51,54 @@ function H2({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function AboutPage() {
+function renderHeroHeadline(headline: string) {
+  const dotIdx = headline.indexOf(". ");
+  if (dotIdx === -1) return highlightIntelligence(headline);
+  const line1 = headline.slice(0, dotIdx + 1);
+  const line2 = headline.slice(dotIdx + 2);
+  return (
+    <>
+      {line1}
+      <br />
+      {highlightIntelligence(line2)}
+    </>
+  );
+}
+
+function highlightIntelligence(text: string) {
+  const word = "intelligence";
+  const idx = text.toLowerCase().indexOf(word);
+  if (idx === -1) return <>{text}</>;
+  return (
+    <>
+      {text.slice(0, idx)}
+      <em className="text-primary" style={{ fontStyle: "italic" }}>{text.slice(idx, idx + word.length)}</em>
+      {text.slice(idx + word.length)}
+    </>
+  );
+}
+
+function renderWhereNextHeadline(headline: string) {
+  const parts = headline.split(" — ");
+  if (parts.length < 2) return <>{headline}</>;
+  return (
+    <>
+      {parts[0]} —
+      <br />
+      {parts.slice(1).join(" — ")}
+    </>
+  );
+}
+
+export default async function AboutPage() {
+  const [hero, builtForItems, whereNext] = await Promise.all([
+    prisma.aboutHero.findUnique({ where: { id: 1 } }),
+    prisma.aboutBuiltForItem.findMany({ orderBy: { order: "asc" } }),
+    prisma.aboutWhereNext.findUnique({ where: { id: 1 } }),
+  ]);
+
+  if (!hero) notFound();
+
   return (
     <div>
       <section className="relative overflow-hidden border-b" style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
@@ -63,16 +113,10 @@ export default function AboutPage() {
           }}
         />
         <div className="mx-auto w-full max-w-6xl px-6 pb-16 pt-20 md:pb-20 md:pt-28">
-          <Eyebrow>About</Eyebrow>
-          <H1>
-            Not an agency.
-            <br />
-            An <em className="text-primary" style={{ fontStyle: "italic" }}>intelligence</em> unit.
-          </H1>
+          <Eyebrow>{hero.eyebrow}</Eyebrow>
+          <H1>{renderHeroHeadline(hero.headline)}</H1>
           <p className="mt-8 max-w-[68ch] text-[15px] leading-8 text-muted-foreground">
-            DiQualia operates at the intersection of deep market research and precision go-to-market strategy. We immerse
-            ourselves in your sector before we touch a single campaign — so your marketing decisions are grounded in
-            evidence, not assumption.
+            {hero.body}
           </p>
 
           <div className="mt-10 flex flex-wrap items-center gap-4">
@@ -87,7 +131,7 @@ export default function AboutPage() {
       </section>
 
       <section className="mx-auto w-full max-w-6xl px-6 py-20">
-        <Eyebrow>What we’re built for</Eyebrow>
+        <Eyebrow>What we&apos;re built for</Eyebrow>
         <H2>
           Intelligence that compounds —
           <br />
@@ -95,53 +139,33 @@ export default function AboutPage() {
         </H2>
 
         <div className="mt-12 grid grid-cols-1 gap-px md:grid-cols-2" style={{ background: "color-mix(in oklab, var(--border) 100%, transparent)" }}>
-          {[
-            [
-              "Research Before Everything",
-              "Every engagement begins with deep sector immersion. No strategy until we know your market as well as you do — often better.",
-            ],
-            [
-              "Precision Over Volume",
-              "We don’t generate noise. We identify the exact buyers who are ready, able, and willing to engage — then reach them with purpose.",
-            ],
-            [
-              "Intelligence That Compounds",
-              "The intelligence we build doesn’t expire. Every engagement makes the next one faster, sharper, and more effective.",
-            ],
-            [
-              "Built to Scale Across Niches",
-              "We grow with you — from one niche to many, one market to several, without ever losing the depth that makes intelligence valuable.",
-            ],
-          ].map(([title, body]) => (
-            <div key={title} className="p-10" style={{ background: "var(--bg)" }}>
+          {builtForItems.map((item) => (
+            <div key={item.id} className="p-10" style={{ background: "var(--bg)" }}>
               <div className="text-[16px] text-foreground" style={{ fontFamily: "var(--font-display)", fontWeight: 400 }}>
-                {title}
+                {item.title}
               </div>
-              <p className="mt-3 text-[13px] leading-7 text-muted-foreground">{body}</p>
+              <p className="mt-3 text-[13px] leading-7 text-muted-foreground">{item.description}</p>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="border-t" style={{ background: "var(--bg-elev)", borderTopColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
-        <div className="mx-auto w-full max-w-6xl px-6 py-20">
-          <Eyebrow>Where next</Eyebrow>
-          <H2>
-            See how we work —
-            <br />
-            then start with intelligence.
-          </H2>
-          <div className="mt-10 flex flex-wrap gap-4">
-            <Link href="/process" className="diq-btnGhost">
-              How We Work
-            </Link>
-            <Link href="/contact" className="diq-btnGold">
-              Contact
-            </Link>
+      {whereNext && (
+        <section className="border-t" style={{ background: "var(--bg-elev)", borderTopColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
+          <div className="mx-auto w-full max-w-6xl px-6 py-20">
+            <Eyebrow>{whereNext.eyebrow}</Eyebrow>
+            <H2>{renderWhereNextHeadline(whereNext.headline)}</H2>
+            <div className="mt-10 flex flex-wrap gap-4">
+              <Link href={whereNext.btn1Href} className="diq-btnGhost">
+                {whereNext.btn1Label}
+              </Link>
+              <Link href={whereNext.btn2Href} className="diq-btnGold">
+                {whereNext.btn2Label}
+              </Link>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
     </div>
   );
 }
-
