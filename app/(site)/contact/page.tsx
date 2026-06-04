@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ContactLeadForm } from "../components/ContactLeadForm";
+import { ContactLeadForm } from "@/app/components/ContactLeadForm";
 
 export const metadata: Metadata = {
   title: "Contact — DiQualia",

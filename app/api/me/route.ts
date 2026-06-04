@@ -1,25 +1,21 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 
-import { createSupabaseServerClient } from "@/lib/supabase/server";
-
-export const runtime = "edge";
+import { verifyAdminToken } from "@/lib/auth/jwt";
+import { COOKIE_NAME } from "@/lib/auth/session";
 
 export async function GET() {
-  const supabase = await createSupabaseServerClient();
+  const cookieStore = await cookies();
+  const token = cookieStore.get(COOKIE_NAME)?.value;
 
-  const { data, error } = await supabase.auth.getUser();
-
-  if (error || !data.user) {
+  if (!token) {
     return NextResponse.json({ authenticated: false, user: null });
   }
 
-  return NextResponse.json({
-    authenticated: true,
-    user: {
-      id: data.user.id,
-      email: data.user.email,
-      created_at: data.user.created_at,
-    },
-  });
+  try {
+    const { sub: id, email } = await verifyAdminToken(token);
+    return NextResponse.json({ authenticated: true, user: { id, email } });
+  } catch {
+    return NextResponse.json({ authenticated: false, user: null });
+  }
 }
-
