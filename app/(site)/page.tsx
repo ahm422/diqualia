@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const [hero, marqueeItems, exploreSection, exploreCards, whereNext] = await Promise.all([
     prisma.homeHero.findUnique({ where: { id: 1 } }),
