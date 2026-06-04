@@ -5,6 +5,7 @@ import { Pool } from "pg";
 import bcrypt from "bcrypt";
 
 import { pgConnectionString, pgSslOption } from "../lib/pgSsl";
+import { seedCms } from "./seed-cms";
 
 const ssl = pgSslOption();
 const pool = new Pool({
@@ -39,6 +40,8 @@ async function main() {
     });
     console.log("Test lead created");
   }
+
+  await seedCms(prisma);
 }
 
 main()

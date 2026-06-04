@@ -29,3 +29,286 @@ model AdminUser {
 
   @@map("admin_users")
 }
+
+// ─── Global ──────────────────────────────────────────────────────────────────
+
+model SiteSettings {
+  id       Int     @id @default(1)
+  siteName String  @map("site_name")
+  logoUrl  String? @map("logo_url")
+
+  @@map("site_settings")
+}
+
+model NavItem {
+  id    Int    @id @default(autoincrement())
+  href  String
+  label String
+  order Int
+
+  @@map("nav_items")
+}
+
+model CtaButton {
+  id    Int    @id @default(1)
+  label String
+  href  String
+
+  @@map("cta_buttons")
+}
+
+// ─── Home ────────────────────────────────────────────────────────────────────
+
+model HomeHero {
+  id            Int    @id @default(1)
+  eyebrow       String
+  headlineLine1 String @map("headline_line1")
+  headlineLine2 String @map("headline_line2")
+  headlineLine3 String @map("headline_line3")
+  body          String
+  btn1Label     String @map("btn1_label")
+  btn1Href      String @map("btn1_href")
+  btn2Label     String @map("btn2_label")
+  btn2Href      String @map("btn2_href")
+  stat1Label    String @map("stat1_label")
+  stat1Value    String @map("stat1_value")
+  stat2Label    String @map("stat2_label")
+  stat2Value    String @map("stat2_value")
+  stat3Label    String @map("stat3_label")
+  stat3Value    String @map("stat3_value")
+
+  @@map("home_hero")
+}
+
+model HomeMarqueeItem {
+  id    Int    @id @default(autoincrement())
+  text  String
+  order Int
+
+  @@map("home_marquee_items")
+}
+
+model HomeExploreCard {
+  id           Int     @id @default(autoincrement())
+  href         String
+  title        String
+  body         String
+  sectionLabel String? @map("section_label")
+  order        Int
+
+  @@map("home_explore_cards")
+}
+
+model HomeWhereNext {
+  id       Int    @id @default(1)
+  eyebrow  String
+  headline String
+  body     String
+  btnLabel String @map("btn_label")
+  btnHref  String @map("btn_href")
+
+  @@map("home_where_next")
+}
+
+// ─── About ───────────────────────────────────────────────────────────────────
+
+model AboutHero {
+  id       Int    @id @default(1)
+  eyebrow  String
+  headline String
+  body     String
+
+  @@map("about_hero")
+}
+
+model AboutBuiltForItem {
+  id          Int    @id @default(autoincrement())
+  title       String
+  description String
+  order       Int
+
+  @@map("about_built_for_items")
+}
+
+model AboutWhereNext {
+  id        Int    @id @default(1)
+  eyebrow   String
+  headline  String
+  btn1Label String @map("btn1_label")
+  btn1Href  String @map("btn1_href")
+  btn2Label String @map("btn2_label")
+  btn2Href  String @map("btn2_href")
+
+  @@map("about_where_next")
+}
+
+// ─── Services ────────────────────────────────────────────────────────────────
+
+model ServicesPage {
+  id           Int    @id @default(1)
+  eyebrow      String
+  headline     String
+  body         String
+  stat1Value   String @map("stat1_value")
+  stat1Label   String @map("stat1_label")
+  stat2Value   String @map("stat2_value")
+  stat2Label   String @map("stat2_label")
+  stat3Value   String @map("stat3_value")
+  stat3Label   String @map("stat3_label")
+  stat4Value   String @map("stat4_value")
+  stat4Label   String @map("stat4_label")
+  ctaEyebrow   String @map("cta_eyebrow")
+  ctaHeadline  String @map("cta_headline")
+  ctaBody      String @map("cta_body")
+  ctaBtn1Label String @map("cta_btn1_label")
+  ctaBtn1Href  String @map("cta_btn1_href")
+  ctaEmailHref String @map("cta_email_href")
+
+  @@map("services_page")
+}
+
+model ServiceSection {
+  id        Int           @id @default(autoincrement())
+  tabId     String        @unique @map("tab_id")
+  order     Int
+  eyebrow   String
+  title     String
+  body      String
+  cardTitle String?       @map("card_title")
+  cardBody  String?       @map("card_body")
+  items     ServiceItem[]
+
+  @@map("service_sections")
+}
+
+model ServiceItem {
+  id         Int            @id @default(autoincrement())
+  sectionId  Int            @map("section_id")
+  groupLabel String?        @map("group_label")
+  title      String
+  body       String?
+  order      Int
+  section    ServiceSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  @@map("service_items")
+}
+
+// ─── Process ─────────────────────────────────────────────────────────────────
+
+model ProcessPage {
+  id               Int    @id @default(1)
+  eyebrow          String
+  headlineLine1    String @map("headline_line1")
+  headlineLine2    String @map("headline_line2")
+  headlineLine3    String @map("headline_line3")
+  body             String
+  whereNextEyebrow String @map("where_next_eyebrow")
+  whereNextTitle1  String @map("where_next_title1")
+  whereNextTitle2  String @map("where_next_title2")
+  whereNextBody    String @map("where_next_body")
+
+  @@map("process_page")
+}
+
+model ProcessStep {
+  id         Int    @id @default(autoincrement())
+  stepLabel  String @map("step_label")
+  stepNumber String @map("step_number")
+  title      String
+  body       String
+  order      Int
+
+  @@map("process_steps")
+}
+
+// ─── Industries ──────────────────────────────────────────────────────────────
+
+model IndustriesPage {
+  id                 Int    @id @default(1)
+  eyebrow            String
+  headlineLine1      String @map("headline_line1")
+  headlineLine2      String @map("headline_line2")
+  body               String
+  sectorsLabel       String @map("sectors_label")
+  sectorsDescription String @map("sectors_description")
+  sidebarLabel       String @map("sidebar_label")
+  sidebarCopy        String @map("sidebar_copy")
+  whereNextEyebrow   String @map("where_next_eyebrow")
+  whereNextTitle1    String @map("where_next_title1")
+  whereNextTitle2    String @map("where_next_title2")
+  whereNextBody      String @map("where_next_body")
+
+  @@map("industries_page")
+}
+
+model IndustrySector {
+  id      Int     @id @default(autoincrement())
+  name    String
+  visible Boolean @default(false)
+  order   Int
+
+  @@map("industry_sectors")
+}
+
+// ─── Story ───────────────────────────────────────────────────────────────────
+
+model StoryPage {
+  id            Int    @id @default(1)
+  eyebrow       String
+  headlineLine1 String @map("headline_line1")
+  headlineLine2 String @map("headline_line2")
+  headlineLine3 String @map("headline_line3")
+  body          String
+  dxNum1        String @map("dx_num1")
+  dxTitle1      String @map("dx_title1")
+  dxBody1       String @map("dx_body1")
+  dxNum2        String @map("dx_num2")
+  dxTitle2      String @map("dx_title2")
+  dxBody2       String @map("dx_body2")
+  dxTagline     String @map("dx_tagline")
+  manifestoItems Json  @map("manifesto_items")
+
+  @@map("story_page")
+}
+
+// ─── Contact ─────────────────────────────────────────────────────────────────
+
+model ContactPage {
+  id                 Int    @id @default(1)
+  eyebrow            String
+  headlineLine1      String @map("headline_line1")
+  headlineLine2      String @map("headline_line2")
+  body               String
+  emailLabel         String @map("email_label")
+  emailType          String @map("email_type")
+  email              String
+  emailCopy          String @map("email_copy")
+  whatToIncludeItems Json   @map("what_to_include_items")
+  expectationEyebrow String @map("expectation_eyebrow")
+  expectationText    String @map("expectation_text")
+
+  @@map("contact_page")
+}
+
+// ─── Footer ──────────────────────────────────────────────────────────────────
+
+model FooterSettings {
+  id        Int    @id @default(1)
+  tagline1  String
+  tagline2  String
+  copyright String
+  domain    String
+  allRights String @map("all_rights")
+
+  @@map("footer_settings")
+}
+
+model FooterNavItem {
+  id    Int    @id @default(autoincrement())
+  href  String
+  label String
+  group String
+  order Int
+
+  @@map("footer_nav_items")
+}
