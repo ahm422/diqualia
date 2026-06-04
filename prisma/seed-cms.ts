@@ -13,11 +13,11 @@ export async function seedCms(prisma: PrismaClient): Promise<void> {
   await prisma.navItem.deleteMany();
   await prisma.navItem.createMany({
     data: [
-      { href: "/about", label: "About", order: 0 },
-      { href: "/services", label: "Services", order: 1 },
-      { href: "/process", label: "How We Work", order: 2 },
-      { href: "/industries", label: "Industries", order: 3 },
-      { href: "/story", label: "Story", order: 4 },
+      { href: "/about", label: "About", order: 0, visible: true },
+      { href: "/services", label: "Services", order: 1, visible: true },
+      { href: "/process", label: "How We Work", order: 2, visible: true },
+      { href: "/industries", label: "Industries", order: 3, visible: true },
+      { href: "/story", label: "Story", order: 4, visible: true },
     ],
   });
   console.log("NavItem ready (5)");
@@ -25,8 +25,8 @@ export async function seedCms(prisma: PrismaClient): Promise<void> {
   // ─── CtaButton ────────────────────────────────────────────────────────────
   await prisma.ctaButton.upsert({
     where: { id: 1 },
-    create: { id: 1, label: "Talk to Us", href: "/contact" },
-    update: { label: "Talk to Us", href: "/contact" },
+    create: { id: 1, label: "Talk to Us", href: "/contact", visible: true },
+    update: { label: "Talk to Us", href: "/contact", visible: true },
   });
   console.log("CtaButton ready");
 

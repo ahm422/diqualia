@@ -1,42 +1,50 @@
 import Link from "next/link";
 
+import { prisma } from "@/lib/prisma";
+
 import { BrandLogo } from "./BrandLogo";
 
-export function SiteFooter() {
+export async function SiteFooter() {
+  const [settings, navItems, siteSettings] = await Promise.all([
+    prisma.footerSettings.findUnique({ where: { id: 1 } }),
+    prisma.footerNavItem.findMany({ orderBy: [{ group: "asc" }, { order: "asc" }] }),
+    prisma.siteSettings.findUnique({ where: { id: 1 } }),
+  ]);
+
+  const logoUrl = siteSettings?.logoUrl ?? null;
+
   return (
     <footer className="diq-footer">
       <div className="diq-fBrand">
-        <Link href="/" aria-label="Diqualia home" className="diq-fLogo">
+        <Link href="/" aria-label={`${siteSettings?.siteName ?? "DiQualia"} home`} className="diq-fLogo">
           <span className="diq-logo diq-logoLight">
-            <BrandLogo variant="black" width={132} decorative />
+            <BrandLogo variant="black" width={132} decorative src={logoUrl} />
           </span>
           <span className="diq-logo diq-logoDark">
-            <BrandLogo variant="white" width={132} decorative />
+            <BrandLogo variant="white" width={132} decorative src={logoUrl} />
           </span>
         </Link>
-        <div className="diq-fTag">Marketing Intelligence &amp; Research</div>
-        <div className="diq-fSub">Niche B2B · Data-Driven Strategy</div>
+        {settings?.tagline1 && <div className="diq-fTag">{settings.tagline1}</div>}
+        {settings?.tagline2 && <div className="diq-fSub">{settings.tagline2}</div>}
       </div>
 
       <nav className="diq-fLinks" aria-label="Footer">
-        <Link href="/about">About</Link>
-        <Link href="/services">Services</Link>
-        <Link href="/process">How We Work</Link>
-        <Link href="/industries">Industries</Link>
-        <Link href="/story">Story</Link>
-        <Link href="/contact">Contact</Link>
-        <Link href="/privacy">Privacy</Link>
-        <Link href="/terms">Terms</Link>
+        {navItems.map((item) => (
+          <Link key={item.id} href={item.href}>
+            {item.label}
+          </Link>
+        ))}
       </nav>
 
-      <div className="diq-fCopy">
-        © 2026 DiQualia
-        <br />
-        All rights reserved
-        <br />
-        diqualia.com
-      </div>
+      {settings && (
+        <div className="diq-fCopy">
+          {settings.copyright}
+          <br />
+          {settings.allRights}
+          <br />
+          {settings.domain}
+        </div>
+      )}
     </footer>
   );
 }
-
