@@ -2,9 +2,6 @@ import type { Metadata } from "next";
 import { DM_Mono, Jost, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { ThemeInit } from "./components/ThemeInit";
-import { SiteFooter } from "./components/SiteFooter";
-import { SiteHeader } from "./components/SiteHeader";
-import { ReferenceInteractions } from "./components/ReferenceInteractions";
 
 const jost = Jost({
   variable: "--font-sans",
@@ -51,16 +48,10 @@ export default function RootLayout({
       className={`${jost.variable} ${dmMono.variable} ${playfair.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <head>
-      </head>
+      <head />
       <body className="min-h-full flex flex-col">
         <ThemeInit />
-        <div className="diq-cur" id="cur" aria-hidden="true" />
-        <div className="diq-curR" id="cur-r" aria-hidden="true" />
-        <ReferenceInteractions />
-        <SiteHeader />
-        <main className="flex-1">{children}</main>
-        <SiteFooter />
+        {children}
       </body>
     </html>
   );
