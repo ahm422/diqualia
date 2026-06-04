@@ -97,8 +97,19 @@ model HomeExploreCard {
   body         String
   sectionLabel String? @map("section_label")
   order        Int
+  visible      Boolean @default(true)
 
   @@map("home_explore_cards")
+}
+
+model HomeExploreSection {
+  id            Int    @id @default(1)
+  eyebrow       String
+  headlineLine1 String @map("headline_line1")
+  headlineLine2 String @map("headline_line2")
+  body          String
+
+  @@map("home_explore_section")
 }
 
 model HomeWhereNext {
