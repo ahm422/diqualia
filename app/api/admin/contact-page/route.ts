@@ -1,24 +1,10 @@
 import "server-only";
 
 import { NextResponse } from "next/server";
-import { z } from "zod";
 
 import { requireAdminApi } from "@/lib/auth/require-admin-api";
 import { prisma } from "@/lib/prisma";
-
-const PatchSchema = z.object({
-  eyebrow:            z.string().min(1).max(200).optional(),
-  headlineLine1:      z.string().min(1).max(200).optional(),
-  headlineLine2:      z.string().min(1).max(200).optional(),
-  body:               z.string().min(1).max(2000).optional(),
-  emailLabel:         z.string().min(1).max(200).optional(),
-  emailType:          z.string().min(1).max(200).optional(),
-  email:              z.string().min(1).max(200).optional(),
-  emailCopy:          z.string().min(1).max(2000).optional(),
-  whatToIncludeItems: z.array(z.string().min(1).max(500)).optional(),
-  expectationEyebrow: z.string().min(1).max(200).optional(),
-  expectationText:    z.string().min(1).max(2000).optional(),
-});
+import { contactPagePatchSchema } from "@/lib/schemas/admin/contact";
 
 export async function GET() {
   const session = await requireAdminApi();
@@ -39,9 +25,12 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const parsed = PatchSchema.safeParse(body);
+  const parsed = contactPagePatchSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid input" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Validation failed", issues: parsed.error.flatten() },
+      { status: 400 },
+    );
   }
 
   const page = await prisma.contactPage.upsert({

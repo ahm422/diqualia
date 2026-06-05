@@ -1,5 +1,6 @@
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { prisma } from "@/lib/prisma";
+import { AdminPageHeader } from "@/components/admin";
 
 import { ServicesPageEditor } from "./ServicesPageEditor";
 
@@ -16,7 +17,7 @@ export default async function ServicesAdminPage() {
 
   return (
     <div>
-      <h1 className="font-sans text-2xl font-medium mb-8">Services Page</h1>
+      <AdminPageHeader title="Services Page" description="Page hero, service tabs, and items" />
       <ServicesPageEditor initialPage={page} initialSections={sections} />
     </div>
   );

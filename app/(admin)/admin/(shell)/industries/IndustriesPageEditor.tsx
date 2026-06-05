@@ -2,6 +2,15 @@
 
 import { useState } from "react";
 
+import {
+  AdminSection,
+  AdminField,
+  AdminInput,
+  AdminTextarea,
+  AdminSaveButton,
+  useAdminSave,
+} from "@/components/admin";
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type IndustriesPageData = {
@@ -18,83 +27,6 @@ type Props = {
   initialPage: IndustriesPageData;
   initialSectors: IndustrySector[];
 };
-
-// ─── Shared helpers ───────────────────────────────────────────────────────────
-
-type SaveState = "idle" | "saving" | "saved" | "error";
-
-function SaveStatus({ status }: { status: SaveState }) {
-  if (status === "idle") return null;
-  if (status === "saving") return <span className="text-xs text-[var(--diq_mid)]">Saving…</span>;
-  if (status === "saved") return <span className="text-xs text-green-500">Saved ✓</span>;
-  return <span className="text-xs text-red-400">Error — try again</span>;
-}
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="mb-10 rounded-xl border border-[var(--diq_border)] bg-[var(--diq_surface)] p-6">
-      <h2 className="mb-5 text-base font-medium text-foreground">{title}</h2>
-      {children}
-    </section>
-  );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="mb-4">
-      <label className="mb-1 block text-xs uppercase tracking-widest text-[var(--diq_mid)]">{label}</label>
-      {children}
-    </div>
-  );
-}
-
-function Input({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
-  return (
-    <input
-      type="text"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      className="w-full rounded border border-[var(--diq_border)] bg-[var(--diq_deep)] px-3 py-2 text-sm text-foreground placeholder:text-[var(--diq_mid)] focus:outline-none focus:ring-1 focus:ring-[var(--gold)]"
-    />
-  );
-}
-
-function Textarea({ value, onChange, placeholder, rows = 3 }: { value: string; onChange: (v: string) => void; placeholder?: string; rows?: number }) {
-  return (
-    <textarea
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      rows={rows}
-      className="w-full resize-y rounded border border-[var(--diq_border)] bg-[var(--diq_deep)] px-3 py-2 text-sm text-foreground placeholder:text-[var(--diq_mid)] focus:outline-none focus:ring-1 focus:ring-[var(--gold)]"
-    />
-  );
-}
-
-function SaveBtn({ onClick, status }: { onClick: () => void; status: SaveState }) {
-  return (
-    <div className="mt-4 flex items-center gap-3">
-      <button
-        onClick={onClick}
-        disabled={status === "saving"}
-        className="rounded border border-[var(--gold)] px-4 py-2 text-xs uppercase tracking-widest text-[var(--gold)] transition-colors hover:bg-[var(--gold)] hover:text-[var(--diq_ink)] disabled:opacity-50"
-      >
-        Save
-      </button>
-      <SaveStatus status={status} />
-    </div>
-  );
-}
-
-async function apiPatch(url: string, data: Record<string, unknown>) {
-  return fetch(url, {
-    method: "PATCH",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
-}
 
 // ─── Main editor ─────────────────────────────────────────────────────────────
 
@@ -141,25 +73,18 @@ function HeroTab({ initial }: { initial: IndustriesPageData }) {
   const [line1, setLine1] = useState(initial?.headlineLine1 ?? "");
   const [line2, setLine2] = useState(initial?.headlineLine2 ?? "");
   const [body, setBody] = useState(initial?.body ?? "");
-  const [status, setStatus] = useState<SaveState>("idle");
-
-  async function save() {
-    setStatus("saving");
-    const res = await apiPatch("/api/admin/industries-page", { eyebrow, headlineLine1: line1, headlineLine2: line2, body });
-    setStatus(res.ok ? "saved" : "error");
-    setTimeout(() => setStatus("idle"), 2500);
-  }
+  const { save, saving } = useAdminSave("/api/admin/industries-page");
 
   return (
-    <Section title="Hero">
-      <Field label="Eyebrow"><Input value={eyebrow} onChange={setEyebrow} placeholder="Industries" /></Field>
+    <AdminSection title="Hero">
+      <AdminField label="Eyebrow"><AdminInput value={eyebrow} onChange={setEyebrow} placeholder="Industries" /></AdminField>
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Headline Line 1"><Input value={line1} onChange={setLine1} placeholder="Deep expertise." /></Field>
-        <Field label="Headline Line 2 (italic)"><Input value={line2} onChange={setLine2} placeholder="Broad reach." /></Field>
+        <AdminField label="Headline Line 1"><AdminInput value={line1} onChange={setLine1} placeholder="Deep expertise." /></AdminField>
+        <AdminField label="Headline Line 2 (italic)"><AdminInput value={line2} onChange={setLine2} placeholder="Broad reach." /></AdminField>
       </div>
-      <Field label="Body"><Textarea value={body} onChange={setBody} rows={3} placeholder="We operate across…" /></Field>
-      <SaveBtn onClick={save} status={status} />
-    </Section>
+      <AdminField label="Body"><AdminTextarea value={body} onChange={setBody} rows={3} placeholder="We operate across…" /></AdminField>
+      <AdminSaveButton onClick={() => save({ eyebrow, headlineLine1: line1, headlineLine2: line2, body })} saving={saving} />
+    </AdminSection>
   );
 }
 
@@ -170,18 +95,11 @@ function SectorsTab({ initialPage, initialSectors }: { initialPage: IndustriesPa
   const [sectorsDescription, setSectorsDescription] = useState(initialPage?.sectorsDescription ?? "");
   const [sidebarLabel, setSidebarLabel] = useState(initialPage?.sidebarLabel ?? "");
   const [sidebarCopy, setSidebarCopy] = useState(initialPage?.sidebarCopy ?? "");
-  const [copyStatus, setCopyStatus] = useState<SaveState>("idle");
+  const { save: saveCopy, saving: copyStatus } = useAdminSave("/api/admin/industries-page");
 
   const [sectors, setSectors] = useState<IndustrySector[]>(initialSectors);
   const [newName, setNewName] = useState("");
   const [adding, setAdding] = useState(false);
-
-  async function saveCopy() {
-    setCopyStatus("saving");
-    const res = await apiPatch("/api/admin/industries-page", { sectorsLabel, sectorsDescription, sidebarLabel, sidebarCopy });
-    setCopyStatus(res.ok ? "saved" : "error");
-    setTimeout(() => setCopyStatus("idle"), 2500);
-  }
 
   async function patchSector(id: number, data: Partial<IndustrySector>) {
     const res = await fetch(`/api/admin/industry-sectors/${id}`, {
@@ -231,17 +149,17 @@ function SectorsTab({ initialPage, initialSectors }: { initialPage: IndustriesPa
 
   return (
     <div>
-      <Section title="Sectors copy">
+      <AdminSection title="Sectors copy">
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Sectors Label"><Input value={sectorsLabel} onChange={setSectorsLabel} placeholder="Sectors we actively research" /></Field>
-          <Field label="Sidebar Label"><Input value={sidebarLabel} onChange={setSidebarLabel} placeholder="Active research" /></Field>
-          <Field label="Sectors Description"><Textarea value={sectorsDescription} onChange={setSectorsDescription} rows={2} /></Field>
-          <Field label="Sidebar Copy"><Textarea value={sidebarCopy} onChange={setSidebarCopy} rows={2} /></Field>
+          <AdminField label="Sectors Label"><AdminInput value={sectorsLabel} onChange={setSectorsLabel} placeholder="Sectors we actively research" /></AdminField>
+          <AdminField label="Sidebar Label"><AdminInput value={sidebarLabel} onChange={setSidebarLabel} placeholder="Active research" /></AdminField>
+          <AdminField label="Sectors Description"><AdminTextarea value={sectorsDescription} onChange={setSectorsDescription} rows={2} /></AdminField>
+          <AdminField label="Sidebar Copy"><AdminTextarea value={sidebarCopy} onChange={setSidebarCopy} rows={2} /></AdminField>
         </div>
-        <SaveBtn onClick={saveCopy} status={copyStatus} />
-      </Section>
+        <AdminSaveButton onClick={() => saveCopy({ sectorsLabel, sectorsDescription, sidebarLabel, sidebarCopy })} saving={copyStatus} />
+      </AdminSection>
 
-      <Section title="Sector tags">
+      <AdminSection title="Sector tags">
         <div className="space-y-2">
           {sectors.map((sector, idx) => (
             <div key={sector.id} className="flex items-center gap-3 rounded border border-[var(--diq_border2)] p-3">
@@ -286,7 +204,7 @@ function SectorsTab({ initialPage, initialSectors }: { initialPage: IndustriesPa
             Add
           </button>
         </div>
-      </Section>
+      </AdminSection>
     </div>
   );
 }
@@ -298,26 +216,17 @@ function WhereNextTab({ initial }: { initial: IndustriesPageData }) {
   const [title1, setTitle1] = useState(initial?.whereNextTitle1 ?? "");
   const [title2, setTitle2] = useState(initial?.whereNextTitle2 ?? "");
   const [body, setBody] = useState(initial?.whereNextBody ?? "");
-  const [status, setStatus] = useState<SaveState>("idle");
-
-  async function save() {
-    setStatus("saving");
-    const res = await apiPatch("/api/admin/industries-page", {
-      whereNextEyebrow: eyebrow, whereNextTitle1: title1, whereNextTitle2: title2, whereNextBody: body,
-    });
-    setStatus(res.ok ? "saved" : "error");
-    setTimeout(() => setStatus("idle"), 2500);
-  }
+  const { save, saving } = useAdminSave("/api/admin/industries-page");
 
   return (
-    <Section title="Where Next CTA">
-      <Field label="Eyebrow"><Input value={eyebrow} onChange={setEyebrow} placeholder="Start here" /></Field>
+    <AdminSection title="Where Next CTA">
+      <AdminField label="Eyebrow"><AdminInput value={eyebrow} onChange={setEyebrow} placeholder="Start here" /></AdminField>
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Title Line 1"><Input value={title1} onChange={setTitle1} placeholder="Tell us your niche —" /></Field>
-        <Field label="Title Line 2"><Input value={title2} onChange={setTitle2} placeholder="we'll map your buyers." /></Field>
+        <AdminField label="Title Line 1"><AdminInput value={title1} onChange={setTitle1} placeholder="Tell us your niche —" /></AdminField>
+        <AdminField label="Title Line 2"><AdminInput value={title2} onChange={setTitle2} placeholder="we'll map your buyers." /></AdminField>
       </div>
-      <Field label="Body"><Textarea value={body} onChange={setBody} rows={3} /></Field>
-      <SaveBtn onClick={save} status={status} />
-    </Section>
+      <AdminField label="Body"><AdminTextarea value={body} onChange={setBody} rows={3} /></AdminField>
+      <AdminSaveButton onClick={() => save({ whereNextEyebrow: eyebrow, whereNextTitle1: title1, whereNextTitle2: title2, whereNextBody: body })} saving={saving} />
+    </AdminSection>
   );
 }

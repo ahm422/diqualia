@@ -2,6 +2,15 @@
 
 import { useState } from "react";
 
+import {
+  AdminSection,
+  AdminField,
+  AdminInput,
+  AdminTextarea,
+  AdminSaveButton,
+  useAdminSave,
+} from "@/components/admin";
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type ContactPageData = {
@@ -22,83 +31,6 @@ type ContactPageData = {
 type Props = {
   initialData: ContactPageData;
 };
-
-// ─── Shared helpers ───────────────────────────────────────────────────────────
-
-type SaveState = "idle" | "saving" | "saved" | "error";
-
-function SaveStatus({ status }: { status: SaveState }) {
-  if (status === "idle")    return null;
-  if (status === "saving")  return <span className="text-xs text-[var(--diq_mid)]">Saving…</span>;
-  if (status === "saved")   return <span className="text-xs text-green-500">Saved ✓</span>;
-  return <span className="text-xs text-red-400">Error — try again</span>;
-}
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="mb-10 rounded-xl border border-[var(--diq_border)] bg-[var(--diq_surface)] p-6">
-      <h2 className="mb-5 text-base font-medium text-foreground">{title}</h2>
-      {children}
-    </section>
-  );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="mb-4">
-      <label className="mb-1 block text-xs uppercase tracking-widest text-[var(--diq_mid)]">{label}</label>
-      {children}
-    </div>
-  );
-}
-
-function Input({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
-  return (
-    <input
-      type="text"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      className="w-full rounded border border-[var(--diq_border)] bg-[var(--diq_deep)] px-3 py-2 text-sm text-foreground placeholder:text-[var(--diq_mid)] focus:outline-none focus:ring-1 focus:ring-[var(--gold)]"
-    />
-  );
-}
-
-function Textarea({ value, onChange, placeholder, rows = 3 }: { value: string; onChange: (v: string) => void; placeholder?: string; rows?: number }) {
-  return (
-    <textarea
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      rows={rows}
-      className="w-full resize-y rounded border border-[var(--diq_border)] bg-[var(--diq_deep)] px-3 py-2 text-sm text-foreground placeholder:text-[var(--diq_mid)] focus:outline-none focus:ring-1 focus:ring-[var(--gold)]"
-    />
-  );
-}
-
-function SaveBtn({ onClick, status }: { onClick: () => void; status: SaveState }) {
-  return (
-    <div className="mt-4 flex items-center gap-3">
-      <button
-        onClick={onClick}
-        disabled={status === "saving"}
-        className="rounded border border-[var(--gold)] px-4 py-2 text-xs uppercase tracking-widest text-[var(--gold)] transition-colors hover:bg-[var(--gold)] hover:text-[var(--diq_ink)] disabled:opacity-50"
-      >
-        Save
-      </button>
-      <SaveStatus status={status} />
-    </div>
-  );
-}
-
-async function apiPatch(data: Record<string, unknown>) {
-  return fetch("/api/admin/contact-page", {
-    method: "PATCH",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
-}
 
 // ─── Main editor ─────────────────────────────────────────────────────────────
 
@@ -147,31 +79,24 @@ function HeroTab({ initial }: { initial: ContactPageData }) {
   const [headlineLine1, setHeadlineLine1] = useState(initial?.headlineLine1 ?? "");
   const [headlineLine2, setHeadlineLine2] = useState(initial?.headlineLine2 ?? "");
   const [body,          setBody]          = useState(initial?.body          ?? "");
-  const [status, setStatus] = useState<SaveState>("idle");
-
-  async function save() {
-    setStatus("saving");
-    const res = await apiPatch({ eyebrow, headlineLine1, headlineLine2, body });
-    setStatus(res.ok ? "saved" : "error");
-    setTimeout(() => setStatus("idle"), 2500);
-  }
+  const { save, saving } = useAdminSave("/api/admin/contact-page");
 
   return (
-    <Section title="Hero">
-      <Field label="Eyebrow">
-        <Input value={eyebrow} onChange={setEyebrow} placeholder="Contact" />
-      </Field>
-      <Field label="Headline line 1">
-        <Input value={headlineLine1} onChange={setHeadlineLine1} placeholder="Start with" />
-      </Field>
-      <Field label="Headline line 2 (italic primary)">
-        <Input value={headlineLine2} onChange={setHeadlineLine2} placeholder="intelligence." />
-      </Field>
-      <Field label="Body">
-        <Textarea value={body} onChange={setBody} rows={4} placeholder="Every engagement begins with…" />
-      </Field>
-      <SaveBtn onClick={save} status={status} />
-    </Section>
+    <AdminSection title="Hero">
+      <AdminField label="Eyebrow">
+        <AdminInput value={eyebrow} onChange={setEyebrow} placeholder="Contact" />
+      </AdminField>
+      <AdminField label="Headline line 1">
+        <AdminInput value={headlineLine1} onChange={setHeadlineLine1} placeholder="Start with" />
+      </AdminField>
+      <AdminField label="Headline line 2 (italic primary)">
+        <AdminInput value={headlineLine2} onChange={setHeadlineLine2} placeholder="intelligence." />
+      </AdminField>
+      <AdminField label="Body">
+        <AdminTextarea value={body} onChange={setBody} rows={4} placeholder="Every engagement begins with…" />
+      </AdminField>
+      <AdminSaveButton onClick={() => save({ eyebrow, headlineLine1, headlineLine2, body })} saving={saving} />
+    </AdminSection>
   );
 }
 
@@ -182,31 +107,24 @@ function EmailCardTab({ initial }: { initial: ContactPageData }) {
   const [emailType,  setEmailType]  = useState(initial?.emailType  ?? "");
   const [email,      setEmail]      = useState(initial?.email      ?? "");
   const [emailCopy,  setEmailCopy]  = useState(initial?.emailCopy  ?? "");
-  const [status, setStatus] = useState<SaveState>("idle");
-
-  async function save() {
-    setStatus("saving");
-    const res = await apiPatch({ emailLabel, emailType, email, emailCopy });
-    setStatus(res.ok ? "saved" : "error");
-    setTimeout(() => setStatus("idle"), 2500);
-  }
+  const { save, saving } = useAdminSave("/api/admin/contact-page");
 
   return (
-    <Section title="Email Card">
-      <Field label="Label (e.g. 'Primary contact')">
-        <Input value={emailLabel} onChange={setEmailLabel} placeholder="Primary contact" />
-      </Field>
-      <Field label="Type (e.g. 'Email')">
-        <Input value={emailType} onChange={setEmailType} placeholder="Email" />
-      </Field>
-      <Field label="Email address">
-        <Input value={email} onChange={setEmail} placeholder="intel@diqualia.com" />
-      </Field>
-      <Field label="Copy below email">
-        <Textarea value={emailCopy} onChange={setEmailCopy} rows={3} placeholder="Tell us your niche…" />
-      </Field>
-      <SaveBtn onClick={save} status={status} />
-    </Section>
+    <AdminSection title="Email Card">
+      <AdminField label="Label (e.g. 'Primary contact')">
+        <AdminInput value={emailLabel} onChange={setEmailLabel} placeholder="Primary contact" />
+      </AdminField>
+      <AdminField label="Type (e.g. 'Email')">
+        <AdminInput value={emailType} onChange={setEmailType} placeholder="Email" />
+      </AdminField>
+      <AdminField label="Email address">
+        <AdminInput value={email} onChange={setEmail} placeholder="intel@diqualia.com" />
+      </AdminField>
+      <AdminField label="Copy below email">
+        <AdminTextarea value={emailCopy} onChange={setEmailCopy} rows={3} placeholder="Tell us your niche…" />
+      </AdminField>
+      <AdminSaveButton onClick={() => save({ emailLabel, emailType, email, emailCopy })} saving={saving} />
+    </AdminSection>
   );
 }
 
@@ -218,7 +136,7 @@ function WhatToIncludeTab({ initial }: { initial: ContactPageData }) {
       ? (initial.whatToIncludeItems as string[]).filter(Boolean)
       : []
   );
-  const [status, setStatus] = useState<SaveState>("idle");
+  const { save, saving } = useAdminSave("/api/admin/contact-page");
 
   function update(idx: number, val: string) {
     setItems((prev) => prev.map((it, i) => (i === idx ? val : it)));
@@ -241,15 +159,8 @@ function WhatToIncludeTab({ initial }: { initial: ContactPageData }) {
     setItems((prev) => [...prev, ""]);
   }
 
-  async function save() {
-    setStatus("saving");
-    const res = await apiPatch({ whatToIncludeItems: items });
-    setStatus(res.ok ? "saved" : "error");
-    setTimeout(() => setStatus("idle"), 2500);
-  }
-
   return (
-    <Section title="What to Include Items">
+    <AdminSection title="What to Include Items">
       <div className="space-y-3">
         {items.map((item, idx) => (
           <div
@@ -289,8 +200,8 @@ function WhatToIncludeTab({ initial }: { initial: ContactPageData }) {
         + Add item
       </button>
 
-      <SaveBtn onClick={save} status={status} />
-    </Section>
+      <AdminSaveButton onClick={() => save({ whatToIncludeItems: items })} saving={saving} />
+    </AdminSection>
   );
 }
 
@@ -299,24 +210,17 @@ function WhatToIncludeTab({ initial }: { initial: ContactPageData }) {
 function ExpectationTab({ initial }: { initial: ContactPageData }) {
   const [expectationEyebrow, setExpectationEyebrow] = useState(initial?.expectationEyebrow ?? "");
   const [expectationText,    setExpectationText]    = useState(initial?.expectationText    ?? "");
-  const [status, setStatus] = useState<SaveState>("idle");
-
-  async function save() {
-    setStatus("saving");
-    const res = await apiPatch({ expectationEyebrow, expectationText });
-    setStatus(res.ok ? "saved" : "error");
-    setTimeout(() => setStatus("idle"), 2500);
-  }
+  const { save, saving } = useAdminSave("/api/admin/contact-page");
 
   return (
-    <Section title="Expectation">
-      <Field label="Eyebrow">
-        <Input value={expectationEyebrow} onChange={setExpectationEyebrow} placeholder="Expectation" />
-      </Field>
-      <Field label="Text (italic, displayed below eyebrow)">
-        <Textarea value={expectationText} onChange={setExpectationText} rows={3} placeholder="No noise. No pressure…" />
-      </Field>
-      <SaveBtn onClick={save} status={status} />
-    </Section>
+    <AdminSection title="Expectation">
+      <AdminField label="Eyebrow">
+        <AdminInput value={expectationEyebrow} onChange={setExpectationEyebrow} placeholder="Expectation" />
+      </AdminField>
+      <AdminField label="Text (italic, displayed below eyebrow)">
+        <AdminTextarea value={expectationText} onChange={setExpectationText} rows={3} placeholder="No noise. No pressure…" />
+      </AdminField>
+      <AdminSaveButton onClick={() => save({ expectationEyebrow, expectationText })} saving={saving} />
+    </AdminSection>
   );
 }

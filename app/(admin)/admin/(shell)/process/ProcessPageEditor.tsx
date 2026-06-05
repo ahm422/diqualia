@@ -2,6 +2,15 @@
 
 import { useState } from "react";
 
+import {
+  AdminSection,
+  AdminField,
+  AdminInput,
+  AdminTextarea,
+  AdminSaveButton,
+  useAdminSave,
+} from "@/components/admin";
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type ProcessPageData = {
@@ -30,83 +39,6 @@ type Props = {
   initialPage: ProcessPageData;
   initialSteps: ProcessStepData[];
 };
-
-// ─── Shared helpers ───────────────────────────────────────────────────────────
-
-type SaveState = "idle" | "saving" | "saved" | "error";
-
-function SaveStatus({ status }: { status: SaveState }) {
-  if (status === "idle") return null;
-  if (status === "saving") return <span className="text-xs text-[var(--diq_mid)]">Saving…</span>;
-  if (status === "saved") return <span className="text-xs text-green-500">Saved ✓</span>;
-  return <span className="text-xs text-red-400">Error — try again</span>;
-}
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="mb-10 rounded-xl border border-[var(--diq_border)] bg-[var(--diq_surface)] p-6">
-      <h2 className="mb-5 text-base font-medium text-foreground">{title}</h2>
-      {children}
-    </section>
-  );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="mb-4">
-      <label className="mb-1 block text-xs uppercase tracking-widest text-[var(--diq_mid)]">{label}</label>
-      {children}
-    </div>
-  );
-}
-
-function Input({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
-  return (
-    <input
-      type="text"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      className="w-full rounded border border-[var(--diq_border)] bg-[var(--diq_deep)] px-3 py-2 text-sm text-foreground placeholder:text-[var(--diq_mid)] focus:outline-none focus:ring-1 focus:ring-[var(--gold)]"
-    />
-  );
-}
-
-function Textarea({ value, onChange, placeholder, rows = 3 }: { value: string; onChange: (v: string) => void; placeholder?: string; rows?: number }) {
-  return (
-    <textarea
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      rows={rows}
-      className="w-full rounded border border-[var(--diq_border)] bg-[var(--diq_deep)] px-3 py-2 text-sm text-foreground placeholder:text-[var(--diq_mid)] focus:outline-none focus:ring-1 focus:ring-[var(--gold)] resize-y"
-    />
-  );
-}
-
-function SaveBtn({ onClick, status }: { onClick: () => void; status: SaveState }) {
-  return (
-    <div className="mt-4 flex items-center gap-3">
-      <button
-        onClick={onClick}
-        disabled={status === "saving"}
-        className="rounded border border-[var(--gold)] px-4 py-2 text-xs uppercase tracking-widest text-[var(--gold)] transition-colors hover:bg-[var(--gold)] hover:text-[var(--diq_ink)] disabled:opacity-50"
-      >
-        Save
-      </button>
-      <SaveStatus status={status} />
-    </div>
-  );
-}
-
-async function apiPatch(url: string, data: Record<string, unknown>) {
-  return fetch(url, {
-    method: "PATCH",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
-}
 
 // ─── Main editor ─────────────────────────────────────────────────────────────
 
@@ -154,30 +86,17 @@ function HeroSection({ initial }: { initial: ProcessPageData }) {
   const [headlineLine2, setHeadlineLine2] = useState(initial?.headlineLine2 ?? "");
   const [headlineLine3, setHeadlineLine3] = useState(initial?.headlineLine3 ?? "");
   const [body, setBody] = useState(initial?.body ?? "");
-  const [status, setStatus] = useState<SaveState>("idle");
-
-  async function save() {
-    setStatus("saving");
-    const res = await apiPatch("/api/admin/process-page", {
-      eyebrow,
-      headlineLine1,
-      headlineLine2,
-      headlineLine3,
-      body,
-    });
-    setStatus(res.ok ? "saved" : "error");
-    setTimeout(() => setStatus("idle"), 2500);
-  }
+  const { save, saving } = useAdminSave("/api/admin/process-page");
 
   return (
-    <Section title="Hero">
-      <Field label="Eyebrow"><Input value={eyebrow} onChange={setEyebrow} placeholder="How We Work" /></Field>
-      <Field label="Headline line 1"><Input value={headlineLine1} onChange={setHeadlineLine1} placeholder="Research." /></Field>
-      <Field label="Headline line 2 (italic)"><Input value={headlineLine2} onChange={setHeadlineLine2} placeholder="Precision." /></Field>
-      <Field label="Headline line 3"><Input value={headlineLine3} onChange={setHeadlineLine3} placeholder="Results." /></Field>
-      <Field label="Body"><Textarea value={body} onChange={setBody} rows={4} placeholder="We don't start with tactics…" /></Field>
-      <SaveBtn onClick={save} status={status} />
-    </Section>
+    <AdminSection title="Hero">
+      <AdminField label="Eyebrow"><AdminInput value={eyebrow} onChange={setEyebrow} placeholder="How We Work" /></AdminField>
+      <AdminField label="Headline line 1"><AdminInput value={headlineLine1} onChange={setHeadlineLine1} placeholder="Research." /></AdminField>
+      <AdminField label="Headline line 2 (italic)"><AdminInput value={headlineLine2} onChange={setHeadlineLine2} placeholder="Precision." /></AdminField>
+      <AdminField label="Headline line 3"><AdminInput value={headlineLine3} onChange={setHeadlineLine3} placeholder="Results." /></AdminField>
+      <AdminField label="Body"><AdminTextarea value={body} onChange={setBody} rows={4} placeholder="We don't start with tactics…" /></AdminField>
+      <AdminSaveButton onClick={() => save({ eyebrow, headlineLine1, headlineLine2, headlineLine3, body })} saving={saving} />
+    </AdminSection>
   );
 }
 
@@ -249,7 +168,7 @@ function StepsSection({ initial }: { initial: ProcessStepData[] }) {
   }
 
   return (
-    <Section title="Process Steps">
+    <AdminSection title="Process Steps">
       <div className="space-y-4">
         {steps.map((step, idx) => (
           <div key={step.id} className="rounded border border-[var(--diq_border2)] p-4">
@@ -348,7 +267,7 @@ function StepsSection({ initial }: { initial: ProcessStepData[] }) {
           Add Step
         </button>
       </div>
-    </Section>
+    </AdminSection>
   );
 }
 
@@ -359,27 +278,15 @@ function WhereNextSection({ initial }: { initial: ProcessPageData }) {
   const [whereNextTitle1, setWhereNextTitle1] = useState(initial?.whereNextTitle1 ?? "");
   const [whereNextTitle2, setWhereNextTitle2] = useState(initial?.whereNextTitle2 ?? "");
   const [whereNextBody, setWhereNextBody] = useState(initial?.whereNextBody ?? "");
-  const [status, setStatus] = useState<SaveState>("idle");
-
-  async function save() {
-    setStatus("saving");
-    const res = await apiPatch("/api/admin/process-page", {
-      whereNextEyebrow,
-      whereNextTitle1,
-      whereNextTitle2,
-      whereNextBody,
-    });
-    setStatus(res.ok ? "saved" : "error");
-    setTimeout(() => setStatus("idle"), 2500);
-  }
+  const { save, saving } = useAdminSave("/api/admin/process-page");
 
   return (
-    <Section title="Where Next">
-      <Field label="Eyebrow"><Input value={whereNextEyebrow} onChange={setWhereNextEyebrow} placeholder="Next" /></Field>
-      <Field label="Title line 1"><Input value={whereNextTitle1} onChange={setWhereNextTitle1} placeholder="See what this looks like" /></Field>
-      <Field label="Title line 2"><Input value={whereNextTitle2} onChange={setWhereNextTitle2} placeholder="in your market." /></Field>
-      <Field label="Body"><Textarea value={whereNextBody} onChange={setWhereNextBody} rows={4} placeholder="We'll run a short discovery call…" /></Field>
-      <SaveBtn onClick={save} status={status} />
-    </Section>
+    <AdminSection title="Where Next">
+      <AdminField label="Eyebrow"><AdminInput value={whereNextEyebrow} onChange={setWhereNextEyebrow} placeholder="Next" /></AdminField>
+      <AdminField label="Title line 1"><AdminInput value={whereNextTitle1} onChange={setWhereNextTitle1} placeholder="See what this looks like" /></AdminField>
+      <AdminField label="Title line 2"><AdminInput value={whereNextTitle2} onChange={setWhereNextTitle2} placeholder="in your market." /></AdminField>
+      <AdminField label="Body"><AdminTextarea value={whereNextBody} onChange={setWhereNextBody} rows={4} placeholder="We'll run a short discovery call…" /></AdminField>
+      <AdminSaveButton onClick={() => save({ whereNextEyebrow, whereNextTitle1, whereNextTitle2, whereNextBody })} saving={saving} />
+    </AdminSection>
   );
 }

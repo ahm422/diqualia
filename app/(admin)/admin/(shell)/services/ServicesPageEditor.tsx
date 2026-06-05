@@ -1,6 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
+
+import {
+  AdminSection,
+  AdminField,
+  AdminInput,
+  AdminTextarea,
+  AdminSaveButton,
+  useAdminSave,
+} from "@/components/admin";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -32,83 +42,6 @@ type Props = {
   initialSections: ServiceSection[];
 };
 
-// ─── Shared helpers ───────────────────────────────────────────────────────────
-
-type SaveState = "idle" | "saving" | "saved" | "error";
-
-function SaveStatus({ status }: { status: SaveState }) {
-  if (status === "idle") return null;
-  if (status === "saving") return <span className="text-xs text-[var(--diq_mid)]">Saving…</span>;
-  if (status === "saved") return <span className="text-xs text-green-500">Saved ✓</span>;
-  return <span className="text-xs text-red-400">Error — try again</span>;
-}
-
-function AdminSection({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="mb-6 rounded-xl border border-[var(--diq_border)] bg-[var(--diq_surface)] p-6">
-      <h2 className="mb-5 text-base font-medium text-foreground">{title}</h2>
-      {children}
-    </section>
-  );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="mb-4">
-      <label className="mb-1 block text-xs uppercase tracking-widest text-[var(--diq_mid)]">{label}</label>
-      {children}
-    </div>
-  );
-}
-
-function Input({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
-  return (
-    <input
-      type="text"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      className="w-full rounded border border-[var(--diq_border)] bg-[var(--diq_deep)] px-3 py-2 text-sm text-foreground placeholder:text-[var(--diq_mid)] focus:outline-none focus:ring-1 focus:ring-[var(--gold)]"
-    />
-  );
-}
-
-function Textarea({ value, onChange, placeholder, rows = 3 }: { value: string; onChange: (v: string) => void; placeholder?: string; rows?: number }) {
-  return (
-    <textarea
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      rows={rows}
-      className="w-full resize-y rounded border border-[var(--diq_border)] bg-[var(--diq_deep)] px-3 py-2 text-sm text-foreground placeholder:text-[var(--diq_mid)] focus:outline-none focus:ring-1 focus:ring-[var(--gold)]"
-    />
-  );
-}
-
-function SaveBtn({ onClick, status }: { onClick: () => void; status: SaveState }) {
-  return (
-    <div className="mt-4 flex items-center gap-3">
-      <button
-        onClick={onClick}
-        disabled={status === "saving"}
-        className="rounded border border-[var(--gold)] px-4 py-2 text-xs uppercase tracking-widest text-[var(--gold)] transition-colors hover:bg-[var(--gold)] hover:text-[var(--diq_ink)] disabled:opacity-50"
-      >
-        Save
-      </button>
-      <SaveStatus status={status} />
-    </div>
-  );
-}
-
-async function apiPatch(url: string, data: Record<string, unknown>) {
-  return fetch(url, {
-    method: "PATCH",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
-}
-
 // ─── Main editor ─────────────────────────────────────────────────────────────
 
 export function ServicesPageEditor({ initialPage, initialSections }: Props) {
@@ -137,21 +70,14 @@ function HeroBlock({ initial }: { initial: ServicesPageData }) {
     stat4Value: initial?.stat4Value ?? "",
     stat4Label: initial?.stat4Label ?? "",
   });
-  const [status, setStatus] = useState<SaveState>("idle");
   const set = (key: keyof typeof f) => (v: string) => setF((p) => ({ ...p, [key]: v }));
-
-  async function save() {
-    setStatus("saving");
-    const res = await apiPatch("/api/admin/services-page", f);
-    setStatus(res.ok ? "saved" : "error");
-    setTimeout(() => setStatus("idle"), 2500);
-  }
+  const { save, saving } = useAdminSave("/api/admin/services-page");
 
   return (
     <AdminSection title="Hero">
-      <Field label="Eyebrow"><Input value={f.eyebrow} onChange={set("eyebrow")} placeholder="Our Intelligence Services" /></Field>
-      <Field label="Headline"><Input value={f.headline} onChange={set("headline")} placeholder="What We Do for You." /></Field>
-      <Field label="Body"><Textarea value={f.body} onChange={set("body")} rows={3} /></Field>
+      <AdminField label="Eyebrow"><AdminInput value={f.eyebrow} onChange={set("eyebrow")} placeholder="Our Intelligence Services" /></AdminField>
+      <AdminField label="Headline"><AdminInput value={f.headline} onChange={set("headline")} placeholder="What We Do for You." /></AdminField>
+      <AdminField label="Body"><AdminTextarea value={f.body} onChange={set("body")} rows={3} /></AdminField>
       <div className="mt-2 mb-2 text-xs uppercase tracking-widest text-[var(--diq_mid)]">Stats</div>
       <div className="grid gap-4 sm:grid-cols-2">
         {([
@@ -161,12 +87,12 @@ function HeroBlock({ initial }: { initial: ServicesPageData }) {
           ["stat4Value", "stat4Label", "~21d", "First Qualified Lead"],
         ] as const).map(([vk, lk, vp, lp]) => (
           <div key={vk} className="rounded border border-[var(--diq_border2)] p-3">
-            <Field label="Value"><Input value={f[vk]} onChange={set(vk)} placeholder={vp} /></Field>
-            <Field label="Label"><Input value={f[lk]} onChange={set(lk)} placeholder={lp} /></Field>
+            <AdminField label="Value"><AdminInput value={f[vk]} onChange={set(vk)} placeholder={vp} /></AdminField>
+            <AdminField label="Label"><AdminInput value={f[lk]} onChange={set(lk)} placeholder={lp} /></AdminField>
           </div>
         ))}
       </div>
-      <SaveBtn onClick={save} status={status} />
+      <AdminSaveButton onClick={() => save(f)} saving={saving} />
     </AdminSection>
   );
 }
@@ -182,27 +108,20 @@ function CtaBlock({ initial }: { initial: ServicesPageData }) {
     ctaBtn1Href: initial?.ctaBtn1Href ?? "",
     ctaEmailHref: initial?.ctaEmailHref ?? "",
   });
-  const [status, setStatus] = useState<SaveState>("idle");
   const set = (key: keyof typeof f) => (v: string) => setF((p) => ({ ...p, [key]: v }));
-
-  async function save() {
-    setStatus("saving");
-    const res = await apiPatch("/api/admin/services-page", f);
-    setStatus(res.ok ? "saved" : "error");
-    setTimeout(() => setStatus("idle"), 2500);
-  }
+  const { save, saving } = useAdminSave("/api/admin/services-page");
 
   return (
     <AdminSection title="CTA Strip">
-      <Field label="Eyebrow"><Input value={f.ctaEyebrow} onChange={set("ctaEyebrow")} placeholder="Begin With Intelligence" /></Field>
-      <Field label="Headline"><Input value={f.ctaHeadline} onChange={set("ctaHeadline")} placeholder="Ready to Start?" /></Field>
-      <Field label="Body"><Textarea value={f.ctaBody} onChange={set("ctaBody")} rows={2} /></Field>
+      <AdminField label="Eyebrow"><AdminInput value={f.ctaEyebrow} onChange={set("ctaEyebrow")} placeholder="Begin With Intelligence" /></AdminField>
+      <AdminField label="Headline"><AdminInput value={f.ctaHeadline} onChange={set("ctaHeadline")} placeholder="Ready to Start?" /></AdminField>
+      <AdminField label="Body"><AdminTextarea value={f.ctaBody} onChange={set("ctaBody")} rows={2} /></AdminField>
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Button Label"><Input value={f.ctaBtn1Label} onChange={set("ctaBtn1Label")} placeholder="Contact" /></Field>
-        <Field label="Button Href"><Input value={f.ctaBtn1Href} onChange={set("ctaBtn1Href")} placeholder="/contact" /></Field>
-        <Field label="Email (mailto)"><Input value={f.ctaEmailHref} onChange={set("ctaEmailHref")} placeholder="intel@diqualia.com" /></Field>
+        <AdminField label="Button Label"><AdminInput value={f.ctaBtn1Label} onChange={set("ctaBtn1Label")} placeholder="Contact" /></AdminField>
+        <AdminField label="Button Href"><AdminInput value={f.ctaBtn1Href} onChange={set("ctaBtn1Href")} placeholder="/contact" /></AdminField>
+        <AdminField label="Email (mailto)"><AdminInput value={f.ctaEmailHref} onChange={set("ctaEmailHref")} placeholder="intel@diqualia.com" /></AdminField>
       </div>
-      <SaveBtn onClick={save} status={status} />
+      <AdminSaveButton onClick={() => save(f)} saving={saving} />
     </AdminSection>
   );
 }
@@ -297,10 +216,10 @@ function SectionsBlock({ initial }: { initial: ServiceSection[] }) {
       <div className="mt-6 border-t border-[var(--diq_border2)] pt-5">
         <div className="text-xs uppercase tracking-widest text-[var(--diq_mid)] mb-3">Add section</div>
         <div className="grid gap-3 sm:grid-cols-2">
-          <Field label="Tab ID (unique, e.g. s07)"><Input value={newTabId} onChange={setNewTabId} placeholder="s07" /></Field>
-          <Field label="Eyebrow"><Input value={newEyebrow} onChange={setNewEyebrow} placeholder="Intelligence Service Seven" /></Field>
-          <Field label="Title"><Input value={newTitle} onChange={setNewTitle} placeholder="New Service Title" /></Field>
-          <Field label="Body"><Textarea value={newBody} onChange={setNewBody} rows={2} placeholder="Service description…" /></Field>
+          <AdminField label="Tab ID (unique, e.g. s07)"><AdminInput value={newTabId} onChange={setNewTabId} placeholder="s07" /></AdminField>
+          <AdminField label="Eyebrow"><AdminInput value={newEyebrow} onChange={setNewEyebrow} placeholder="Intelligence Service Seven" /></AdminField>
+          <AdminField label="Title"><AdminInput value={newTitle} onChange={setNewTitle} placeholder="New Service Title" /></AdminField>
+          <AdminField label="Body"><AdminTextarea value={newBody} onChange={setNewBody} rows={2} placeholder="Service description…" /></AdminField>
         </div>
         <button
           onClick={addSection}
@@ -329,16 +248,17 @@ type SectionPanelProps = {
 };
 
 function SectionPanel({ section, idx, total, isOpen, onToggle, onPatch, onMove, onDelete, onItemsChange }: SectionPanelProps) {
-  const [sectionStatus, setSectionStatus] = useState<SaveState>("idle");
+  const [saving, setSaving] = useState(false);
 
   async function saveSection() {
-    setSectionStatus("saving");
+    setSaving(true);
     const inputs = document.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(`[data-section-field="${section.id}"]`);
     const data: Record<string, unknown> = {};
     inputs.forEach((el) => { data[el.name] = el.value || null; });
     const res = await onPatch(data);
-    setSectionStatus(res.ok ? "saved" : "error");
-    setTimeout(() => setSectionStatus("idle"), 2500);
+    if (res.ok) toast.success("Saved");
+    else toast.error("Save failed — try again");
+    setSaving(false);
   }
 
   return (
@@ -396,12 +316,11 @@ function SectionPanel({ section, idx, total, isOpen, onToggle, onPatch, onMove, 
           <div className="flex items-center gap-3 mb-6">
             <button
               onClick={saveSection}
-              disabled={sectionStatus === "saving"}
+              disabled={saving}
               className="rounded border border-[var(--gold)] px-3 py-1.5 text-xs uppercase tracking-widest text-[var(--gold)] hover:bg-[var(--gold)] hover:text-[var(--diq_ink)] disabled:opacity-50"
             >
-              Save Section
+              {saving ? "Saving…" : "Save Section"}
             </button>
-            <SaveStatus status={sectionStatus} />
           </div>
 
           {/* Items */}

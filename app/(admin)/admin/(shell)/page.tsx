@@ -22,7 +22,7 @@ export default async function AdminDashboard() {
           ["Home", "/admin/home"],
           ["About", "/admin/about"],
           ["Services", "/admin/services"],
-          ["Process", "/admin/process"],
+          ["How We Work", "/admin/process"],
           ["Industries", "/admin/industries"],
           ["Story", "/admin/story"],
           ["Contact", "/admin/contact"],

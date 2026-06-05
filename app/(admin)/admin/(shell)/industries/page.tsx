@@ -1,5 +1,6 @@
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { prisma } from "@/lib/prisma";
+import { AdminPageHeader } from "@/components/admin";
 
 import { IndustriesPageEditor } from "./IndustriesPageEditor";
 
@@ -13,7 +14,7 @@ export default async function IndustriesAdminPage() {
 
   return (
     <div>
-      <h1 className="font-sans text-2xl font-medium mb-8">Industries Page</h1>
+      <AdminPageHeader title="Industries Page" description="Hero, sector tags, and Where Next section" />
       <IndustriesPageEditor initialPage={page} initialSectors={sectors} />
     </div>
   );

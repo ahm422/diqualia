@@ -1,5 +1,6 @@
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { prisma } from "@/lib/prisma";
+import { AdminPageHeader } from "@/components/admin";
 
 import { SiteSettingsEditor } from "./SiteSettingsEditor";
 
@@ -16,7 +17,7 @@ export default async function SiteSettingsPage() {
 
   return (
     <div>
-      <h1 className="font-sans text-2xl font-medium mb-8">Site Settings</h1>
+      <AdminPageHeader title="Site Settings" description="Logo, navigation, CTA button, and footer" />
       <SiteSettingsEditor
         initialSiteSettings={siteSettings}
         initialNavItems={navItems}

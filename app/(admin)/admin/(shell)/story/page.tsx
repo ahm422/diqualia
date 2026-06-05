@@ -1,5 +1,6 @@
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { prisma } from "@/lib/prisma";
+import { AdminPageHeader } from "@/components/admin";
 
 import { StoryPageEditor } from "./StoryPageEditor";
 
@@ -10,7 +11,10 @@ export default async function StoryAdminPage() {
 
   return (
     <div>
-      <h1 className="font-sans text-2xl font-medium mb-8">Story</h1>
+      <AdminPageHeader
+        title="Story Page"
+        description="Hero, Double Experience cards, and manifesto"
+      />
       <StoryPageEditor initialData={storyPage} />
     </div>
   );
