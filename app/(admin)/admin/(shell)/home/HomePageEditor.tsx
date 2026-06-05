@@ -2,6 +2,15 @@
 
 import { useState } from "react";
 
+import {
+  AdminSection,
+  AdminField,
+  AdminInput,
+  AdminTextarea,
+  AdminSaveButton,
+  useAdminSave,
+} from "@/components/admin";
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type HomeHero = {
@@ -26,83 +35,6 @@ type Props = {
   initialExploreCards: ExploreCard[];
   initialWhereNext: WhereNext;
 };
-
-// ─── Shared helpers ───────────────────────────────────────────────────────────
-
-type SaveState = "idle" | "saving" | "saved" | "error";
-
-function SaveStatus({ status }: { status: SaveState }) {
-  if (status === "idle") return null;
-  if (status === "saving") return <span className="text-xs text-[var(--diq_mid)]">Saving…</span>;
-  if (status === "saved") return <span className="text-xs text-green-500">Saved ✓</span>;
-  return <span className="text-xs text-red-400">Error — try again</span>;
-}
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="mb-10 rounded-xl border border-[var(--diq_border)] bg-[var(--diq_surface)] p-6">
-      <h2 className="mb-5 text-base font-medium text-foreground">{title}</h2>
-      {children}
-    </section>
-  );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="mb-4">
-      <label className="mb-1 block text-xs uppercase tracking-widest text-[var(--diq_mid)]">{label}</label>
-      {children}
-    </div>
-  );
-}
-
-function Input({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
-  return (
-    <input
-      type="text"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      className="w-full rounded border border-[var(--diq_border)] bg-[var(--diq_deep)] px-3 py-2 text-sm text-foreground placeholder:text-[var(--diq_mid)] focus:outline-none focus:ring-1 focus:ring-[var(--gold)]"
-    />
-  );
-}
-
-function Textarea({ value, onChange, placeholder, rows = 3 }: { value: string; onChange: (v: string) => void; placeholder?: string; rows?: number }) {
-  return (
-    <textarea
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      rows={rows}
-      className="w-full rounded border border-[var(--diq_border)] bg-[var(--diq_deep)] px-3 py-2 text-sm text-foreground placeholder:text-[var(--diq_mid)] focus:outline-none focus:ring-1 focus:ring-[var(--gold)] resize-y"
-    />
-  );
-}
-
-function SaveBtn({ onClick, status }: { onClick: () => void; status: SaveState }) {
-  return (
-    <div className="mt-4 flex items-center gap-3">
-      <button
-        onClick={onClick}
-        disabled={status === "saving"}
-        className="rounded border border-[var(--gold)] px-4 py-2 text-xs uppercase tracking-widest text-[var(--gold)] transition-colors hover:bg-[var(--gold)] hover:text-[var(--diq_ink)] disabled:opacity-50"
-      >
-        Save
-      </button>
-      <SaveStatus status={status} />
-    </div>
-  );
-}
-
-async function apiPatch(url: string, data: Record<string, unknown>) {
-  return fetch(url, {
-    method: "PATCH",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
-}
 
 // ─── Main editor ─────────────────────────────────────────────────────────────
 
@@ -138,45 +70,37 @@ function HeroSection({ initial }: { initial: HomeHero }) {
     stat3Label: initial?.stat3Label ?? "",
     stat3Value: initial?.stat3Value ?? "",
   });
-  const [status, setStatus] = useState<SaveState>("idle");
-
   const set = (key: keyof typeof f) => (v: string) => setF((p) => ({ ...p, [key]: v }));
-
-  async function save() {
-    setStatus("saving");
-    const res = await apiPatch("/api/admin/home-hero", f);
-    setStatus(res.ok ? "saved" : "error");
-    setTimeout(() => setStatus("idle"), 2500);
-  }
+  const { save, saving } = useAdminSave("/api/admin/home-hero");
 
   return (
-    <Section title="Hero">
-      <Field label="Eyebrow"><Input value={f.eyebrow} onChange={set("eyebrow")} placeholder="Marketing Intelligence & Research" /></Field>
+    <AdminSection title="Hero">
+      <AdminField label="Eyebrow"><AdminInput value={f.eyebrow} onChange={set("eyebrow")} placeholder="Marketing Intelligence & Research" /></AdminField>
       <div className="grid gap-4 sm:grid-cols-3">
-        <Field label="Headline Line 1"><Input value={f.headlineLine1} onChange={set("headlineLine1")} placeholder="Intelligence" /></Field>
-        <Field label="Headline Line 2"><Input value={f.headlineLine2} onChange={set("headlineLine2")} placeholder="That Moves" /></Field>
-        <Field label="Headline Line 3"><Input value={f.headlineLine3} onChange={set("headlineLine3")} placeholder="Markets." /></Field>
+        <AdminField label="Headline Line 1"><AdminInput value={f.headlineLine1} onChange={set("headlineLine1")} placeholder="Intelligence" /></AdminField>
+        <AdminField label="Headline Line 2"><AdminInput value={f.headlineLine2} onChange={set("headlineLine2")} placeholder="That Moves" /></AdminField>
+        <AdminField label="Headline Line 3"><AdminInput value={f.headlineLine3} onChange={set("headlineLine3")} placeholder="Markets." /></AdminField>
       </div>
-      <Field label="Body">
-        <Textarea value={f.body} onChange={set("body")} rows={3} placeholder="DiQualia is…" />
-      </Field>
+      <AdminField label="Body">
+        <AdminTextarea value={f.body} onChange={set("body")} rows={3} placeholder="DiQualia is…" />
+      </AdminField>
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Button 1 Label"><Input value={f.btn1Label} onChange={set("btn1Label")} placeholder="Our Services" /></Field>
-        <Field label="Button 1 Href"><Input value={f.btn1Href} onChange={set("btn1Href")} placeholder="/services" /></Field>
-        <Field label="Button 2 Label"><Input value={f.btn2Label} onChange={set("btn2Label")} placeholder="Talk to Us" /></Field>
-        <Field label="Button 2 Href"><Input value={f.btn2Href} onChange={set("btn2Href")} placeholder="/contact" /></Field>
+        <AdminField label="Button 1 Label"><AdminInput value={f.btn1Label} onChange={set("btn1Label")} placeholder="Our Services" /></AdminField>
+        <AdminField label="Button 1 Href"><AdminInput value={f.btn1Href} onChange={set("btn1Href")} placeholder="/services" /></AdminField>
+        <AdminField label="Button 2 Label"><AdminInput value={f.btn2Label} onChange={set("btn2Label")} placeholder="Talk to Us" /></AdminField>
+        <AdminField label="Button 2 Href"><AdminInput value={f.btn2Href} onChange={set("btn2Href")} placeholder="/contact" /></AdminField>
       </div>
       <div className="mt-2 mb-2 text-xs uppercase tracking-widest text-[var(--diq_mid)]">Stats</div>
       <div className="grid gap-4 sm:grid-cols-3">
         {([["stat1Label", "stat1Value", "Label 1", "Value 1"], ["stat2Label", "stat2Value", "Label 2", "Value 2"], ["stat3Label", "stat3Value", "Label 3", "Value 3"]] as const).map(([lk, vk, lp, vp]) => (
           <div key={lk} className="rounded border border-[var(--diq_border2)] p-3">
-            <Field label="Label"><Input value={f[lk]} onChange={set(lk)} placeholder={lp} /></Field>
-            <Field label="Value"><Input value={f[vk]} onChange={set(vk)} placeholder={vp} /></Field>
+            <AdminField label="Label"><AdminInput value={f[lk]} onChange={set(lk)} placeholder={lp} /></AdminField>
+            <AdminField label="Value"><AdminInput value={f[vk]} onChange={set(vk)} placeholder={vp} /></AdminField>
           </div>
         ))}
       </div>
-      <SaveBtn onClick={save} status={status} />
-    </Section>
+      <AdminSaveButton onClick={() => save(f)} saving={saving} />
+    </AdminSection>
   );
 }
 
@@ -230,7 +154,7 @@ function MarqueeSection({ initial }: { initial: MarqueeItem[] }) {
   }
 
   return (
-    <Section title="Marquee Ticker">
+    <AdminSection title="Marquee Ticker">
       <p className="mb-4 text-xs text-[var(--diq_mid)]">Format: &quot;Label — Sublabel&quot; (bold/rest split on &quot; — &quot;)</p>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
@@ -276,7 +200,7 @@ function MarqueeSection({ initial }: { initial: MarqueeItem[] }) {
           Add
         </button>
       </div>
-    </Section>
+    </AdminSection>
   );
 }
 
@@ -287,25 +211,18 @@ function ExploreSectionHeader({ initial }: { initial: ExploreSection }) {
   const [line1, setLine1] = useState(initial?.headlineLine1 ?? "");
   const [line2, setLine2] = useState(initial?.headlineLine2 ?? "");
   const [body, setBody] = useState(initial?.body ?? "");
-  const [status, setStatus] = useState<SaveState>("idle");
-
-  async function save() {
-    setStatus("saving");
-    const res = await apiPatch("/api/admin/home-explore-section", { eyebrow, headlineLine1: line1, headlineLine2: line2, body });
-    setStatus(res.ok ? "saved" : "error");
-    setTimeout(() => setStatus("idle"), 2500);
-  }
+  const { save, saving } = useAdminSave("/api/admin/home-explore-section");
 
   return (
-    <Section title="Explore Section Header">
-      <Field label="Eyebrow"><Input value={eyebrow} onChange={setEyebrow} placeholder="Explore" /></Field>
+    <AdminSection title="Explore Section Header">
+      <AdminField label="Eyebrow"><AdminInput value={eyebrow} onChange={setEyebrow} placeholder="Explore" /></AdminField>
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Headline Line 1"><Input value={line1} onChange={setLine1} placeholder="A multi-page site" /></Field>
-        <Field label="Headline Line 2"><Input value={line2} onChange={setLine2} placeholder="built for clarity." /></Field>
+        <AdminField label="Headline Line 1"><AdminInput value={line1} onChange={setLine1} placeholder="A multi-page site" /></AdminField>
+        <AdminField label="Headline Line 2"><AdminInput value={line2} onChange={setLine2} placeholder="built for clarity." /></AdminField>
       </div>
-      <Field label="Subtext"><Textarea value={body} onChange={setBody} rows={2} /></Field>
-      <SaveBtn onClick={save} status={status} />
-    </Section>
+      <AdminField label="Subtext"><AdminTextarea value={body} onChange={setBody} rows={2} /></AdminField>
+      <AdminSaveButton onClick={() => save({ eyebrow, headlineLine1: line1, headlineLine2: line2, body })} saving={saving} />
+    </AdminSection>
   );
 }
 
@@ -361,7 +278,7 @@ function ExploreCardsSection({ initial }: { initial: ExploreCard[] }) {
   }
 
   return (
-    <Section title="Explore Cards">
+    <AdminSection title="Explore Cards">
       <div className="space-y-4">
         {cards.map((card, idx) => (
           <div key={card.id} className="rounded border border-[var(--diq_border2)] p-4">
@@ -421,7 +338,7 @@ function ExploreCardsSection({ initial }: { initial: ExploreCard[] }) {
           Add Card
         </button>
       </div>
-    </Section>
+    </AdminSection>
   );
 }
 
@@ -433,25 +350,18 @@ function WhereNextSection({ initial }: { initial: WhereNext }) {
   const [body, setBody] = useState(initial?.body ?? "");
   const [btnLabel, setBtnLabel] = useState(initial?.btnLabel ?? "");
   const [btnHref, setBtnHref] = useState(initial?.btnHref ?? "");
-  const [status, setStatus] = useState<SaveState>("idle");
-
-  async function save() {
-    setStatus("saving");
-    const res = await apiPatch("/api/admin/home-where-next", { eyebrow, headline, body, btnLabel, btnHref });
-    setStatus(res.ok ? "saved" : "error");
-    setTimeout(() => setStatus("idle"), 2500);
-  }
+  const { save, saving } = useAdminSave("/api/admin/home-where-next");
 
   return (
-    <Section title="Where Next CTA">
-      <Field label="Eyebrow"><Input value={eyebrow} onChange={setEyebrow} placeholder="Begin With Intelligence" /></Field>
-      <Field label="Headline"><Input value={headline} onChange={setHeadline} placeholder="Ready to Know Your Market Better Than Anyone?" /></Field>
-      <Field label="Body"><Textarea value={body} onChange={setBody} rows={2} /></Field>
+    <AdminSection title="Where Next CTA">
+      <AdminField label="Eyebrow"><AdminInput value={eyebrow} onChange={setEyebrow} placeholder="Begin With Intelligence" /></AdminField>
+      <AdminField label="Headline"><AdminInput value={headline} onChange={setHeadline} placeholder="Ready to Know Your Market Better Than Anyone?" /></AdminField>
+      <AdminField label="Body"><AdminTextarea value={body} onChange={setBody} rows={2} /></AdminField>
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Button Label"><Input value={btnLabel} onChange={setBtnLabel} placeholder="Contact" /></Field>
-        <Field label="Button Href"><Input value={btnHref} onChange={setBtnHref} placeholder="/contact" /></Field>
+        <AdminField label="Button Label"><AdminInput value={btnLabel} onChange={setBtnLabel} placeholder="Contact" /></AdminField>
+        <AdminField label="Button Href"><AdminInput value={btnHref} onChange={setBtnHref} placeholder="/contact" /></AdminField>
       </div>
-      <SaveBtn onClick={save} status={status} />
-    </Section>
+      <AdminSaveButton onClick={() => save({ eyebrow, headline, body, btnLabel, btnHref })} saving={saving} />
+    </AdminSection>
   );
 }

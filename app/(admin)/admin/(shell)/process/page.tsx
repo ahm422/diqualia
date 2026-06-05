@@ -1,5 +1,6 @@
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { prisma } from "@/lib/prisma";
+import { AdminPageHeader } from "@/components/admin";
 
 import { ProcessPageEditor } from "./ProcessPageEditor";
 
@@ -13,7 +14,7 @@ export default async function ProcessPage() {
 
   return (
     <div>
-      <h1 className="font-sans text-2xl font-medium mb-8">Process Page</h1>
+      <AdminPageHeader title="How We Work" description="Page hero, process steps, and Where Next section" />
       <ProcessPageEditor initialPage={initialPage} initialSteps={initialSteps} />
     </div>
   );

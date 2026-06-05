@@ -2,6 +2,15 @@
 
 import { useState } from "react";
 
+import {
+  AdminSection,
+  AdminField,
+  AdminInput,
+  AdminTextarea,
+  AdminSaveButton,
+  useAdminSave,
+} from "@/components/admin";
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type StoryPageData = {
@@ -24,83 +33,6 @@ type StoryPageData = {
 type Props = {
   initialData: StoryPageData;
 };
-
-// ─── Shared helpers ───────────────────────────────────────────────────────────
-
-type SaveState = "idle" | "saving" | "saved" | "error";
-
-function SaveStatus({ status }: { status: SaveState }) {
-  if (status === "idle") return null;
-  if (status === "saving") return <span className="text-xs text-[var(--diq_mid)]">Saving…</span>;
-  if (status === "saved") return <span className="text-xs text-green-500">Saved ✓</span>;
-  return <span className="text-xs text-red-400">Error — try again</span>;
-}
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="mb-10 rounded-xl border border-[var(--diq_border)] bg-[var(--diq_surface)] p-6">
-      <h2 className="mb-5 text-base font-medium text-foreground">{title}</h2>
-      {children}
-    </section>
-  );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="mb-4">
-      <label className="mb-1 block text-xs uppercase tracking-widest text-[var(--diq_mid)]">{label}</label>
-      {children}
-    </div>
-  );
-}
-
-function Input({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
-  return (
-    <input
-      type="text"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      className="w-full rounded border border-[var(--diq_border)] bg-[var(--diq_deep)] px-3 py-2 text-sm text-foreground placeholder:text-[var(--diq_mid)] focus:outline-none focus:ring-1 focus:ring-[var(--gold)]"
-    />
-  );
-}
-
-function Textarea({ value, onChange, placeholder, rows = 3 }: { value: string; onChange: (v: string) => void; placeholder?: string; rows?: number }) {
-  return (
-    <textarea
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      rows={rows}
-      className="w-full rounded border border-[var(--diq_border)] bg-[var(--diq_deep)] px-3 py-2 text-sm text-foreground placeholder:text-[var(--diq_mid)] focus:outline-none focus:ring-1 focus:ring-[var(--gold)] resize-y"
-    />
-  );
-}
-
-function SaveBtn({ onClick, status }: { onClick: () => void; status: SaveState }) {
-  return (
-    <div className="mt-4 flex items-center gap-3">
-      <button
-        onClick={onClick}
-        disabled={status === "saving"}
-        className="rounded border border-[var(--gold)] px-4 py-2 text-xs uppercase tracking-widest text-[var(--gold)] transition-colors hover:bg-[var(--gold)] hover:text-[var(--diq_ink)] disabled:opacity-50"
-      >
-        Save
-      </button>
-      <SaveStatus status={status} />
-    </div>
-  );
-}
-
-async function apiPatch(data: Record<string, unknown>) {
-  return fetch("/api/admin/story-page", {
-    method: "PATCH",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
-}
 
 // ─── Main editor ─────────────────────────────────────────────────────────────
 
@@ -148,34 +80,27 @@ function HeroTab({ initial }: { initial: StoryPageData }) {
   const [headlineLine2, setHeadlineLine2] = useState(initial?.headlineLine2 ?? "");
   const [headlineLine3, setHeadlineLine3] = useState(initial?.headlineLine3 ?? "");
   const [body, setBody] = useState(initial?.body ?? "");
-  const [status, setStatus] = useState<SaveState>("idle");
-
-  async function save() {
-    setStatus("saving");
-    const res = await apiPatch({ eyebrow, headlineLine1, headlineLine2, headlineLine3, body });
-    setStatus(res.ok ? "saved" : "error");
-    setTimeout(() => setStatus("idle"), 2500);
-  }
+  const { save, saving } = useAdminSave("/api/admin/story-page");
 
   return (
-    <Section title="Hero">
-      <Field label="Eyebrow">
-        <Input value={eyebrow} onChange={setEyebrow} placeholder="Our Story" />
-      </Field>
-      <Field label="Headline line 1">
-        <Input value={headlineLine1} onChange={setHeadlineLine1} placeholder="We did not build" />
-      </Field>
-      <Field label="Headline line 2">
-        <Input value={headlineLine2} onChange={setHeadlineLine2} placeholder="a brand. We built" />
-      </Field>
-      <Field label="Headline line 3 (italic gold)">
-        <Input value={headlineLine3} onChange={setHeadlineLine3} placeholder="a point of view." />
-      </Field>
-      <Field label="Body">
-        <Textarea value={body} onChange={setBody} rows={4} placeholder="DiQualia was born from a question…" />
-      </Field>
-      <SaveBtn onClick={save} status={status} />
-    </Section>
+    <AdminSection title="Hero">
+      <AdminField label="Eyebrow">
+        <AdminInput value={eyebrow} onChange={setEyebrow} placeholder="Our Story" />
+      </AdminField>
+      <AdminField label="Headline line 1">
+        <AdminInput value={headlineLine1} onChange={setHeadlineLine1} placeholder="We did not build" />
+      </AdminField>
+      <AdminField label="Headline line 2">
+        <AdminInput value={headlineLine2} onChange={setHeadlineLine2} placeholder="a brand. We built" />
+      </AdminField>
+      <AdminField label="Headline line 3 (italic gold)">
+        <AdminInput value={headlineLine3} onChange={setHeadlineLine3} placeholder="a point of view." />
+      </AdminField>
+      <AdminField label="Body">
+        <AdminTextarea value={body} onChange={setBody} rows={4} placeholder="DiQualia was born from a question…" />
+      </AdminField>
+      <AdminSaveButton onClick={() => save({ eyebrow, headlineLine1, headlineLine2, headlineLine3, body })} saving={saving} />
+    </AdminSection>
   );
 }
 
@@ -189,47 +114,40 @@ function DoubleExperienceTab({ initial }: { initial: StoryPageData }) {
   const [dxTitle2, setDxTitle2] = useState(initial?.dxTitle2 ?? "");
   const [dxBody2, setDxBody2] = useState(initial?.dxBody2 ?? "");
   const [dxTagline, setDxTagline] = useState(initial?.dxTagline ?? "");
-  const [status, setStatus] = useState<SaveState>("idle");
-
-  async function save() {
-    setStatus("saving");
-    const res = await apiPatch({ dxNum1, dxTitle1, dxBody1, dxNum2, dxTitle2, dxBody2, dxTagline });
-    setStatus(res.ok ? "saved" : "error");
-    setTimeout(() => setStatus("idle"), 2500);
-  }
+  const { save, saving } = useAdminSave("/api/admin/story-page");
 
   return (
     <>
-      <Section title="DX Card 1">
-        <Field label="Number">
-          <Input value={dxNum1} onChange={setDxNum1} placeholder="01" />
-        </Field>
-        <Field label="Title">
-          <Input value={dxTitle1} onChange={setDxTitle1} placeholder="Human Intelligence" />
-        </Field>
-        <Field label="Body">
-          <Textarea value={dxBody1} onChange={setDxBody1} rows={4} placeholder="Years of real market understanding…" />
-        </Field>
-      </Section>
+      <AdminSection title="DX Card 1">
+        <AdminField label="Number">
+          <AdminInput value={dxNum1} onChange={setDxNum1} placeholder="01" />
+        </AdminField>
+        <AdminField label="Title">
+          <AdminInput value={dxTitle1} onChange={setDxTitle1} placeholder="Human Intelligence" />
+        </AdminField>
+        <AdminField label="Body">
+          <AdminTextarea value={dxBody1} onChange={setDxBody1} rows={4} placeholder="Years of real market understanding…" />
+        </AdminField>
+      </AdminSection>
 
-      <Section title="DX Card 2">
-        <Field label="Number">
-          <Input value={dxNum2} onChange={setDxNum2} placeholder="02" />
-        </Field>
-        <Field label="Title">
-          <Input value={dxTitle2} onChange={setDxTitle2} placeholder="System Precision" />
-        </Field>
-        <Field label="Body">
-          <Textarea value={dxBody2} onChange={setDxBody2} rows={4} placeholder="The power of intelligent tools…" />
-        </Field>
-      </Section>
+      <AdminSection title="DX Card 2">
+        <AdminField label="Number">
+          <AdminInput value={dxNum2} onChange={setDxNum2} placeholder="02" />
+        </AdminField>
+        <AdminField label="Title">
+          <AdminInput value={dxTitle2} onChange={setDxTitle2} placeholder="System Precision" />
+        </AdminField>
+        <AdminField label="Body">
+          <AdminTextarea value={dxBody2} onChange={setDxBody2} rows={4} placeholder="The power of intelligent tools…" />
+        </AdminField>
+      </AdminSection>
 
-      <Section title="Tagline">
-        <Field label="Tagline (italic, shown below both cards)">
-          <Textarea value={dxTagline} onChange={setDxTagline} rows={2} placeholder="Together, they produce something neither can achieve alone…" />
-        </Field>
-        <SaveBtn onClick={save} status={status} />
-      </Section>
+      <AdminSection title="Tagline">
+        <AdminField label="Tagline (italic, shown below both cards)">
+          <AdminTextarea value={dxTagline} onChange={setDxTagline} rows={2} placeholder="Together, they produce something neither can achieve alone…" />
+        </AdminField>
+        <AdminSaveButton onClick={() => save({ dxNum1, dxTitle1, dxBody1, dxNum2, dxTitle2, dxBody2, dxTagline })} saving={saving} />
+      </AdminSection>
     </>
   );
 }
@@ -242,7 +160,7 @@ function ManifestoTab({ initial }: { initial: StoryPageData }) {
       ? (initial.manifestoItems as string[]).filter(Boolean)
       : []
   );
-  const [status, setStatus] = useState<SaveState>("idle");
+  const { save, saving } = useAdminSave("/api/admin/story-page");
 
   function update(idx: number, val: string) {
     setItems((prev) => prev.map((it, i) => (i === idx ? val : it)));
@@ -265,15 +183,8 @@ function ManifestoTab({ initial }: { initial: StoryPageData }) {
     setItems((prev) => [...prev, ""]);
   }
 
-  async function save() {
-    setStatus("saving");
-    const res = await apiPatch({ manifestoItems: items });
-    setStatus(res.ok ? "saved" : "error");
-    setTimeout(() => setStatus("idle"), 2500);
-  }
-
   return (
-    <Section title="Manifesto Items">
+    <AdminSection title="Manifesto Items">
       <div className="space-y-3">
         {items.map((item, idx) => (
           <div
@@ -319,7 +230,7 @@ function ManifestoTab({ initial }: { initial: StoryPageData }) {
         + Add item
       </button>
 
-      <SaveBtn onClick={save} status={status} />
-    </Section>
+      <AdminSaveButton onClick={() => save({ manifestoItems: items })} saving={saving} />
+    </AdminSection>
   );
 }

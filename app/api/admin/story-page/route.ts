@@ -1,26 +1,10 @@
 import "server-only";
 
 import { NextResponse } from "next/server";
-import { z } from "zod";
 
 import { requireAdminApi } from "@/lib/auth/require-admin-api";
 import { prisma } from "@/lib/prisma";
-
-const PatchSchema = z.object({
-  eyebrow:        z.string().min(1).max(200).optional(),
-  headlineLine1:  z.string().min(1).max(200).optional(),
-  headlineLine2:  z.string().min(1).max(200).optional(),
-  headlineLine3:  z.string().min(1).max(200).optional(),
-  body:           z.string().min(1).max(2000).optional(),
-  dxNum1:         z.string().min(1).max(200).optional(),
-  dxTitle1:       z.string().min(1).max(200).optional(),
-  dxBody1:        z.string().min(1).max(2000).optional(),
-  dxNum2:         z.string().min(1).max(200).optional(),
-  dxTitle2:       z.string().min(1).max(200).optional(),
-  dxBody2:        z.string().min(1).max(2000).optional(),
-  dxTagline:      z.string().min(1).max(2000).optional(),
-  manifestoItems: z.array(z.string().min(1).max(2000)).optional(),
-});
+import { storyPagePatchSchema } from "@/lib/schemas/admin/story";
 
 export async function GET() {
   const session = await requireAdminApi();
@@ -41,9 +25,12 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const parsed = PatchSchema.safeParse(body);
+  const parsed = storyPagePatchSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid input" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Validation failed", issues: parsed.error.flatten() },
+      { status: 400 },
+    );
   }
 
   const page = await prisma.storyPage.upsert({

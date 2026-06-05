@@ -1,28 +1,10 @@
 import "server-only";
 
 import { NextResponse } from "next/server";
-import { z } from "zod";
 
 import { requireAdminApi } from "@/lib/auth/require-admin-api";
 import { prisma } from "@/lib/prisma";
-
-const PatchSchema = z.object({
-  eyebrow: z.string().min(1).max(200).optional(),
-  headlineLine1: z.string().min(1).max(200).optional(),
-  headlineLine2: z.string().min(1).max(200).optional(),
-  headlineLine3: z.string().min(1).max(200).optional(),
-  body: z.string().min(1).max(2000).optional(),
-  btn1Label: z.string().min(1).max(100).optional(),
-  btn1Href: z.string().min(1).max(500).optional(),
-  btn2Label: z.string().min(1).max(100).optional(),
-  btn2Href: z.string().min(1).max(500).optional(),
-  stat1Label: z.string().min(1).max(100).optional(),
-  stat1Value: z.string().min(1).max(50).optional(),
-  stat2Label: z.string().min(1).max(100).optional(),
-  stat2Value: z.string().min(1).max(50).optional(),
-  stat3Label: z.string().min(1).max(100).optional(),
-  stat3Value: z.string().min(1).max(50).optional(),
-});
+import { homeHeroPatchSchema } from "@/lib/schemas/admin/home";
 
 export async function GET() {
   const session = await requireAdminApi();
@@ -43,9 +25,12 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const parsed = PatchSchema.safeParse(body);
+  const parsed = homeHeroPatchSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid input" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Validation failed", issues: parsed.error.flatten() },
+      { status: 400 },
+    );
   }
 
   const hero = await prisma.homeHero.upsert({

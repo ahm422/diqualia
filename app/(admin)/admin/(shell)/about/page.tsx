@@ -1,5 +1,6 @@
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { prisma } from "@/lib/prisma";
+import { AdminPageHeader } from "@/components/admin";
 
 import { AboutPageEditor } from "./AboutPageEditor";
 
@@ -14,7 +15,7 @@ export default async function AboutPage() {
 
   return (
     <div>
-      <h1 className="font-sans text-2xl font-medium mb-8">About Page</h1>
+      <AdminPageHeader title="About Page" description="Hero, built-for items, and Where Next section" />
       <AboutPageEditor
         initialHero={hero}
         initialBuiltFor={builtFor}

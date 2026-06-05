@@ -1,19 +1,19 @@
 "use client";
 
 import Link from "next/link";
+import { ExternalLink } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 
 const NAV = [
-  { href: "/admin", label: "Dashboard" },
-  { href: "/admin/submissions", label: "Submissions" },
-  { href: "/admin/home", label: "Home" },
-  { href: "/admin/about", label: "About" },
-  { href: "/admin/services", label: "Services" },
-  { href: "/admin/process", label: "Process" },
-  { href: "/admin/industries", label: "Industries" },
-  { href: "/admin/story", label: "Story" },
-  { href: "/admin/contact", label: "Contact" },
   { href: "/admin/site-settings", label: "Site Settings" },
+  { href: "/admin/home",          label: "Home" },
+  { href: "/admin/about",         label: "About" },
+  { href: "/admin/services",      label: "Services" },
+  { href: "/admin/process",       label: "How We Work" },
+  { href: "/admin/industries",    label: "Industries" },
+  { href: "/admin/story",         label: "Story" },
+  { href: "/admin/contact",       label: "Contact" },
+  { href: "/admin/submissions",   label: "Submissions" },
 ];
 
 export function AdminSidebar() {
@@ -30,8 +30,9 @@ export function AdminSidebar() {
       <div className="font-mono text-xs tracking-widest text-[var(--gold)] uppercase mb-8 px-2">
         DiQualia Admin
       </div>
+
       {NAV.map(({ href, label }) => {
-        const isActive = href === "/admin" ? pathname === href : pathname.startsWith(href);
+        const isActive = pathname.startsWith(href);
         return (
           <Link
             key={href}
@@ -47,10 +48,22 @@ export function AdminSidebar() {
           </Link>
         );
       })}
+
       <div className="flex-1" />
+
+      <a
+        href="/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center gap-2 rounded px-3 py-2 text-sm text-[var(--diq_mid)] transition-colors hover:text-[var(--foreground)] hover:bg-[var(--diq_panel)]"
+      >
+        <ExternalLink size={14} />
+        Preview site
+      </a>
+
       <button
         onClick={handleLogout}
-        className="mt-4 rounded px-3 py-2 text-sm text-[var(--diq_mid)] hover:text-[var(--foreground)] hover:bg-[var(--diq_panel)] text-left transition-colors"
+        className="mt-1 rounded px-3 py-2 text-sm text-[var(--diq_mid)] hover:text-[var(--foreground)] hover:bg-[var(--diq_panel)] text-left transition-colors"
       >
         Logout
       </button>

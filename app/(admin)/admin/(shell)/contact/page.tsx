@@ -1,5 +1,6 @@
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { prisma } from "@/lib/prisma";
+import { AdminPageHeader } from "@/components/admin";
 
 import { ContactPageEditor } from "./ContactPageEditor";
 
@@ -10,7 +11,10 @@ export default async function ContactAdminPage() {
 
   return (
     <div>
-      <h1 className="font-sans text-2xl font-medium mb-8">Contact</h1>
+      <AdminPageHeader
+        title="Contact Page"
+        description="Hero, email card, What to Include list, and Expectation"
+      />
       <ContactPageEditor initialData={contactPage} />
     </div>
   );

@@ -1,7 +1,15 @@
 "use client";
 
-import Image from "next/image";
-import { useState, useRef } from "react";
+import { useState } from "react";
+
+import {
+  AdminSection,
+  AdminField,
+  AdminInput,
+  AdminSaveButton,
+  AdminImageField,
+  useAdminSave,
+} from "@/components/admin";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -18,62 +26,6 @@ type Props = {
   initialFooter: FooterSettings;
   initialFooterNav: FooterNavItem[];
 };
-
-// ─── Shared helpers ───────────────────────────────────────────────────────────
-
-function SaveStatus({ status }: { status: "idle" | "saving" | "saved" | "error" }) {
-  if (status === "idle") return null;
-  if (status === "saving") return <span className="text-xs text-[var(--diq_mid)]">Saving…</span>;
-  if (status === "saved") return <span className="text-xs text-green-500">Saved ✓</span>;
-  return <span className="text-xs text-red-400">Error — try again</span>;
-}
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <section className="mb-10 rounded-xl border border-[var(--diq_border)] bg-[var(--diq_surface)] p-6">
-      <h2 className="mb-5 text-base font-medium text-foreground">{title}</h2>
-      {children}
-    </section>
-  );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="mb-4">
-      <label className="mb-1 block text-xs uppercase tracking-widest text-[var(--diq_mid)]">{label}</label>
-      {children}
-    </div>
-  );
-}
-
-function Input({ value, onChange, placeholder, type = "text" }: {
-  value: string; onChange: (v: string) => void; placeholder?: string; type?: string;
-}) {
-  return (
-    <input
-      type={type}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      className="w-full rounded border border-[var(--diq_border)] bg-[var(--diq_deep)] px-3 py-2 text-sm text-foreground placeholder:text-[var(--diq_mid)] focus:outline-none focus:ring-1 focus:ring-[var(--gold)]"
-    />
-  );
-}
-
-function SaveBtn({ onClick, status }: { onClick: () => void; status: "idle" | "saving" | "saved" | "error" }) {
-  return (
-    <div className="mt-4 flex items-center gap-3">
-      <button
-        onClick={onClick}
-        disabled={status === "saving"}
-        className="rounded border border-[var(--gold)] px-4 py-2 text-xs uppercase tracking-widest text-[var(--gold)] transition-colors hover:bg-[var(--gold)] hover:text-[var(--diq_ink)] disabled:opacity-50"
-      >
-        Save
-      </button>
-      <SaveStatus status={status} />
-    </div>
-  );
-}
 
 // ─── Main editor ─────────────────────────────────────────────────────────────
 
@@ -94,80 +46,23 @@ export function SiteSettingsEditor({ initialSiteSettings, initialNavItems, initi
 function LogoSection({ initial }: { initial: SiteSettings }) {
   const [siteName, setSiteName] = useState(initial?.siteName ?? "");
   const [logoUrl, setLogoUrl] = useState<string | null>(initial?.logoUrl ?? null);
-  const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
-  const [uploading, setUploading] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
-
-  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
-    const fd = new FormData();
-    fd.append("file", file);
-    try {
-      const res = await fetch("/api/admin/upload", { method: "POST", credentials: "include", body: fd });
-      const data = await res.json();
-      if (res.ok) setLogoUrl(data.url);
-      else alert(data.error ?? "Upload failed");
-    } catch {
-      alert("Upload failed");
-    } finally {
-      setUploading(false);
-      if (fileRef.current) fileRef.current.value = "";
-    }
-  }
-
-  async function save() {
-    setStatus("saving");
-    try {
-      const res = await fetch("/api/admin/site-settings", {
-        method: "PATCH",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ siteName, logoUrl }),
-      });
-      setStatus(res.ok ? "saved" : "error");
-    } catch {
-      setStatus("error");
-    }
-    setTimeout(() => setStatus("idle"), 2500);
-  }
+  const { save, saving } = useAdminSave("/api/admin/site-settings");
 
   return (
-    <Section title="Logo & Site Name">
-      <Field label="Site Name">
-        <Input value={siteName} onChange={setSiteName} placeholder="DiQualia" />
-      </Field>
+    <AdminSection title="Logo & Site Name">
+      <AdminField label="Site Name">
+        <AdminInput value={siteName} onChange={setSiteName} placeholder="DiQualia" />
+      </AdminField>
 
-      <Field label="Logo">
-        <div className="flex flex-wrap items-start gap-4">
-          {logoUrl && (
-            <div className="relative">
-              <Image src={logoUrl} alt="Logo preview" width={160} height={50} className="rounded border border-[var(--diq_border)] bg-[var(--diq_deep)] object-contain p-2" style={{ height: 50, width: "auto" }} />
-              <button
-                onClick={() => setLogoUrl(null)}
-                className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] text-white"
-                title="Remove logo"
-              >
-                ×
-              </button>
-            </div>
-          )}
-          <div>
-            <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,image/svg+xml" onChange={handleFileChange} className="hidden" id="logo-upload" />
-            <label
-              htmlFor="logo-upload"
-              className="cursor-pointer rounded border border-[var(--diq_border)] px-3 py-2 text-xs text-[var(--diq_mid)] hover:border-[var(--gold)] hover:text-[var(--gold)]"
-            >
-              {uploading ? "Uploading…" : logoUrl ? "Replace logo" : "Upload logo"}
-            </label>
-            <p className="mt-1 text-[11px] text-[var(--diq_mid)]">JPEG, PNG, WebP, SVG · max 5 MB</p>
-          </div>
-        </div>
-      </Field>
+      <AdminImageField
+        label="Logo"
+        currentUrl={logoUrl}
+        onUpload={setLogoUrl}
+        onRemove={() => setLogoUrl(null)}
+      />
 
-      <SaveBtn onClick={save} status={status} />
-    </Section>
+      <AdminSaveButton onClick={() => save({ siteName, logoUrl })} saving={saving} />
+    </AdminSection>
   );
 }
 
@@ -237,7 +132,7 @@ function NavSection({ initial }: { initial: NavItem[] }) {
   }
 
   return (
-    <Section title="Header Navigation">
+    <AdminSection title="Header Navigation">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -297,7 +192,7 @@ function NavSection({ initial }: { initial: NavItem[] }) {
           Add
         </button>
       </div>
-    </Section>
+    </AdminSection>
   );
 }
 
@@ -307,36 +202,20 @@ function CtaSection({ initial }: { initial: CtaButton }) {
   const [label, setLabel] = useState(initial?.label ?? "");
   const [href, setHref] = useState(initial?.href ?? "");
   const [visible, setVisible] = useState(initial?.visible ?? true);
-  const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
-
-  async function save() {
-    setStatus("saving");
-    try {
-      const res = await fetch("/api/admin/cta-button", {
-        method: "PATCH",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ label, href, visible }),
-      });
-      setStatus(res.ok ? "saved" : "error");
-    } catch {
-      setStatus("error");
-    }
-    setTimeout(() => setStatus("idle"), 2500);
-  }
+  const { save, saving } = useAdminSave("/api/admin/cta-button");
 
   return (
-    <Section title="CTA Button">
+    <AdminSection title="CTA Button">
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Label"><Input value={label} onChange={setLabel} placeholder="Talk to Us" /></Field>
-        <Field label="Href"><Input value={href} onChange={setHref} placeholder="/contact" /></Field>
+        <AdminField label="Label"><AdminInput value={label} onChange={setLabel} placeholder="Talk to Us" /></AdminField>
+        <AdminField label="Href"><AdminInput value={href} onChange={setHref} placeholder="/contact" /></AdminField>
       </div>
       <label className="flex items-center gap-2 text-sm text-foreground">
         <input type="checkbox" checked={visible} onChange={(e) => setVisible(e.target.checked)} className="accent-[var(--gold)]" />
         Show CTA in header
       </label>
-      <SaveBtn onClick={save} status={status} />
-    </Section>
+      <AdminSaveButton onClick={() => save({ label, href, visible })} saving={saving} />
+    </AdminSection>
   );
 }
 
@@ -348,35 +227,19 @@ function FooterCopySection({ initial }: { initial: FooterSettings }) {
   const [copyright, setCopyright] = useState(initial?.copyright ?? "");
   const [allRights, setAllRights] = useState(initial?.allRights ?? "");
   const [domain, setDomain] = useState(initial?.domain ?? "");
-  const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
-
-  async function save() {
-    setStatus("saving");
-    try {
-      const res = await fetch("/api/admin/footer", {
-        method: "PATCH",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tagline1, tagline2, copyright, allRights, domain }),
-      });
-      setStatus(res.ok ? "saved" : "error");
-    } catch {
-      setStatus("error");
-    }
-    setTimeout(() => setStatus("idle"), 2500);
-  }
+  const { save, saving } = useAdminSave("/api/admin/footer");
 
   return (
-    <Section title="Footer Copy">
+    <AdminSection title="Footer Copy">
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Tagline 1"><Input value={tagline1} onChange={setTagline1} placeholder="Marketing Intelligence & Research" /></Field>
-        <Field label="Tagline 2"><Input value={tagline2} onChange={setTagline2} placeholder="Niche B2B · Data-Driven Strategy" /></Field>
-        <Field label="Copyright"><Input value={copyright} onChange={setCopyright} placeholder="© 2026 DiQualia" /></Field>
-        <Field label="All Rights Text"><Input value={allRights} onChange={setAllRights} placeholder="All rights reserved" /></Field>
-        <Field label="Domain"><Input value={domain} onChange={setDomain} placeholder="diqualia.com" /></Field>
+        <AdminField label="Tagline 1"><AdminInput value={tagline1} onChange={setTagline1} placeholder="Marketing Intelligence & Research" /></AdminField>
+        <AdminField label="Tagline 2"><AdminInput value={tagline2} onChange={setTagline2} placeholder="Niche B2B · Data-Driven Strategy" /></AdminField>
+        <AdminField label="Copyright"><AdminInput value={copyright} onChange={setCopyright} placeholder="© 2026 DiQualia" /></AdminField>
+        <AdminField label="All Rights Text"><AdminInput value={allRights} onChange={setAllRights} placeholder="All rights reserved" /></AdminField>
+        <AdminField label="Domain"><AdminInput value={domain} onChange={setDomain} placeholder="diqualia.com" /></AdminField>
       </div>
-      <SaveBtn onClick={save} status={status} />
-    </Section>
+      <AdminSaveButton onClick={() => save({ tagline1, tagline2, copyright, allRights, domain })} saving={saving} />
+    </AdminSection>
   );
 }
 
@@ -444,7 +307,7 @@ function FooterNavSection({ initial }: { initial: FooterNavItem[] }) {
   const sorted = [...items].sort((a, b) => a.group.localeCompare(b.group) || a.order - b.order);
 
   return (
-    <Section title="Footer Navigation">
+    <AdminSection title="Footer Navigation">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -522,6 +385,6 @@ function FooterNavSection({ initial }: { initial: FooterNavItem[] }) {
           Add
         </button>
       </div>
-    </Section>
+    </AdminSection>
   );
 }

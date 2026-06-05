@@ -1,5 +1,6 @@
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { prisma } from "@/lib/prisma";
+import { AdminPageHeader } from "@/components/admin";
 
 import { HomePageEditor } from "./HomePageEditor";
 
@@ -16,7 +17,7 @@ export default async function HomePage() {
 
   return (
     <div>
-      <h1 className="font-sans text-2xl font-medium mb-8">Home Page</h1>
+      <AdminPageHeader title="Home Page" description="Hero, marquee, explore cards, and Where Next section" />
       <HomePageEditor
         initialHero={hero}
         initialMarquee={marqueeItems}

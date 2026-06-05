@@ -1,5 +1,6 @@
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { prisma } from "@/lib/prisma";
+import { AdminPageHeader } from "@/components/admin";
 
 import { SubmissionsTable } from "./SubmissionsTable";
 
@@ -12,7 +13,10 @@ export default async function SubmissionsPage() {
 
   return (
     <div>
-      <h1 className="font-sans text-2xl font-medium mb-8">Submissions</h1>
+      <AdminPageHeader
+        title="Submissions"
+        description="Form submissions from the contact page"
+      />
       <SubmissionsTable initialLeads={leads} />
     </div>
   );
