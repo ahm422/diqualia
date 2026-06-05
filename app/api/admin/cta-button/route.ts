@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { requireAdminApi } from "@/lib/auth/require-admin-api";
 import { prisma } from "@/lib/prisma";
+import { revalidateSiteLayout } from "@/lib/revalidate-site";
 
 const PatchSchema = z.object({
   label: z.string().min(1).max(100).optional(),
@@ -42,5 +43,6 @@ export async function PATCH(request: Request) {
     update: parsed.data,
   });
 
+  revalidateSiteLayout();
   return NextResponse.json(cta);
 }

@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { requireAdminApi } from "@/lib/auth/require-admin-api";
 import { prisma } from "@/lib/prisma";
+import { revalidatePage } from "@/lib/revalidate-site";
 
 const PostSchema = z.object({
   stepLabel: z.string().min(1).max(100),
@@ -50,5 +51,6 @@ export async function POST(request: Request) {
     },
   });
 
+  revalidatePage("/process");
   return NextResponse.json(step, { status: 201 });
 }

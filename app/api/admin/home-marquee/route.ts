@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { requireAdminApi } from "@/lib/auth/require-admin-api";
 import { prisma } from "@/lib/prisma";
+import { revalidatePage } from "@/lib/revalidate-site";
 
 const PostSchema = z.object({
   text: z.string().min(1).max(500),
@@ -41,5 +42,6 @@ export async function POST(request: Request) {
     data: { text: parsed.data.text, order: nextOrder },
   });
 
+  revalidatePage("/");
   return NextResponse.json(item, { status: 201 });
 }
