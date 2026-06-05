@@ -15,6 +15,7 @@ model Lead {
   name      String?
   message   String?
   source    String?
+  read      Boolean  @default(false)
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("leads")
