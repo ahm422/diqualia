@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { prisma } from "@/lib/prisma";
+
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Story — DiQualia",
   description:
@@ -57,7 +61,7 @@ function PullQuote({ quote, cite }: { quote: React.ReactNode; cite: string }) {
         className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 text-[180px] leading-none"
         style={{ fontFamily: "var(--font-display)", color: "color-mix(in oklab, var(--gold) 8%, transparent)" }}
       >
-        “
+        "
       </div>
       <blockquote
         className="mx-auto max-w-4xl"
@@ -78,10 +82,24 @@ function PullQuote({ quote, cite }: { quote: React.ReactNode; cite: string }) {
   );
 }
 
-export default function StoryPage() {
+export default async function StoryPage() {
+  const page = await prisma.storyPage.findUnique({ where: { id: 1 } });
+
+  if (!page) {
+    return (
+      <main className="py-20 text-center text-sm" style={{ color: "var(--text-faint)" }}>
+        Story content coming soon.
+      </main>
+    );
+  }
+
+  const manifestoItems = Array.isArray(page.manifestoItems)
+    ? (page.manifestoItems as string[]).filter(Boolean)
+    : [];
+
   return (
     <div>
-      {/* Top back link (replaces “Back to Home” #) */}
+      {/* Top back link */}
       <div className="mx-auto w-full max-w-6xl px-6 pt-8">
         <Link
           href="/"
@@ -103,7 +121,7 @@ export default function StoryPage() {
         />
 
         <div className="relative mx-auto w-full max-w-4xl">
-          <Eyebrow center>Our Story</Eyebrow>
+          <Eyebrow center>{page.eyebrow}</Eyebrow>
           <h1
             className="mt-10 text-foreground"
             style={{
@@ -113,13 +131,12 @@ export default function StoryPage() {
               lineHeight: 1.05,
             }}
           >
-            We did not build
-            <br />a brand. We built
-            <br />a <em style={{ fontStyle: "italic", color: "var(--gold-lt)" }}>point of view.</em>
+            {page.headlineLine1}
+            <br />{page.headlineLine2}
+            <br /><em style={{ fontStyle: "italic", color: "var(--gold-lt)" }}>{page.headlineLine3}</em>
           </h1>
           <p className="mx-auto mt-10 max-w-[64ch] text-[16px] leading-9" style={{ color: "var(--text-muted)" }}>
-            DiQualia was born from a question most agencies are unwilling to ask: in an age when everyone has access to
-            the same tools, what does it truly mean to deliver intelligence?
+            {page.body}
           </p>
           <div className="mt-14 flex flex-col items-center gap-4 text-[11px] tracking-[0.22em] uppercase" style={{ color: "color-mix(in oklab, var(--text-muted) 65%, transparent)" }}>
             <span
@@ -173,7 +190,7 @@ export default function StoryPage() {
         cite="The founding principle of DiQualia"
       />
 
-      {/* CHAPTER 3 */}
+      {/* CHAPTER 3 — Double Experience */}
       <section style={{ background: "var(--bg-elev)" }}>
         <div className="mx-auto w-full max-w-6xl px-6 py-20">
           <div className="grid grid-cols-1 gap-12 md:grid-cols-2 md:gap-24">
@@ -182,41 +199,34 @@ export default function StoryPage() {
                 className="grid grid-cols-1 gap-px"
                 style={{ background: "color-mix(in oklab, var(--gold) 12%, transparent)", border: "1px solid color-mix(in oklab, var(--gold) 12%, transparent)" }}
               >
-                {[
-                  [
-                    "01",
-                    "Human Intelligence",
-                    "Years of real market understanding. The ability to read context, sense nuance, and make the kind of judgement calls that no algorithm can replicate. We bring pattern recognition built from genuine experience — not training data.",
-                  ],
-                  [
-                    "02",
-                    "System Precision",
-                    "The power of intelligent tools, applied with intention. Speed without noise. Scale without sacrifice of quality. We use AI as a sharpening instrument — never as a replacement for the thinking that matters.",
-                  ],
-                ].map(([num, title, body]) => (
-                  <div key={num} className="p-10" style={{ background: "var(--bg-elev)" }}>
-                    <div
-                      className="text-[52px] leading-none"
-                      style={{ fontFamily: "var(--font-display)", fontWeight: 300, color: "color-mix(in oklab, var(--gold) 18%, transparent)" }}
-                    >
-                      {num}
-                    </div>
-                    <div className="mt-5 text-[22px] text-foreground" style={{ fontFamily: "var(--font-display)", fontWeight: 400 }}>
-                      {title.includes("Human") ? (
-                        <>
-                          Human <em style={{ fontStyle: "italic", color: "var(--gold-lt)" }}>Intelligence</em>
-                        </>
-                      ) : (
-                        <>
-                          System <em style={{ fontStyle: "italic", color: "var(--gold-lt)" }}>Precision</em>
-                        </>
-                      )}
-                    </div>
-                    <p className="mt-4 text-[13px] leading-7" style={{ color: "var(--text-muted)" }}>
-                      {body}
-                    </p>
+                <div className="p-10" style={{ background: "var(--bg-elev)" }}>
+                  <div
+                    className="text-[52px] leading-none"
+                    style={{ fontFamily: "var(--font-display)", fontWeight: 300, color: "color-mix(in oklab, var(--gold) 18%, transparent)" }}
+                  >
+                    {page.dxNum1}
                   </div>
-                ))}
+                  <div className="mt-5 text-[22px] text-foreground" style={{ fontFamily: "var(--font-display)", fontWeight: 400 }}>
+                    {page.dxTitle1}
+                  </div>
+                  <p className="mt-4 text-[13px] leading-7" style={{ color: "var(--text-muted)" }}>
+                    {page.dxBody1}
+                  </p>
+                </div>
+                <div className="p-10" style={{ background: "var(--bg-elev)" }}>
+                  <div
+                    className="text-[52px] leading-none"
+                    style={{ fontFamily: "var(--font-display)", fontWeight: 300, color: "color-mix(in oklab, var(--gold) 18%, transparent)" }}
+                  >
+                    {page.dxNum2}
+                  </div>
+                  <div className="mt-5 text-[22px] text-foreground" style={{ fontFamily: "var(--font-display)", fontWeight: 400 }}>
+                    {page.dxTitle2}
+                  </div>
+                  <p className="mt-4 text-[13px] leading-7" style={{ color: "var(--text-muted)" }}>
+                    {page.dxBody2}
+                  </p>
+                </div>
                 <div className="p-8 text-center" style={{ background: "var(--panel)", borderTop: "1px solid color-mix(in oklab, var(--gold) 15%, transparent)" }}>
                   <div
                     style={{
@@ -227,7 +237,7 @@ export default function StoryPage() {
                       color: "var(--gold-lt)",
                     }}
                   >
-                    Together, they produce something neither can achieve alone: intelligence that is both felt and proven.
+                    {page.dxTagline}
                   </div>
                 </div>
               </div>
@@ -333,27 +343,19 @@ export default function StoryPage() {
           </h2>
 
           <div className="mx-auto mt-12 max-w-3xl">
-            {[
-              "We believe intelligence is the only sustainable competitive advantage.",
-              "We believe AI is a tool, not a substitute for expertise.",
-              "We believe the best marketing starts with understanding the market, not performing for it.",
-              "We believe clarity is a service — and noise is a disservice.",
-              "We believe human judgement and machine precision are stronger together.",
-              "We believe every B2B company deserves to be truly understood by its marketing partner.",
-              "We believe in intelligence that moves markets.",
-            ].map((line) => (
+            {manifestoItems.map((line, idx) => (
               <div
-                key={line}
+                key={idx}
                 className="py-5"
                 style={{
                   fontFamily: "var(--font-display)",
                   fontWeight: 300,
                   fontSize: "clamp(1.2rem, 2.2vw, 2rem)",
-                  color: line.includes("moves markets") ? "var(--foreground)" : "var(--muted-foreground)",
+                  color: idx === manifestoItems.length - 1 ? "var(--foreground)" : "var(--muted-foreground)",
                   borderBottom: "1px solid color-mix(in oklab, var(--text) 6%, transparent)",
                 }}
               >
-                {line.replace("intelligence", "intelligence")}
+                {line}
               </div>
             ))}
           </div>
@@ -446,25 +448,17 @@ export default function StoryPage() {
               style={{
                 fontFamily: "var(--font-display)",
                 fontWeight: 300,
-                fontSize: "clamp(3rem, 7vw, 7.8rem)",
-                lineHeight: 1,
+                fontSize: "clamp(3.5rem, 8vw, 8rem)",
+                lineHeight: 1.0,
+                fontStyle: emphasize ? "italic" : "normal",
+                color: emphasize ? "var(--gold-lt)" : undefined,
               }}
             >
-              {emphasize ? (
-                <>
-                  that <em style={{ fontStyle: "italic", color: "var(--gold)" }}>moves</em>
-                </>
-              ) : (
-                word
-              )}
+              {word}
             </div>
           ))}
-          <div className="mt-10 text-[11px] tracking-[0.35em] uppercase" style={{ color: "var(--text-muted)" }}>
-            DiQualia — Marketing Intelligence &amp; Research
-          </div>
         </div>
       </section>
     </div>
   );
 }
-
