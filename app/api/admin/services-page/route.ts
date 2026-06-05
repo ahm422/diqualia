@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { requireAdminApi } from "@/lib/auth/require-admin-api";
 import { prisma } from "@/lib/prisma";
+import { revalidatePage } from "@/lib/revalidate-site";
 
 const PatchSchema = z.object({
   eyebrow: z.string().min(1).max(200).optional(),
@@ -75,5 +76,6 @@ export async function PATCH(request: Request) {
     update: parsed.data,
   });
 
+  revalidatePage("/services");
   return NextResponse.json(page);
 }

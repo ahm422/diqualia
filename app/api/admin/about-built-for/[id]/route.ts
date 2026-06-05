@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { requireAdminApi } from "@/lib/auth/require-admin-api";
 import { prisma } from "@/lib/prisma";
+import { revalidatePage } from "@/lib/revalidate-site";
 
 const PatchSchema = z.object({
   title: z.string().min(1).max(200).optional(),
@@ -32,6 +33,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
   try {
     const item = await prisma.aboutBuiltForItem.update({ where: { id: numId }, data: parsed.data });
+    revalidatePage("/about");
     return NextResponse.json(item);
   } catch {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -59,5 +61,6 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
     }
   }
 
+  revalidatePage("/about");
   return NextResponse.json({ ok: true });
 }

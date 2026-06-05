@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { requireAdminApi } from "@/lib/auth/require-admin-api";
 import { prisma } from "@/lib/prisma";
+import { revalidatePage } from "@/lib/revalidate-site";
 
 const PostSchema = z.object({
   name: z.string().min(1).max(200),
@@ -41,5 +42,6 @@ export async function POST(request: Request) {
     data: { name: parsed.data.name, order: nextOrder },
   });
 
+  revalidatePage("/industries");
   return NextResponse.json(sector, { status: 201 });
 }

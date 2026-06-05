@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 
 import { requireAdminApi } from "@/lib/auth/require-admin-api";
 import { prisma } from "@/lib/prisma";
+import { revalidatePage } from "@/lib/revalidate-site";
 import { storyPagePatchSchema } from "@/lib/schemas/admin/story";
 
 export async function GET() {
@@ -54,5 +55,6 @@ export async function PATCH(request: Request) {
     update: parsed.data,
   });
 
+  revalidatePage("/story");
   return NextResponse.json(page);
 }
