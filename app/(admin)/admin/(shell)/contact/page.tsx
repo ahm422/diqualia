@@ -1,11 +1,17 @@
 import { requireAdmin } from "@/lib/auth/require-admin";
+import { prisma } from "@/lib/prisma";
 
-export default async function ContactPage() {
+import { ContactPageEditor } from "./ContactPageEditor";
+
+export default async function ContactAdminPage() {
   await requireAdmin();
+
+  const contactPage = await prisma.contactPage.findUnique({ where: { id: 1 } });
+
   return (
     <div>
-      <h1 className="font-sans text-2xl font-medium mb-4">Contact</h1>
-      <p className="text-[var(--diq_mid)] text-sm">Content editing coming soon.</p>
+      <h1 className="font-sans text-2xl font-medium mb-8">Contact</h1>
+      <ContactPageEditor initialData={contactPage} />
     </div>
   );
 }
