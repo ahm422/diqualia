@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { prisma } from "@/lib/prisma";
+import { getDb } from "@/lib/cloudflare-env";
 
 export const revalidate = 60;
 
@@ -68,6 +68,7 @@ function highlightYou(text: string) {
 }
 
 export default async function ServicesPage() {
+  const prisma = getDb();
   const [page, sections] = await Promise.all([
     prisma.servicesPage.findUnique({ where: { id: 1 } }),
     prisma.serviceSection.findMany({

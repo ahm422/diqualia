@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { requireAdminApi } from "@/lib/auth/require-admin-api";
-import { prisma } from "@/lib/prisma";
+import { getDb } from "@/lib/cloudflare-env";
 
 const PatchSchema = z.object({ read: z.boolean() });
 
@@ -12,6 +12,7 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  const prisma = getDb();
   const session = await requireAdminApi();
   if (session instanceof NextResponse) return session;
 

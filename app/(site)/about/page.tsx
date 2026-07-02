@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { prisma } from "@/lib/prisma";
+import { getDb } from "@/lib/cloudflare-env";
 
 export const revalidate = 60;
 
@@ -93,6 +93,7 @@ function renderWhereNextHeadline(headline: string) {
 }
 
 export default async function AboutPage() {
+  const prisma = getDb();
   const [hero, builtForItems, whereNext] = await Promise.all([
     prisma.aboutHero.findUnique({ where: { id: 1 } }),
     prisma.aboutBuiltForItem.findMany({ orderBy: { order: "asc" } }),

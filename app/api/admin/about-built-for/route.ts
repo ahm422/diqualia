@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { requireAdminApi } from "@/lib/auth/require-admin-api";
-import { prisma } from "@/lib/prisma";
+import { getDb } from "@/lib/cloudflare-env";
 import { revalidatePage } from "@/lib/revalidate-site";
 
 const PostSchema = z.object({
@@ -13,6 +13,7 @@ const PostSchema = z.object({
 });
 
 export async function GET() {
+  const prisma = getDb();
   const session = await requireAdminApi();
   if (session instanceof NextResponse) return session;
 
@@ -21,6 +22,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const prisma = getDb();
   const session = await requireAdminApi();
   if (session instanceof NextResponse) return session;
 

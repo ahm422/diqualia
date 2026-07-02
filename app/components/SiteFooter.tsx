@@ -1,10 +1,11 @@
 import Link from "next/link";
 
-import { prisma } from "@/lib/prisma";
+import { getDb } from "@/lib/cloudflare-env";
 
 import { BrandLogo } from "./BrandLogo";
 
 export async function SiteFooter() {
+  const prisma = getDb();
   const [settings, navItems, siteSettings] = await Promise.all([
     prisma.footerSettings.findUnique({ where: { id: 1 } }),
     prisma.footerNavItem.findMany({ orderBy: [{ group: "asc" }, { order: "asc" }] }),

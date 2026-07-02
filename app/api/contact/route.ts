@@ -3,7 +3,7 @@ import { Resend } from "resend";
 import { z } from "zod";
 
 import { checkRateLimit } from "@/lib/rateLimit";
-import { prisma } from "@/lib/prisma";
+import { getDb } from "@/lib/cloudflare-env";
 
 const ContactBodySchema = z
   .object({
@@ -36,6 +36,7 @@ function esc(s: string) {
 }
 
 export async function POST(request: NextRequest) {
+  const prisma = getDb();
   const ip = getClientIp(request);
   const rl = checkRateLimit({ key: `contact:${ip}`, limit: 10, windowMs: 60_000 });
   if (!rl.ok) {

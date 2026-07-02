@@ -3,9 +3,10 @@ import "server-only";
 import { NextResponse } from "next/server";
 
 import { requireAdminApi } from "@/lib/auth/require-admin-api";
-import { prisma } from "@/lib/prisma";
+import { getDb } from "@/lib/cloudflare-env";
 
 export async function GET(request: Request) {
+  const prisma = getDb();
   const session = await requireAdminApi();
   if (session instanceof NextResponse) return session;
 

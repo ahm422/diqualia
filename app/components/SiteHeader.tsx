@@ -1,8 +1,9 @@
-import { prisma } from "@/lib/prisma";
+import { getDb } from "@/lib/cloudflare-env";
 
 import { SiteHeaderClient } from "./SiteHeaderClient";
 
 export async function SiteHeader() {
+  const prisma = getDb();
   const [navItems, mobileNavItems, cta, settings] = await Promise.all([
     prisma.navItem.findMany({ where: { visible: true }, orderBy: { order: "asc" } }),
     prisma.footerNavItem.findMany({ orderBy: [{ group: "asc" }, { order: "asc" }] }),

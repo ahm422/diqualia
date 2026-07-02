@@ -1,10 +1,11 @@
 import { requireAdmin } from "@/lib/auth/require-admin";
-import { prisma } from "@/lib/prisma";
+import { getDb } from "@/lib/cloudflare-env";
 import { AdminPageHeader } from "@/components/admin";
 
 import { SiteSettingsEditor } from "./SiteSettingsEditor";
 
 export default async function SiteSettingsPage() {
+  const prisma = getDb();
   await requireAdmin();
 
   const [siteSettings, navItems, cta, footer, footerNav] = await Promise.all([

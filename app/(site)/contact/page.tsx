@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { prisma } from "@/lib/prisma";
+import { getDb } from "@/lib/cloudflare-env";
 import { ContactLeadForm } from "@/app/components/ContactLeadForm";
 
 export const revalidate = 60;
@@ -23,6 +23,7 @@ function Eyebrow({ children, center }: { children: React.ReactNode; center?: boo
 }
 
 export default async function ContactPage() {
+  const prisma = getDb();
   const page = await prisma.contactPage.findUnique({ where: { id: 1 } });
 
   if (!page) {

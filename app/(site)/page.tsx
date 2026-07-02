@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { prisma } from "@/lib/prisma";
+import { getDb } from "@/lib/cloudflare-env";
 
 export const revalidate = 60;
 
 export default async function Home() {
+  const prisma = getDb();
   const [hero, marqueeItems, exploreSection, exploreCards, whereNext] = await Promise.all([
     prisma.homeHero.findUnique({ where: { id: 1 } }),
     prisma.homeMarqueeItem.findMany({ orderBy: { order: "asc" } }),
