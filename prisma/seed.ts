@@ -1,8 +1,9 @@
 import "dotenv/config";
-import bcrypt from "bcrypt";
+
 import { getPlatformProxy } from "wrangler";
 
 import { createPrismaClient } from "../lib/prisma-core";
+import { upsertAdminUser } from "../scripts/lib/seed-admin-core";
 import { seedCms } from "./seed-cms";
 
 async function main() {
@@ -16,12 +17,7 @@ async function main() {
   const prisma = createPrismaClient(env.DB);
 
   try {
-    const passwordHash = await bcrypt.hash(password, 12);
-    const admin = await prisma.adminUser.upsert({
-      where: { email },
-      update: { passwordHash },
-      create: { email, passwordHash },
-    });
+    const admin = await upsertAdminUser(prisma, email, password);
     console.log(`Admin user ready: ${admin.email} (id: ${admin.id})`);
 
     const existing = await prisma.lead.findFirst({ where: { source: "seed" } });
