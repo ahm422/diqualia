@@ -5,7 +5,7 @@ import { AdminPageHeader } from "@/components/admin";
 import { ProcessPageEditor } from "./ProcessPageEditor";
 
 export default async function ProcessPage() {
-  const prisma = getDb();
+  const prisma = await getDb();
   await requireAdmin();
 
   const [initialPage, initialSteps] = await Promise.all([

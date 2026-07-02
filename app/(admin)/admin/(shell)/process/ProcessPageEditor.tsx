@@ -118,7 +118,7 @@ function StepsSection({ initial }: { initial: ProcessStepData[] }) {
       body: JSON.stringify(data),
     });
     if (res.ok) {
-      const updated = await res.json();
+      const updated = (await res.json()) as ProcessStepData;
       setSteps((prev) => prev.map((s) => (s.id === id ? updated : s)));
     }
   }
@@ -157,7 +157,7 @@ function StepsSection({ initial }: { initial: ProcessStepData[] }) {
       }),
     });
     if (res.ok) {
-      const step = await res.json();
+      const step = (await res.json()) as ProcessStepData;
       setSteps((prev) => [...prev, step]);
       setNewLabel("");
       setNewNumber("");

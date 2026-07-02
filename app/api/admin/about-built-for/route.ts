@@ -13,7 +13,7 @@ const PostSchema = z.object({
 });
 
 export async function GET() {
-  const prisma = getDb();
+  const prisma = await getDb();
   const session = await requireAdminApi();
   if (session instanceof NextResponse) return session;
 
@@ -22,7 +22,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const prisma = getDb();
+  const prisma = await getDb();
   const session = await requireAdminApi();
   if (session instanceof NextResponse) return session;
 

@@ -5,7 +5,7 @@ import { AdminPageHeader } from "@/components/admin";
 import { ContactPageEditor } from "./ContactPageEditor";
 
 export default async function ContactAdminPage() {
-  const prisma = getDb();
+  const prisma = await getDb();
   await requireAdmin();
 
   const contactPage = await prisma.contactPage.findUnique({ where: { id: 1 } });

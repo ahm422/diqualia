@@ -5,7 +5,7 @@ import { AdminPageHeader } from "@/components/admin";
 import { HomePageEditor } from "./HomePageEditor";
 
 export default async function HomePage() {
-  const prisma = getDb();
+  const prisma = await getDb();
   await requireAdmin();
 
   const [hero, marqueeItems, exploreSection, exploreCards, whereNext] = await Promise.all([

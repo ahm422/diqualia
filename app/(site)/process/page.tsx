@@ -38,7 +38,7 @@ function H1({ children }: { children: React.ReactNode }) {
 }
 
 export default async function ProcessPage() {
-  const prisma = getDb();
+  const prisma = await getDb();
   const [page, steps] = await Promise.all([
     prisma.processPage.findUnique({ where: { id: 1 } }),
     prisma.processStep.findMany({ orderBy: { order: "asc" } }),

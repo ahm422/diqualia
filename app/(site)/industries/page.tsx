@@ -38,7 +38,7 @@ function H1({ children }: { children: React.ReactNode }) {
 }
 
 export default async function IndustriesPage() {
-  const prisma = getDb();
+  const prisma = await getDb();
   const [page, sectors] = await Promise.all([
     prisma.industriesPage.findUnique({ where: { id: 1 } }),
     prisma.industrySector.findMany({ orderBy: { order: "asc" } }),

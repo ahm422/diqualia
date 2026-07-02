@@ -5,7 +5,7 @@ import { AdminPageHeader } from "@/components/admin";
 import { AboutPageEditor } from "./AboutPageEditor";
 
 export default async function AboutPage() {
-  const prisma = getDb();
+  const prisma = await getDb();
   await requireAdmin();
 
   const [hero, builtFor, whereNext] = await Promise.all([

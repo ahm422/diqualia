@@ -5,14 +5,17 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { getPrisma } from "@/lib/prisma";
 import { getStorage } from "@/lib/storage";
 
-export function getEnv() {
-  return getCloudflareContext().env;
+export async function getEnv() {
+  const { env } = await getCloudflareContext({ async: true });
+  return env;
 }
 
-export function getDb() {
-  return getPrisma(getCloudflareContext().env.DB);
+export async function getDb() {
+  const { env } = await getCloudflareContext({ async: true });
+  return getPrisma(env.DB);
 }
 
-export function getR2() {
-  return getStorage(getCloudflareContext().env.R2);
+export async function getR2() {
+  const { env } = await getCloudflareContext({ async: true });
+  return getStorage(env.R2);
 }

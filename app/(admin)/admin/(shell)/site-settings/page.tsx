@@ -5,7 +5,7 @@ import { AdminPageHeader } from "@/components/admin";
 import { SiteSettingsEditor } from "./SiteSettingsEditor";
 
 export default async function SiteSettingsPage() {
-  const prisma = getDb();
+  const prisma = await getDb();
   await requireAdmin();
 
   const [siteSettings, navItems, cta, footer, footerNav] = await Promise.all([

@@ -5,7 +5,7 @@ import { AdminPageHeader } from "@/components/admin";
 import { SubmissionsTable } from "./SubmissionsTable";
 
 export default async function SubmissionsPage() {
-  const prisma = getDb();
+  const prisma = await getDb();
   await requireAdmin();
 
   const leads = await prisma.lead.findMany({

@@ -144,7 +144,7 @@ function SectionsBlock({ initial }: { initial: ServiceSection[] }) {
       body: JSON.stringify(data),
     });
     if (res.ok) {
-      const updated = await res.json();
+      const updated = (await res.json()) as Partial<ServiceSection>;
       setSections((prev) => prev.map((s) => (s.id === id ? { ...s, ...updated } : s)));
     }
     return res;
@@ -183,7 +183,7 @@ function SectionsBlock({ initial }: { initial: ServiceSection[] }) {
       body: JSON.stringify({ tabId: newTabId, eyebrow: newEyebrow, title: newTitle, body: newBody }),
     });
     if (res.ok) {
-      const section = await res.json();
+      const section = (await res.json()) as ServiceSection;
       setSections((prev) => [...prev, section]);
       setNewTabId(""); setNewEyebrow(""); setNewTitle(""); setNewBody("");
     }
@@ -352,7 +352,7 @@ function ItemsEditor({ section, onItemsChange }: { section: ServiceSection; onIt
       body: JSON.stringify(data),
     });
     if (res.ok) {
-      const updated = await res.json();
+      const updated = (await res.json()) as ServiceItem;
       syncItems(items.map((i) => (i.id === id ? updated : i)));
     }
   }
@@ -391,7 +391,7 @@ function ItemsEditor({ section, onItemsChange }: { section: ServiceSection; onIt
       }),
     });
     if (res.ok) {
-      const item = await res.json();
+      const item = (await res.json()) as ServiceItem;
       syncItems([...items, item]);
       setNewTitle(""); setNewGroupLabel(""); setNewBody("");
     }

@@ -23,7 +23,7 @@ function Eyebrow({ children, center }: { children: React.ReactNode; center?: boo
 }
 
 export default async function ContactPage() {
-  const prisma = getDb();
+  const prisma = await getDb();
   const page = await prisma.contactPage.findUnique({ where: { id: 1 } });
 
   if (!page) {

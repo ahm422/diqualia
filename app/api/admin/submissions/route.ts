@@ -6,7 +6,7 @@ import { requireAdminApi } from "@/lib/auth/require-admin-api";
 import { getDb } from "@/lib/cloudflare-env";
 
 export async function GET(request: Request) {
-  const prisma = getDb();
+  const prisma = await getDb();
   const session = await requireAdminApi();
   if (session instanceof NextResponse) return session;
 

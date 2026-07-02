@@ -68,7 +68,7 @@ function highlightYou(text: string) {
 }
 
 export default async function ServicesPage() {
-  const prisma = getDb();
+  const prisma = await getDb();
   const [page, sections] = await Promise.all([
     prisma.servicesPage.findUnique({ where: { id: 1 } }),
     prisma.serviceSection.findMany({

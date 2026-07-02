@@ -9,9 +9,15 @@ const BASE_OPTS = {
 };
 
 export function setSessionCookie(res: NextResponse, token: string) {
+  const secure =
+    process.env.COOKIE_SECURE === "true"
+      ? true
+      : process.env.COOKIE_SECURE === "false"
+        ? false
+        : process.env.NODE_ENV === "production";
   res.cookies.set(COOKIE_NAME, token, {
     ...BASE_OPTS,
-    secure: process.env.NODE_ENV === "production",
+    secure,
     maxAge: 60 * 60 * 24 * 7, // 7 days
   });
 }

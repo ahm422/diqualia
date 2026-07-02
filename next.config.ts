@@ -11,6 +11,10 @@ const assetsPublicUrl = process.env.R2_PUBLIC_URL ?? "";
 const assetsOrigin = assetsPublicUrl ? new URL(assetsPublicUrl) : null;
 
 const nextConfig: NextConfig = {
+  experimental: {
+    // Local D1 (SQLite) cannot handle parallel static-generation workers.
+    staticGenerationMaxConcurrency: 1,
+  },
   images: {
     remotePatterns: assetsOrigin
       ? [

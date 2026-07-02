@@ -5,7 +5,7 @@ import { AdminPageHeader } from "@/components/admin";
 import { ServicesPageEditor } from "./ServicesPageEditor";
 
 export default async function ServicesAdminPage() {
-  const prisma = getDb();
+  const prisma = await getDb();
   await requireAdmin();
 
   const [page, sections] = await Promise.all([

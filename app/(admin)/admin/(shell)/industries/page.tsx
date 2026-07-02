@@ -5,7 +5,7 @@ import { AdminPageHeader } from "@/components/admin";
 import { IndustriesPageEditor } from "./IndustriesPageEditor";
 
 export default async function IndustriesAdminPage() {
-  const prisma = getDb();
+  const prisma = await getDb();
   await requireAdmin();
 
   const [page, sectors] = await Promise.all([
