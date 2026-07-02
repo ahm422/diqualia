@@ -23,7 +23,8 @@
     "cf:build": "opennextjs-cloudflare build",
     "cf:preview": "opennextjs-cloudflare preview -- --ip 127.0.0.1",
     "cf:dev": "opennextjs-cloudflare preview -- --ip 127.0.0.1",
-    "cf:d1:local": "wrangler d1 execute diqualia-db --local"
+    "cf:d1:local": "wrangler d1 execute diqualia-db --local",
+    "cf:e2e": "tsx scripts/e2e-preview.ts"
   },
   "dependencies": {
     "@prisma/adapter-d1": "^7.8.0",
