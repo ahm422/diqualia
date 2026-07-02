@@ -7,17 +7,17 @@ initOpenNextCloudflareForDev({
   remoteBindings: false,
 });
 
-const garagePublicUrl = process.env.GARAGE_PUBLIC_URL ?? "";
-const garageOrigin = garagePublicUrl ? new URL(garagePublicUrl) : null;
+const assetsPublicUrl = process.env.R2_PUBLIC_URL ?? "";
+const assetsOrigin = assetsPublicUrl ? new URL(assetsPublicUrl) : null;
 
 const nextConfig: NextConfig = {
   images: {
-    remotePatterns: garageOrigin
+    remotePatterns: assetsOrigin
       ? [
           {
-            protocol: garageOrigin.protocol.replace(":", "") as "http" | "https",
-            hostname: garageOrigin.hostname,
-            port: garageOrigin.port,
+            protocol: assetsOrigin.protocol.replace(":", "") as "http" | "https",
+            hostname: assetsOrigin.hostname,
+            port: assetsOrigin.port,
             pathname: "/**",
           },
         ]

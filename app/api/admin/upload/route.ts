@@ -3,8 +3,9 @@ import "server-only";
 import { NextResponse, type NextRequest } from "next/server";
 
 import { requireAdminApi } from "@/lib/auth/require-admin-api";
+import { getEnv } from "@/lib/cloudflare-env";
 import { checkRateLimit } from "@/lib/rateLimit";
-import { uploadObject, publicUrl } from "@/lib/storage";
+import { getStorage, publicUrl } from "@/lib/storage";
 
 // Allowed MIME types → file extension
 const ALLOWED: Record<string, string> = {
@@ -52,16 +53,24 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "File exceeds 5 MB limit" }, { status: 413 });
   }
 
-  // 6. Upload to Garage — key: uploads/<uuid>.<ext>
+  // 6. Upload to R2 — key: uploads/<uuid>.<ext>
   const key = `uploads/${crypto.randomUUID()}.${ext}`;
   const body = Buffer.from(await file.arrayBuffer());
 
+  const env = getEnv();
+  if (!env.R2) {
+    console.error("[upload] R2 binding not configured");
+    return NextResponse.json({ error: "Upload failed" }, { status: 500 });
+  }
+  const storage = getStorage(env.R2);
+  const publicBase = env.R2_PUBLIC_URL;
+
   try {
-    await uploadObject({ key, body, contentType: file.type });
+    await storage.uploadObject({ key, body, contentType: file.type });
   } catch (err) {
-    console.error("[upload] S3 error:", err);
+    console.error("[upload] R2 error:", err);
     return NextResponse.json({ error: "Upload failed" }, { status: 500 });
   }
 
-  return NextResponse.json({ url: publicUrl(key), key });
+  return NextResponse.json({ url: publicUrl(key, publicBase), key });
 }
