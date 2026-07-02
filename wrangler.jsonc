@@ -1,8 +1,8 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  // Phase 1 provisioning (issue #41); account moved to the owner's Cloudflare account:
-  // - d1 create diqualia-db: on the owner's account (see database_id below)
-  // - r2 bucket create diqualia-assets: failed — R2 not enabled on account (code 10042); local emulation still works
+  // Phase 1 provisioning (issue #41); account: the owner's Cloudflare account
+  // - d1 create diqualia-db: see database_id below
+  // - r2 bucket create diqualia-assets: created 2026-07-02 (issue #47)
   "name": "diqualia",
   "account_id": "YOUR_CLOUDFLARE_ACCOUNT_ID",
   "compatibility_date": "2026-07-01",
@@ -40,6 +40,7 @@
     }
   ],
   "vars": {
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "R2_PUBLIC_URL": "https://pub-your-r2-bucket-id.r2.dev"
   }
 }
