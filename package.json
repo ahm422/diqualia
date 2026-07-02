@@ -11,7 +11,9 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
-    "db:seed:cms": "tsx prisma/seed-cms.ts"
+    "db:seed:cms": "tsx prisma/seed-cms.ts",
+    "cf:d1:local": "wrangler d1 execute diqualia-db --local",
+    "cf:dev": "wrangler dev"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1061.0",
@@ -51,6 +53,7 @@
     "eslint-config-next": "16.2.1",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "^4.106.0"
   }
 }
