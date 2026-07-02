@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { verifyPassword } from "@/lib/auth/password";
 import { signAdminToken } from "@/lib/auth/jwt";
+import { issueRefreshToken, setRefreshCookie } from "@/lib/auth/refresh-tokens";
 import { setSessionCookie } from "@/lib/auth/session";
 import { getDb } from "@/lib/cloudflare-env";
 import { checkRateLimit } from "@/lib/rateLimit";
@@ -55,7 +56,9 @@ export async function POST(request: NextRequest) {
   }
 
   const token = await signAdminToken({ id: adminUser.id, email: adminUser.email });
+  const refresh = await issueRefreshToken(prisma, adminUser.id);
   const res = NextResponse.json({ ok: true });
   setSessionCookie(res, token);
+  setRefreshCookie(res, refresh.token, refresh.expiresAt);
   return res;
 }

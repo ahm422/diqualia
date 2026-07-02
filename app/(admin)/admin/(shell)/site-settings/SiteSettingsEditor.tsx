@@ -57,7 +57,7 @@ function LogoSection({ initial }: { initial: SiteSettings }) {
       <AdminImageField
         label="Logo"
         currentUrl={logoUrl}
-        onUpload={setLogoUrl}
+        onUpload={(url) => setLogoUrl(url)}
         onRemove={() => setLogoUrl(null)}
       />
 

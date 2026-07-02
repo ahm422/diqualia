@@ -13,12 +13,26 @@ export function AdminImageField({
 }: {
   label: string;
   currentUrl: string | null;
-  onUpload: (url: string) => void;
+  onUpload: (url: string, key: string) => void;
   onRemove?: () => void;
   accept?: string;
 }) {
   const [uploading, setUploading] = useState(false);
+  const [removing, setRemoving] = useState(false);
+  const [storageKey, setStorageKey] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  function keyFromUrl(url: string | null): string | null {
+    if (!url) return null;
+    try {
+      const path = new URL(url).pathname;
+      return path.startsWith("/") ? path.slice(1) : path;
+    } catch {
+      return null;
+    }
+  }
+
+  const activeKey = storageKey ?? keyFromUrl(currentUrl);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -32,9 +46,10 @@ export function AdminImageField({
         credentials: "include",
         body: fd,
       });
-      const data = (await res.json()) as { url?: string; error?: string };
-      if (res.ok && data.url) {
-        onUpload(data.url);
+      const data = (await res.json()) as { url?: string; key?: string; error?: string };
+      if (res.ok && data.url && data.key) {
+        setStorageKey(data.key);
+        onUpload(data.url, data.key);
         toast.success("Image uploaded");
       } else {
         toast.error(data.error ?? "Upload failed");
@@ -44,6 +59,37 @@ export function AdminImageField({
     } finally {
       setUploading(false);
       if (fileRef.current) fileRef.current.value = "";
+    }
+  }
+
+  async function handleRemove() {
+    if (!activeKey && !currentUrl) {
+      onRemove?.();
+      return;
+    }
+
+    setRemoving(true);
+    try {
+      if (activeKey) {
+        const res = await fetch("/api/admin/upload", {
+          method: "DELETE",
+          credentials: "include",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ key: activeKey }),
+        });
+        if (!res.ok) {
+          const data = (await res.json().catch(() => null)) as { error?: string } | null;
+          toast.error(data?.error ?? "Failed to remove image");
+          return;
+        }
+      }
+      setStorageKey(null);
+      onRemove?.();
+      toast.success("Image removed");
+    } catch {
+      toast.error("Failed to remove image");
+    } finally {
+      setRemoving(false);
     }
   }
 
@@ -64,8 +110,9 @@ export function AdminImageField({
               style={{ height: 50, width: "auto" }}
             />
             <button
-              onClick={onRemove}
-              className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] text-white"
+              onClick={handleRemove}
+              disabled={removing}
+              className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] text-white disabled:opacity-50"
               title="Remove image"
             >
               ×

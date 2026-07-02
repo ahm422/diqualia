@@ -2,7 +2,7 @@
 import "dotenv/config";
 const base = "http://127.0.0.1:8787";
 
-async function request(path, init = {}) {
+async function request(path: string, init: RequestInit = {}) {
   const res = await fetch(`${base}${path}`, init);
   const text = await res.text();
   let json;
@@ -35,7 +35,7 @@ async function main() {
   const setCookie = loginRes.headers.getSetCookie?.() ?? [];
   const cookie = setCookie.map((c) => c.split(";")[0]).join("; ");
   console.log(`login -> ${loginRes.status}`);
-  const loginJson = await loginRes.json().catch(() => null);
+  const loginJson = (await loginRes.json().catch(() => null)) as { ok?: boolean } | null;
   console.log(`login body ok: ${loginJson?.ok === true}`);
 
   const adminAuthed = await request("/admin", {
@@ -50,7 +50,7 @@ async function main() {
     headers: { "content-type": "application/json", ...(cookie ? { cookie } : {}) },
     body: JSON.stringify({ siteName: "DiQualia" }),
   });
-  console.log(`patch -> ${patch.status} hasId=${Boolean(patch.json?.id)}`);
+  console.log(`patch -> ${patch.status} hasId=${Boolean((patch.json as { id?: unknown })?.id)}`);
 
   console.log("\n=== Contact form ===");
   const contact = await request("/api/contact", {
@@ -63,7 +63,7 @@ async function main() {
       source: "smoke-test",
     }),
   });
-  console.log(`contact -> ${contact.status} ok=${contact.json?.ok}`);
+  console.log(`contact -> ${contact.status} ok=${(contact.json as { ok?: boolean })?.ok}`);
 
   console.log("\n=== Upload ===");
   const png = Buffer.from(

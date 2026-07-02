@@ -1,6 +1,7 @@
 import "server-only";
 
 import { NextResponse, type NextRequest } from "next/server";
+import { z } from "zod";
 
 import { requireAdminApi } from "@/lib/auth/require-admin-api";
 import { getEnv } from "@/lib/cloudflare-env";
@@ -16,6 +17,12 @@ const ALLOWED: Record<string, string> = {
 };
 
 const MAX_BYTES = 5 * 1024 * 1024; // 5 MB
+
+const UPLOAD_KEY_RE = /^uploads\/[a-f0-9-]+\.(jpg|png|webp|svg)$/;
+
+const DeleteSchema = z.object({
+  key: z.string().min(1).max(500),
+});
 
 export async function POST(request: NextRequest) {
   // 1. Auth — returns 401 JSON if invalid; never redirects
@@ -73,4 +80,41 @@ export async function POST(request: NextRequest) {
   }
 
   return NextResponse.json({ url: publicUrl(key, publicBase), key });
+}
+
+export async function DELETE(request: NextRequest) {
+  const session = await requireAdminApi();
+  if (session instanceof NextResponse) return session;
+
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  const parsed = DeleteSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Invalid input" }, { status: 400 });
+  }
+
+  const { key } = parsed.data;
+  if (!UPLOAD_KEY_RE.test(key)) {
+    return NextResponse.json({ error: "Invalid key" }, { status: 400 });
+  }
+
+  const env = await getEnv();
+  if (!env.R2) {
+    console.error("[upload] R2 binding not configured");
+    return NextResponse.json({ error: "Delete failed" }, { status: 500 });
+  }
+
+  try {
+    await getStorage(env.R2).deleteObject({ key });
+  } catch (err) {
+    console.error("[upload] R2 delete error:", err);
+    return NextResponse.json({ error: "Delete failed" }, { status: 500 });
+  }
+
+  return NextResponse.json({ ok: true });
 }
