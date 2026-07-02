@@ -2,7 +2,7 @@
  * Create or update the CMS super-admin in D1 (admin_users only — CMS content untouched).
  *
  * The login route only accepts process.env.ADMIN_EMAIL; password is verified against
- * admin_users.password_hash (bcrypt, same as lib/auth/password.ts).
+ * admin_users.password_hash (bcryptjs, same as lib/auth/password.ts).
  *
  * Usage:
  *   npm run db:seed:admin          # local D1 (.wrangler/state — npm run dev)
