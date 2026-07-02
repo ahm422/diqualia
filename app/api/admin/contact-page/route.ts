@@ -8,7 +8,7 @@ import { revalidatePage } from "@/lib/revalidate-site";
 import { contactPagePatchSchema } from "@/lib/schemas/admin/contact";
 
 export async function GET() {
-  const prisma = getDb();
+  const prisma = await getDb();
   const session = await requireAdminApi();
   if (session instanceof NextResponse) return session;
 
@@ -17,7 +17,7 @@ export async function GET() {
 }
 
 export async function PATCH(request: Request) {
-  const prisma = getDb();
+  const prisma = await getDb();
   const session = await requireAdminApi();
   if (session instanceof NextResponse) return session;
 

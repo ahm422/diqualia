@@ -108,7 +108,7 @@ function SectorsTab({ initialPage, initialSectors }: { initialPage: IndustriesPa
       body: JSON.stringify(data),
     });
     if (res.ok) {
-      const updated = await res.json();
+      const updated = (await res.json()) as IndustrySector;
       setSectors((prev) => prev.map((s) => (s.id === id ? updated : s)));
     }
   }
@@ -140,7 +140,7 @@ function SectorsTab({ initialPage, initialSectors }: { initialPage: IndustriesPa
       body: JSON.stringify({ name: newName }),
     });
     if (res.ok) {
-      const sector = await res.json();
+      const sector = (await res.json()) as IndustrySector;
       setSectors((prev) => [...prev, sector]);
       setNewName("");
     }

@@ -98,7 +98,7 @@ function BuiltForSection({ initial }: { initial: BuiltForItem[] }) {
       body: JSON.stringify(data),
     });
     if (res.ok) {
-      const updated = await res.json();
+      const updated = (await res.json()) as BuiltForItem;
       setItems((prev) => prev.map((i) => (i.id === id ? updated : i)));
     }
   }
@@ -130,7 +130,7 @@ function BuiltForSection({ initial }: { initial: BuiltForItem[] }) {
       body: JSON.stringify({ title: newTitle, description: newDesc }),
     });
     if (res.ok) {
-      const item = await res.json();
+      const item = (await res.json()) as BuiltForItem;
       setItems((prev) => [...prev, item]);
       setNewTitle("");
       setNewDesc("");

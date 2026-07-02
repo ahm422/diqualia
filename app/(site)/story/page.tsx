@@ -83,7 +83,7 @@ function PullQuote({ quote, cite }: { quote: React.ReactNode; cite: string }) {
 }
 
 export default async function StoryPage() {
-  const prisma = getDb();
+  const prisma = await getDb();
   const page = await prisma.storyPage.findUnique({ where: { id: 1 } });
 
   if (!page) {

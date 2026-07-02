@@ -82,7 +82,7 @@ function NavSection({ initial }: { initial: NavItem[] }) {
       body: JSON.stringify(data),
     });
     if (res.ok) {
-      const updated = await res.json();
+      const updated = (await res.json()) as NavItem;
       setItems((prev) => prev.map((i) => (i.id === id ? updated : i)));
     }
   }
@@ -123,7 +123,7 @@ function NavSection({ initial }: { initial: NavItem[] }) {
       body: JSON.stringify({ href: newHref, label: newLabel }),
     });
     if (res.ok) {
-      const item = await res.json();
+      const item = (await res.json()) as NavItem;
       setItems((prev) => [...prev, item]);
       setNewHref("");
       setNewLabel("");
@@ -260,7 +260,7 @@ function FooterNavSection({ initial }: { initial: FooterNavItem[] }) {
       body: JSON.stringify(data),
     });
     if (res.ok) {
-      const updated = await res.json();
+      const updated = (await res.json()) as FooterNavItem;
       setItems((prev) => prev.map((i) => (i.id === id ? updated : i)));
     }
   }
@@ -296,7 +296,7 @@ function FooterNavSection({ initial }: { initial: FooterNavItem[] }) {
       body: JSON.stringify({ href: newHref, label: newLabel, group: newGroup }),
     });
     if (res.ok) {
-      const item = await res.json();
+      const item = (await res.json()) as FooterNavItem;
       setItems((prev) => [...prev, item]);
       setNewHref("");
       setNewLabel("");

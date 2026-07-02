@@ -93,7 +93,7 @@ function renderWhereNextHeadline(headline: string) {
 }
 
 export default async function AboutPage() {
-  const prisma = getDb();
+  const prisma = await getDb();
   const [hero, builtForItems, whereNext] = await Promise.all([
     prisma.aboutHero.findUnique({ where: { id: 1 } }),
     prisma.aboutBuiltForItem.findMany({ orderBy: { order: "asc" } }),

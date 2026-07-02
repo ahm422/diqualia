@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
   const key = `uploads/${crypto.randomUUID()}.${ext}`;
   const body = Buffer.from(await file.arrayBuffer());
 
-  const env = getEnv();
+  const env = await getEnv();
   if (!env.R2) {
     console.error("[upload] R2 binding not configured");
     return NextResponse.json({ error: "Upload failed" }, { status: 500 });

@@ -118,7 +118,7 @@ function MarqueeSection({ initial }: { initial: MarqueeItem[] }) {
       body: JSON.stringify(data),
     });
     if (res.ok) {
-      const updated = await res.json();
+      const updated = (await res.json()) as MarqueeItem;
       setItems((prev) => prev.map((i) => (i.id === id ? updated : i)));
     }
   }
@@ -149,7 +149,7 @@ function MarqueeSection({ initial }: { initial: MarqueeItem[] }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text: newText }),
     });
-    if (res.ok) { const item = await res.json(); setItems((prev) => [...prev, item]); setNewText(""); }
+    if (res.ok) { const item = (await res.json()) as MarqueeItem; setItems((prev) => [...prev, item]); setNewText(""); }
     setAdding(false);
   }
 
@@ -242,7 +242,7 @@ function ExploreCardsSection({ initial }: { initial: ExploreCard[] }) {
       body: JSON.stringify(data),
     });
     if (res.ok) {
-      const updated = await res.json();
+      const updated = (await res.json()) as ExploreCard;
       setCards((prev) => prev.map((c) => (c.id === id ? updated : c)));
     }
   }
@@ -273,7 +273,7 @@ function ExploreCardsSection({ initial }: { initial: ExploreCard[] }) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ href: newHref, title: newTitle, body: newBody }),
     });
-    if (res.ok) { const card = await res.json(); setCards((prev) => [...prev, card]); setNewHref(""); setNewTitle(""); setNewBody(""); }
+    if (res.ok) { const card = (await res.json()) as ExploreCard; setCards((prev) => [...prev, card]); setNewHref(""); setNewTitle(""); setNewBody(""); }
     setAdding(false);
   }
 

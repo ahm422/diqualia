@@ -36,7 +36,7 @@ function esc(s: string) {
 }
 
 export async function POST(request: NextRequest) {
-  const prisma = getDb();
+  const prisma = await getDb();
   const ip = getClientIp(request);
   const rl = checkRateLimit({ key: `contact:${ip}`, limit: 10, windowMs: 60_000 });
   if (!rl.ok) {

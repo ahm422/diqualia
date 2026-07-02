@@ -14,7 +14,7 @@ import { INSERT_ORDER, WIPE_ORDER } from "./table-order";
 type AnyPrismaClient = PostgresPrismaClient | D1PrismaClient;
 
 function getModelDelegate(prisma: AnyPrismaClient, delegate: PrismaDelegate) {
-  return prisma[delegate as keyof AnyPrismaClient] as {
+  return prisma[delegate as keyof AnyPrismaClient] as unknown as {
     findMany: () => Promise<Record<string, unknown>[]>;
     count: () => Promise<number>;
     deleteMany: () => Promise<unknown>;
@@ -84,7 +84,9 @@ export async function importTables(prisma: D1PrismaClient, payload: ExportPayloa
     console.error(`queued ${key}: ${rows.length}`);
   }
 
-  await prisma.$transaction(operations);
+  for (const op of operations) {
+    await op;
+  }
   console.error(`committed ${operations.length} rows`);
 }
 
