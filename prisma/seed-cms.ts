@@ -1,3 +1,5 @@
+import "dotenv/config";
+
 import type { PrismaClient } from "../lib/generated/prisma/client";
 
 export async function seedCms(prisma: PrismaClient): Promise<void> {
@@ -685,4 +687,32 @@ export async function seedCms(prisma: PrismaClient): Promise<void> {
   console.log("FooterNavItem ready (8)");
 
   console.log("CMS seed complete.");
+}
+
+async function main() {
+  const { PrismaClient } = await import("../lib/generated/prisma/client");
+  const { PrismaPg } = await import("@prisma/adapter-pg");
+  const { Pool } = await import("pg");
+  const { pgConnectionString, pgSslOption } = await import("../lib/pgSsl");
+
+  const ssl = pgSslOption();
+  const pool = new Pool({
+    connectionString: pgConnectionString(process.env.DATABASE_URL),
+    ...(ssl ? { ssl } : {}),
+  });
+  const prisma = new PrismaClient({ adapter: new PrismaPg(pool) });
+
+  try {
+    await seedCms(prisma);
+  } finally {
+    await prisma.$disconnect();
+    await pool.end();
+  }
+}
+
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main().catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });
 }
