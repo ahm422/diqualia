@@ -3,11 +3,12 @@ import "server-only";
 import { NextResponse } from "next/server";
 
 import { requireAdminApi } from "@/lib/auth/require-admin-api";
-import { prisma } from "@/lib/prisma";
+import { getDb } from "@/lib/cloudflare-env";
 import { revalidatePage } from "@/lib/revalidate-site";
 import { homeHeroPatchSchema } from "@/lib/schemas/admin/home";
 
 export async function GET() {
+  const prisma = getDb();
   const session = await requireAdminApi();
   if (session instanceof NextResponse) return session;
 
@@ -16,6 +17,7 @@ export async function GET() {
 }
 
 export async function PATCH(request: Request) {
+  const prisma = getDb();
   const session = await requireAdminApi();
   if (session instanceof NextResponse) return session;
 

@@ -1,5 +1,8 @@
 import type { NextConfig } from "next";
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 import { URL } from "url";
+
+initOpenNextCloudflareForDev();
 
 const garagePublicUrl = process.env.GARAGE_PUBLIC_URL ?? "";
 const garageOrigin = garagePublicUrl ? new URL(garagePublicUrl) : null;

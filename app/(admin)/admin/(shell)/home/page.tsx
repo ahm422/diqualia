@@ -1,10 +1,11 @@
 import { requireAdmin } from "@/lib/auth/require-admin";
-import { prisma } from "@/lib/prisma";
+import { getDb } from "@/lib/cloudflare-env";
 import { AdminPageHeader } from "@/components/admin";
 
 import { HomePageEditor } from "./HomePageEditor";
 
 export default async function HomePage() {
+  const prisma = getDb();
   await requireAdmin();
 
   const [hero, marqueeItems, exploreSection, exploreCards, whereNext] = await Promise.all([

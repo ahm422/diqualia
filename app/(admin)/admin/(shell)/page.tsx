@@ -1,7 +1,8 @@
 import { requireAdmin } from "@/lib/auth/require-admin";
-import { prisma } from "@/lib/prisma";
+import { getDb } from "@/lib/cloudflare-env";
 
 export default async function AdminDashboard() {
+  const prisma = getDb();
   await requireAdmin();
   const leadCount = await prisma.lead.count();
 

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { prisma } from "@/lib/prisma";
+import { getDb } from "@/lib/cloudflare-env";
 
 export const revalidate = 60;
 
@@ -38,6 +38,7 @@ function H1({ children }: { children: React.ReactNode }) {
 }
 
 export default async function ProcessPage() {
+  const prisma = getDb();
   const [page, steps] = await Promise.all([
     prisma.processPage.findUnique({ where: { id: 1 } }),
     prisma.processStep.findMany({ orderBy: { order: "asc" } }),

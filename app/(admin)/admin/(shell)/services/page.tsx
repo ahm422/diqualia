@@ -1,10 +1,11 @@
 import { requireAdmin } from "@/lib/auth/require-admin";
-import { prisma } from "@/lib/prisma";
+import { getDb } from "@/lib/cloudflare-env";
 import { AdminPageHeader } from "@/components/admin";
 
 import { ServicesPageEditor } from "./ServicesPageEditor";
 
 export default async function ServicesAdminPage() {
+  const prisma = getDb();
   await requireAdmin();
 
   const [page, sections] = await Promise.all([

@@ -4,7 +4,7 @@ import { z } from "zod";
 import { verifyPassword } from "@/lib/auth/password";
 import { signAdminToken } from "@/lib/auth/jwt";
 import { setSessionCookie } from "@/lib/auth/session";
-import { prisma } from "@/lib/prisma";
+import { getDb } from "@/lib/cloudflare-env";
 import { checkRateLimit } from "@/lib/rateLimit";
 
 const BodySchema = z.object({
@@ -19,6 +19,7 @@ function getClientIp(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const prisma = getDb();
   const ip = getClientIp(request);
   const rl = checkRateLimit({ key: `login:${ip}`, limit: 10, windowMs: 60_000 });
   if (!rl.ok) {

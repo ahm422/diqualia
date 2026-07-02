@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { prisma } from "@/lib/prisma";
+import { getDb } from "@/lib/cloudflare-env";
 
 export const revalidate = 60;
 
@@ -83,6 +83,7 @@ function PullQuote({ quote, cite }: { quote: React.ReactNode; cite: string }) {
 }
 
 export default async function StoryPage() {
+  const prisma = getDb();
   const page = await prisma.storyPage.findUnique({ where: { id: 1 } });
 
   if (!page) {
