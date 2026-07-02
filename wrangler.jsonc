@@ -1,0 +1,33 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  // Phase 1 provisioning (issue #41):
+  // - wrangler login: success (OAuth)
+  // - d1 create diqualia-db: success (real database_id below)
+  // - r2 bucket create diqualia-assets: failed — R2 not enabled on account (code 10042); local emulation still works
+  // - account_id set for multi-account OAuth (a developer's account)
+  "name": "diqualia",
+  "account_id": "YOUR_CLOUDFLARE_ACCOUNT_ID",
+  "compatibility_date": "2026-07-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": ".open-next/worker.js",
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "diqualia-db",
+      "database_id": "YOUR_D1_DATABASE_ID"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "R2",
+      "bucket_name": "diqualia-assets"
+    }
+  ],
+  "vars": {
+    "NODE_ENV": "production"
+  }
+}

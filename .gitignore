@@ -44,3 +44,7 @@ next-env.d.ts
 /reference/
 
 /lib/generated/prisma
+
+# cloudflare local dev state
+.wrangler/
+.open-next/
