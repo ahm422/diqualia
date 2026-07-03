@@ -1,5 +1,6 @@
 # Wrangler local preview secrets (copy to .dev.vars — never commit .dev.vars)
-# Used by: npm run cf:preview / npm run cf:dev
+# Used by: npm run preview / npm run cf:preview / npm run cf:dev
+# For migration export tooling, see .env.example
 
 JWT_SECRET=your-jwt-secret-here
 ADMIN_EMAIL=admin@example.com

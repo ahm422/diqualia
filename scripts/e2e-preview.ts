@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /**
- * Phase 7 local E2E regression against cf:preview (http://127.0.0.1:8787).
+ * Phase 7 local E2E regression against preview (http://127.0.0.1:8787).
  *
  * Prerequisites:
  *   npm run db:migrate && npm run db:import:local && npm run db:seed:admin
  *   Copy .dev.vars.example → .dev.vars (JWT_SECRET, ADMIN_EMAIL, COOKIE_SECURE=false)
  *   ADMIN_PASSWORD in .env (used by seed-admin + this script)
- *   npm run cf:build && npm run cf:preview   (separate terminal)
+ *   npm run build && npm run preview   (separate terminal; cf:preview is an alias)
  *
  * Usage:
  *   npm run cf:e2e

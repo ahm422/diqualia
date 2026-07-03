@@ -11,9 +11,12 @@
 import {
   parseMigrationCliArgs,
   readExportFile,
-  withD1Client,
 } from "./lib/d1-proxy";
-import { countD1Tables, validateExportCounts } from "./lib/migration-ops";
+import { validateExportCounts } from "./lib/migration-ops";
+import {
+  countLocalTables,
+  queryLocalJsonColumn,
+} from "./lib/migration-ops-local";
 import {
   countRemoteTables,
   queryRemoteJsonColumn,
@@ -80,8 +83,7 @@ async function main() {
       }
     }
   } else {
-    await withD1Client(options.target, async (prisma) => {
-    const d1Counts = await countD1Tables(prisma);
+    const d1Counts = await countLocalTables();
 
     console.error(`\nRow counts (${options.target}):\n`);
     for (const { key } of TABLE_MANIFEST) {
@@ -94,13 +96,10 @@ async function main() {
       console.error(`${mark} ${label} ${actual}/${expected}`);
     }
 
-    const storyRows = payload.storyPage;
-    const contactRows = payload.contactPage;
-
-    if (storyRows.length > 0) {
-      const manifesto = (storyRows[0] as { manifestoItems?: unknown }).manifestoItems;
-      const story = await prisma.storyPage.findFirst();
-      const d1Manifesto = story?.manifestoItems;
+    if (payload.storyPage.length > 0) {
+      const manifesto = (payload.storyPage[0] as { manifestoItems?: unknown })
+        .manifestoItems;
+      const d1Manifesto = await queryLocalJsonColumn("storyPage", "manifestoItems");
       const exportOk = isNonEmptyStringArray(manifesto);
       const d1Ok = isNonEmptyStringArray(d1Manifesto);
       if (!exportOk || !d1Ok) {
@@ -111,11 +110,13 @@ async function main() {
       }
     }
 
-    if (contactRows.length > 0) {
-      const whatToInclude = (contactRows[0] as { whatToIncludeItems?: unknown })
+    if (payload.contactPage.length > 0) {
+      const whatToInclude = (payload.contactPage[0] as { whatToIncludeItems?: unknown })
         .whatToIncludeItems;
-      const contact = await prisma.contactPage.findFirst();
-      const d1WhatToInclude = contact?.whatToIncludeItems;
+      const d1WhatToInclude = await queryLocalJsonColumn(
+        "contactPage",
+        "whatToIncludeItems",
+      );
       const exportOk = isNonEmptyStringArray(whatToInclude);
       const d1Ok = isNonEmptyStringArray(d1WhatToInclude);
       if (!exportOk || !d1Ok) {
@@ -125,7 +126,6 @@ async function main() {
         console.error("✅ contactPage.whatToIncludeItems is a non-empty string[]");
       }
     }
-  });
   }
 
   if (failed) {

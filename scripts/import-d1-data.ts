@@ -22,14 +22,10 @@
  */
 import path from "node:path";
 
-import {
-  assertD1Schema,
-  parseMigrationCliArgs,
-  readExportFile,
-  withD1Client,
-} from "./lib/d1-proxy";
+import { parseMigrationCliArgs, readExportFile } from "./lib/d1-proxy";
+import { validateExportCounts } from "./lib/migration-ops";
+import { importLocal } from "./lib/migration-ops-local";
 import { importRemote } from "./lib/migration-ops-remote";
-import { importTables, validateExportCounts, wipeD1Tables } from "./lib/migration-ops";
 import { INSERT_ORDER } from "./lib/table-order";
 
 async function main() {
@@ -61,14 +57,8 @@ async function main() {
     return;
   }
 
-  await withD1Client(options.target, async (prisma) => {
-    await assertD1Schema(prisma);
-    if (options.force) {
-      await wipeD1Tables(prisma);
-    }
-    await importTables(prisma, payload);
-    console.error(`Import complete (${options.target}).`);
-  });
+  await importLocal(payload, options.force);
+  console.error(`Import complete (${options.target}).`);
 }
 
 main().catch((error) => {
