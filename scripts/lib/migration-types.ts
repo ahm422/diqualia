@@ -1,3 +1,4 @@
+/** Export payload compatibility marker (TABLE_MANIFEST tables from 0001_init). Not the latest D1 migration filename. */
 export const SCHEMA_VERSION = "0001_init";
 
 export const TABLE_MANIFEST = [

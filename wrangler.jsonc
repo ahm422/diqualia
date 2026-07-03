@@ -1,5 +1,25 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
+  // ── Phase 8 deployment config (issue #55) ───────────────────────────────────
+  // Full cutover runbook: docs/DEPLOY-PHASE9.md
+  //
+  // Confirmed (Phase 1/4 — do not change unless reprovisioning):
+  //   account_id, database_name, database_id, bucket_name, R2_PUBLIC_URL
+  //
+  // Swap at Phase 9.7 (DNS cutover — uncomment when zone is ready):
+  //   "routes": [
+  //     { "pattern": "diqualia.com/*", "zone_name": "diqualia.com" }
+  //   ]
+  // Alternative: bind custom domain via Cloudflare dashboard after deploy.
+  //
+  // Vars vs secrets (production):
+  //   vars (wrangler.jsonc):     R2_PUBLIC_URL, NODE_ENV
+  //   wrangler secret (required): JWT_SECRET, ADMIN_EMAIL
+  //   wrangler secret (optional): RESEND_API_KEY, RESEND_FROM (contact form email)
+  //   never long-lived secret:    ADMIN_PASSWORD — one-time seed only (scripts/seed-admin.ts)
+  //   local preview only:         COOKIE_SECURE=false in .dev.vars
+  //   omitted until implemented:  CRON_SECRET (no cron handler in codebase)
+  //
   // Phase 1 provisioning (issue #41); account: the owner's Cloudflare account
   // - d1 create diqualia-db: see database_id below
   // - r2 bucket create diqualia-assets: created 2026-07-02 (issue #47)
