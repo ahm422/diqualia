@@ -23,7 +23,8 @@
   // Phase 1 provisioning (issue #41); account: the owner's Cloudflare account
   // - d1 create diqualia-db: see database_id below
   // - r2 bucket create diqualia-assets: created 2026-07-02 (issue #47)
-  "name": "diqualia",
+  // Must match existing dashboard Worker (diqualia-web) so deploy updates in place.
+  "name": "diqualia-web",
   "account_id": "YOUR_CLOUDFLARE_ACCOUNT_ID",
   "compatibility_date": "2026-07-01",
   "compatibility_flags": ["nodejs_compat"],
