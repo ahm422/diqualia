@@ -6,6 +6,8 @@ declare global {
     R2: R2Bucket;
     ASSETS: Fetcher;
     R2_PUBLIC_URL: string;
+    /** Cloudflare Email Service binding (wrangler send_email → EMAIL) */
+    EMAIL?: SendEmail;
   }
 }
 

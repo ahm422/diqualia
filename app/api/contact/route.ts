@@ -1,9 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { Resend } from "resend";
 import { z } from "zod";
 
 import { checkRateLimit } from "@/lib/rateLimit";
-import { getDb } from "@/lib/cloudflare-env";
+import { getDb, getEmail } from "@/lib/cloudflare-env";
 
 const ContactBodySchema = z
   .object({
@@ -80,21 +79,35 @@ export async function POST(request: NextRequest) {
 
   // Send admin notification — best-effort; lead is already saved
   try {
-    const resend = new Resend(process.env.RESEND_API_KEY);
-    await resend.emails.send({
-      from:    process.env.RESEND_FROM!,
-      to:      process.env.ADMIN_EMAIL!,
-      replyTo: email || undefined,
-      subject: `New contact: ${name || email || "unknown"}`,
-      html: `
+    const mailer = await getEmail();
+    if (!mailer) {
+      console.warn("[contact] EMAIL binding unavailable; skipping send");
+    } else {
+      const subject = `New contact: ${name || email || "unknown"}`;
+      const html = `
         <p><b>Name:</b> ${esc(name ?? "—")}</p>
         <p><b>Email:</b> ${esc(email ?? "—")}</p>
         <p><b>Message:</b></p>
         <p>${esc(message ?? "—").replace(/\n/g, "<br>")}</p>
-      `,
-    });
+      `;
+      const text = [
+        `Name: ${name ?? "—"}`,
+        `Email: ${email ?? "—"}`,
+        `Message:`,
+        message ?? "—",
+      ].join("\n");
+
+      await mailer.send({
+        to: process.env.ADMIN_EMAIL!,
+        from: { email: "noreply@diqualia.com", name: "DiQualia" },
+        replyTo: email || undefined,
+        subject,
+        html,
+        text,
+      });
+    }
   } catch (err) {
-    console.error("[contact] Resend failed:", err);
+    console.error("[contact] Email send failed:", err);
   }
 
   return NextResponse.json({ ok: true, id: lead.id });

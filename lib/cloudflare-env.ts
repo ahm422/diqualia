@@ -19,3 +19,8 @@ export async function getR2() {
   const { env } = await getCloudflareContext({ async: true });
   return getStorage(env.R2);
 }
+
+export async function getEmail() {
+  const { env } = await getCloudflareContext({ async: true });
+  return env.EMAIL;
+}

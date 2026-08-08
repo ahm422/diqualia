@@ -1,12 +1,9 @@
 # Wrangler local preview secrets (copy to .dev.vars — never commit .dev.vars)
 # Used by: npm run preview / npm run cf:preview / npm run cf:dev
-# For migration export tooling, see .env.example
+# Contact email uses the EMAIL (send_email) binding in wrangler.jsonc — no Resend secrets.
+# For seed tooling, see .env.example
 
 JWT_SECRET=your-jwt-secret-here
 ADMIN_EMAIL=admin@example.com
 # Set false for local HTTP preview (wrangler.jsonc sets NODE_ENV=production)
 COOKIE_SECURE=false
-
-# Optional — contact form email via Resend
-# RESEND_API_KEY=re_xxxxxxxx
-# RESEND_FROM=DiQualia <noreply@example.com>

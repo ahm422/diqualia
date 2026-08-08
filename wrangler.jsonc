@@ -15,7 +15,8 @@
   // Vars vs secrets (production):
   //   vars (wrangler.jsonc):     R2_PUBLIC_URL, NODE_ENV
   //   wrangler secret (required): JWT_SECRET, ADMIN_EMAIL
-  //   wrangler secret (optional): RESEND_API_KEY, RESEND_FROM (contact form email)
+  //   bindings:                   EMAIL (send_email) — contact form via Cloudflare Email Service
+  //                               from: noreply@diqualia.com (domain must be email-sending enabled)
   //   never long-lived secret:    ADMIN_PASSWORD — one-time seed only (scripts/seed-admin.ts)
   //   local preview only:         COOKIE_SECURE=false in .dev.vars
   //   omitted until implemented:  CRON_SECRET (no cron handler in codebase)
@@ -58,6 +59,11 @@
     {
       "binding": "R2",
       "bucket_name": "diqualia-assets"
+    }
+  ],
+  "send_email": [
+    {
+      "name": "EMAIL"
     }
   ],
   "vars": {

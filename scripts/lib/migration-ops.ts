@@ -1,48 +1,20 @@
-import type { PrismaClient as PostgresPrismaClient } from "../../lib/generated/prisma-postgres/client";
 import type { PrismaClient as D1PrismaClient } from "../../lib/generated/prisma/client";
 import {
-  SCHEMA_VERSION,
   TABLE_MANIFEST,
   getDelegateForKey,
   type ExportPayload,
   type ExportTableKey,
   type PrismaDelegate,
-  serializeRow,
 } from "./migration-types";
 import { INSERT_ORDER, WIPE_ORDER } from "./table-order";
 
-type AnyPrismaClient = PostgresPrismaClient | D1PrismaClient;
-
-function getModelDelegate(prisma: AnyPrismaClient, delegate: PrismaDelegate) {
-  return prisma[delegate as keyof AnyPrismaClient] as unknown as {
+function getModelDelegate(prisma: D1PrismaClient, delegate: PrismaDelegate) {
+  return prisma[delegate as keyof D1PrismaClient] as unknown as {
     findMany: () => Promise<Record<string, unknown>[]>;
     count: () => Promise<number>;
     deleteMany: () => Promise<unknown>;
     create: (args: { data: Record<string, unknown> }) => Promise<unknown>;
   };
-}
-
-export async function exportAllTables(prisma: PostgresPrismaClient) {
-  const payload: Partial<ExportPayload> = {
-    meta: {
-      exportedAt: new Date().toISOString(),
-      source: "postgres",
-      schemaVersion: SCHEMA_VERSION,
-    },
-    counts: {} as Record<ExportTableKey, number>,
-  };
-
-  console.error(`Exporting ${TABLE_MANIFEST.length} tables…`);
-
-  for (const { key, delegate } of TABLE_MANIFEST) {
-    const rows = await getModelDelegate(prisma, delegate).findMany();
-    const serialized = rows.map((row) => serializeRow(row));
-    (payload as Record<string, unknown>)[key] = serialized;
-    payload.counts![key] = serialized.length;
-    console.error(`${key}: ${serialized.length}`);
-  }
-
-  return payload as ExportPayload;
 }
 
 export function validateExportCounts(payload: ExportPayload) {

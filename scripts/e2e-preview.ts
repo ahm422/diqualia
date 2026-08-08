@@ -10,7 +10,10 @@
  *
  * Usage:
  *   npm run cf:e2e
- *   npm run cf:e2e -- --base http://127.0.0.1:8787 --skip-resend
+ *   npm run cf:e2e -- --base http://127.0.0.1:8787
+ *
+ * Contact email is best-effort via Cloudflare Email Service (EMAIL binding).
+ * This suite asserts lead save only; delivery is not required for pass.
  */
 import "dotenv/config";
 
@@ -29,7 +32,7 @@ import {
   stepLabel,
 } from "./lib/e2e-client";
 
-const { base, skipResend } = parseArgs(process.argv.slice(2));
+const { base } = parseArgs(process.argv.slice(2));
 const TS = `e2e-${Date.now()}`;
 const jar = new CookieJar();
 const { request } = createClient(base, jar);
@@ -469,12 +472,7 @@ async function testContact() {
   assert(markRead.status === 200, stepLabel(`PATCH submission read → 200 (got ${markRead.status})`));
   assert((markRead.json as { read?: boolean })?.read === true, stepLabel("lead read:true"));
   logOk("lead marked read");
-
-  if (skipResend) {
-    logOk("Resend email test skipped (no RESEND_API_KEY or --skip-resend)");
-  } else {
-    logOk("Resend attempted (best-effort; lead saved regardless)");
-  }
+  logOk("CF Email Service send is best-effort (lead saved regardless of delivery)");
 }
 
 // ─── 7. Public routes ────────────────────────────────────────────────────────
