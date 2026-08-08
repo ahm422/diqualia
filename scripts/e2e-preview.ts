@@ -487,6 +487,7 @@ async function testPublicRoutes() {
     "/process",
     "/industries",
     "/story",
+    "/blog",
     "/contact",
     "/privacy",
     "/terms",
