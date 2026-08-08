@@ -46,7 +46,6 @@ next-env.d.ts
 /reference/
 
 /lib/generated/prisma
-/lib/generated/prisma-postgres
 
 /scratch/
 

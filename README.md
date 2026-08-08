@@ -1,110 +1,48 @@
-DiQualia marketing site (Next.js) with a production-grade backend foundation using **Supabase (Postgres + Auth)** and **Prisma**.
+# DiQualia
 
-## Getting Started
+Marketing site (Next.js on Cloudflare Workers via OpenNext) with **D1**, **R2**, **Workers**, and **Cloudflare Email Service**. Admin auth is custom JWT (`jose`) + `bcryptjs`.
 
-### 1) Create a Supabase project (PostgreSQL + Auth)
+## Getting started
 
-- Create a Supabase project in the dashboard.
-- Collect these values from **Settings → API**:
-  - `NEXT_PUBLIC_SUPABASE_URL`
-  - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-  - `SUPABASE_SERVICE_ROLE_KEY` (server-only)
-- Collect Postgres connection strings from **Settings → Database**:
-  - A pooled connection (Supavisor, usually port `6543`) for `DATABASE_URL`
-  - A direct connection (usually port `5432`) for `DIRECT_DATABASE_URL`
-
-### 2) Configure environment variables
-
-Copy `.env.example` to `.env.local` and fill in the values:
+### 1) Configure local secrets
 
 ```bash
-cp .env.example .env.local
+cp .env.example .env          # ADMIN_EMAIL, ADMIN_PASSWORD (seed only)
+cp .dev.vars.example .dev.vars # JWT_SECRET, ADMIN_EMAIL, COOKIE_SECURE=false
+npm install
 ```
 
-### 3) Run migrations + generate Prisma client
+Worker bindings (D1 `DB`, R2, `EMAIL`) live in [`wrangler.jsonc`](wrangler.jsonc). Contact notifications use `env.EMAIL.send` from `noreply@diqualia.com` (no Resend keys).
+
+### 2) Local D1 + admin seed
 
 ```bash
 npm run db:migrate
+npm run db:seed:admin
+# optional CMS from existing scratch/export.json:
+# npm run db:import:local -- --force
 ```
 
-If your `DATABASE_URL` is a pooled Supabase connection (port `6543`), you may need to temporarily set `DATABASE_URL` to the **direct** connection string (port `5432`) when running migrations.
-
-If you need to apply migrations in production/CI:
+### 3) Preview (authoritative Worker path)
 
 ```bash
-npm run db:deploy
+npm run build
+npm run preview   # http://127.0.0.1:8787
+npm run cf:e2e    # regression against preview
 ```
 
-Optional seed (dev only):
+For fast UI iteration you can also use `npm run dev` (Next only; no Worker bindings — contact email is skipped gracefully).
 
-```bash
-npm run db:seed
-```
+## Stack
 
-### 4) Run the dev server
+| Area | Implementation |
+|------|----------------|
+| App | Next.js + OpenNext Cloudflare |
+| Database | Cloudflare D1 + Prisma D1 adapter |
+| Storage | Cloudflare R2 |
+| Email | Cloudflare Email Service (`send_email` → `EMAIL`) |
+| Auth | Custom JWT (`jose`) + `bcryptjs` + `ADMIN_EMAIL` |
 
-```bash
-npm run dev
-```
+## Deploy
 
-Open `http://localhost:3000`.
-
-## API endpoints (verification)
-
-### POST `/api/leads` (public)
-
-Valid request:
-
-```bash
-curl -s -X POST "http://localhost:3000/api/leads" \
-  -H "content-type: application/json" \
-  -d '{"email":"test@example.com","name":"Test","message":"Hello","source":"contact-page"}'
-```
-
-Invalid request (missing both email + message) returns `400`:
-
-```bash
-curl -i -X POST "http://localhost:3000/api/leads" \
-  -H "content-type: application/json" \
-  -d '{"name":"Test"}'
-```
-
-### GET `/api/me` (auth check)
-
-Logged out:
-
-```bash
-curl -s "http://localhost:3000/api/me"
-```
-
-Logged in: this endpoint relies on Supabase auth cookies set by your app (SSR helpers + middleware).
-
-## Database + security notes
-
-- **Supabase is PostgreSQL.** Prisma connects to Supabase Postgres via `DATABASE_URL` / `DIRECT_DATABASE_URL`.
-- `leads` has **RLS enabled** and **no client policies** — writes use the server-only **service role** key from `POST /api/leads` (Edge-safe HTTP to Supabase, not direct TCP/`pg`).
-- `profiles` has RLS enabled with policies for authenticated users to access their own row (`auth.uid() = id`).
-
-## Optional: auto-create `profiles` on sign-up
-
-If you want `public.profiles` to be created when a user signs up, add a trigger in Supabase SQL editor:
-
-```sql
-create or replace function public.handle_new_user()
-returns trigger
-language plpgsql
-security definer set search_path = public
-as $$
-begin
-  insert into public.profiles (id, email)
-  values (new.id, new.email);
-  return new;
-end;
-$$;
-
-drop trigger if exists on_auth_user_created on auth.users;
-create trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute procedure public.handle_new_user();
-```
-
+See [`docs/DEPLOY-PHASE9.md`](docs/DEPLOY-PHASE9.md) and [`MIGRATION_D1_R2_WORKERS.md`](MIGRATION_D1_R2_WORKERS.md).

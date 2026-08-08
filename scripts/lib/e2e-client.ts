@@ -141,15 +141,12 @@ export function r2ObjectExists(key: string): boolean {
 
 export function parseArgs(argv: string[]) {
   let base = "http://127.0.0.1:8787";
-  let skipResend = !process.env.RESEND_API_KEY;
 
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === "--base" && argv[i + 1]) {
       base = argv[++i];
-    } else if (argv[i] === "--skip-resend") {
-      skipResend = true;
     }
   }
 
-  return { base, skipResend };
+  return { base };
 }
