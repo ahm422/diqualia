@@ -21,6 +21,11 @@ export function revalidateBlogPost(slug: string) {
   revalidatePath(`/blog/${slug}`);
 }
 
+/** Revalidate a dynamic industry sector path (not in SITE_PATHS) */
+export function revalidateIndustrySector(slug: string) {
+  revalidatePath(`/industries/${slug}`);
+}
+
 /** Revalidate SiteHeader/SiteFooter layout data shown on every public page */
 export function revalidateSiteLayout() {
   for (const path of SITE_PATHS) {

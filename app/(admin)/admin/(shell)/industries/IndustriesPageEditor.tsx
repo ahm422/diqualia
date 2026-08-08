@@ -10,6 +10,7 @@ import {
   AdminSaveButton,
   useAdminSave,
 } from "@/components/admin";
+import { slugify } from "@/lib/slugify";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -21,12 +22,59 @@ type IndustriesPageData = {
   whereNextEyebrow: string; whereNextTitle1: string; whereNextTitle2: string; whereNextBody: string;
 } | null;
 
-type IndustrySector = { id: number; name: string; visible: boolean; order: number };
+type WhyPoint = { title: string; body: string };
+type CaseStudyRef = { label: string; href: string };
+
+type IndustrySector = {
+  id: number;
+  slug: string;
+  name: string;
+  visible: boolean;
+  order: number;
+  eyebrow: string | null;
+  headline: string | null;
+  body: string | null;
+  heroImageUrl: string | null;
+  whyPoints: WhyPoint[] | null;
+  caseStudyRefs: CaseStudyRef[] | null;
+};
 
 type Props = {
   initialPage: IndustriesPageData;
   initialSectors: IndustrySector[];
 };
+
+function parseWhyPoints(value: unknown): WhyPoint[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((item): item is WhyPoint =>
+      item != null &&
+      typeof item === "object" &&
+      typeof (item as WhyPoint).title === "string" &&
+      typeof (item as WhyPoint).body === "string",
+    )
+    .map((item) => ({ title: item.title, body: item.body }));
+}
+
+function parseCaseStudyRefs(value: unknown): CaseStudyRef[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((item): item is CaseStudyRef =>
+      item != null &&
+      typeof item === "object" &&
+      typeof (item as CaseStudyRef).label === "string" &&
+      typeof (item as CaseStudyRef).href === "string",
+    )
+    .map((item) => ({ label: item.label, href: item.href }));
+}
+
+function normalizeSector(raw: IndustrySector): IndustrySector {
+  return {
+    ...raw,
+    whyPoints: parseWhyPoints(raw.whyPoints),
+    caseStudyRefs: parseCaseStudyRefs(raw.caseStudyRefs),
+  };
+}
 
 // ─── Main editor ─────────────────────────────────────────────────────────────
 
@@ -60,7 +108,12 @@ export function IndustriesPageEditor({ initialPage, initialSectors }: Props) {
       </div>
 
       {activeTab === "hero" && <HeroTab initial={initialPage} />}
-      {activeTab === "sectors" && <SectorsTab initialPage={initialPage} initialSectors={initialSectors} />}
+      {activeTab === "sectors" && (
+        <SectorsTab
+          initialPage={initialPage}
+          initialSectors={initialSectors.map(normalizeSector)}
+        />
+      )}
       {activeTab === "whereNext" && <WhereNextTab initial={initialPage} />}
     </div>
   );
@@ -100,17 +153,20 @@ function SectorsTab({ initialPage, initialSectors }: { initialPage: IndustriesPa
   const [sectors, setSectors] = useState<IndustrySector[]>(initialSectors);
   const [newName, setNewName] = useState("");
   const [adding, setAdding] = useState(false);
+  const [expandedId, setExpandedId] = useState<number | null>(null);
 
-  async function patchSector(id: number, data: Partial<IndustrySector>) {
+  async function patchSector(id: number, data: Record<string, unknown>) {
     const res = await fetch(`/api/admin/industry-sectors/${id}`, {
       method: "PATCH", credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
     if (res.ok) {
-      const updated = (await res.json()) as IndustrySector;
+      const updated = normalizeSector((await res.json()) as IndustrySector);
       setSectors((prev) => prev.map((s) => (s.id === id ? updated : s)));
+      return updated;
     }
+    return null;
   }
 
   async function move(id: number, dir: -1 | 1) {
@@ -128,7 +184,10 @@ function SectorsTab({ initialPage, initialSectors }: { initialPage: IndustriesPa
   async function del(id: number) {
     if (!confirm("Delete this sector?")) return;
     const res = await fetch(`/api/admin/industry-sectors/${id}`, { method: "DELETE", credentials: "include" });
-    if (res.ok) setSectors((prev) => prev.filter((s) => s.id !== id).map((s, i) => ({ ...s, order: i })));
+    if (res.ok) {
+      setSectors((prev) => prev.filter((s) => s.id !== id).map((s, i) => ({ ...s, order: i })));
+      if (expandedId === id) setExpandedId(null);
+    }
   }
 
   async function add() {
@@ -140,9 +199,10 @@ function SectorsTab({ initialPage, initialSectors }: { initialPage: IndustriesPa
       body: JSON.stringify({ name: newName }),
     });
     if (res.ok) {
-      const sector = (await res.json()) as IndustrySector;
+      const sector = normalizeSector((await res.json()) as IndustrySector);
       setSectors((prev) => [...prev, sector]);
       setNewName("");
+      setExpandedId(sector.id);
     }
     setAdding(false);
   }
@@ -162,26 +222,44 @@ function SectorsTab({ initialPage, initialSectors }: { initialPage: IndustriesPa
       <AdminSection title="Sector tags">
         <div className="space-y-2">
           {sectors.map((sector, idx) => (
-            <div key={sector.id} className="flex items-center gap-3 rounded border border-[var(--diq_border2)] p-3">
-              <input
-                defaultValue={sector.name}
-                onBlur={(e) => { if (e.target.value !== sector.name) patchSector(sector.id, { name: e.target.value }); }}
-                className="flex-1 rounded border border-transparent bg-transparent px-1 text-sm focus:border-[var(--diq_border)] focus:outline-none"
-              />
-              <label className="flex items-center gap-2 text-xs text-foreground shrink-0">
+            <div key={sector.id} className="rounded border border-[var(--diq_border2)]">
+              <div className="flex items-center gap-3 p-3">
                 <input
-                  type="checkbox"
-                  checked={sector.visible}
-                  onChange={() => patchSector(sector.id, { visible: !sector.visible })}
-                  className="accent-[var(--gold)]"
+                  defaultValue={sector.name}
+                  key={`${sector.id}-${sector.name}`}
+                  onBlur={(e) => { if (e.target.value !== sector.name) patchSector(sector.id, { name: e.target.value }); }}
+                  className="flex-1 rounded border border-transparent bg-transparent px-1 text-sm focus:border-[var(--diq_border)] focus:outline-none"
                 />
-                Active research
-              </label>
-              <div className="flex gap-1 shrink-0">
-                <button onClick={() => move(sector.id, -1)} disabled={idx === 0} className="rounded px-1 text-[var(--diq_mid)] hover:text-foreground disabled:opacity-30 text-xs">↑</button>
-                <button onClick={() => move(sector.id, 1)} disabled={idx === sectors.length - 1} className="rounded px-1 text-[var(--diq_mid)] hover:text-foreground disabled:opacity-30 text-xs">↓</button>
+                <label className="flex items-center gap-2 text-xs text-foreground shrink-0">
+                  <input
+                    type="checkbox"
+                    checked={sector.visible}
+                    onChange={() => patchSector(sector.id, { visible: !sector.visible })}
+                    className="accent-[var(--gold)]"
+                  />
+                  Active research
+                </label>
+                <div className="flex gap-1 shrink-0">
+                  <button type="button" onClick={() => move(sector.id, -1)} disabled={idx === 0} className="rounded px-1 text-[var(--diq_mid)] hover:text-foreground disabled:opacity-30 text-xs">↑</button>
+                  <button type="button" onClick={() => move(sector.id, 1)} disabled={idx === sectors.length - 1} className="rounded px-1 text-[var(--diq_mid)] hover:text-foreground disabled:opacity-30 text-xs">↓</button>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setExpandedId((prev) => (prev === sector.id ? null : sector.id))}
+                  className="text-xs text-[var(--gold)] hover:underline shrink-0"
+                >
+                  {expandedId === sector.id ? "Close" : "Edit page"}
+                </button>
+                <button type="button" onClick={() => del(sector.id)} className="text-xs text-red-400 hover:text-red-300 shrink-0">Delete</button>
               </div>
-              <button onClick={() => del(sector.id)} className="text-xs text-red-400 hover:text-red-300 shrink-0">Delete</button>
+              {expandedId === sector.id && (
+                <SectorPagePanel
+                  sector={sector}
+                  onSaved={(updated) => {
+                    setSectors((prev) => prev.map((s) => (s.id === updated.id ? updated : s)));
+                  }}
+                />
+              )}
             </div>
           ))}
         </div>
@@ -197,6 +275,7 @@ function SectorsTab({ initialPage, initialSectors }: { initialPage: IndustriesPa
             />
           </div>
           <button
+            type="button"
             onClick={add}
             disabled={adding || !newName.trim()}
             className="rounded border border-[var(--gold)] px-4 py-1.5 text-xs uppercase tracking-widest text-[var(--gold)] hover:bg-[var(--gold)] hover:text-[var(--diq_ink)] disabled:opacity-50"
@@ -205,6 +284,191 @@ function SectorsTab({ initialPage, initialSectors }: { initialPage: IndustriesPa
           </button>
         </div>
       </AdminSection>
+    </div>
+  );
+}
+
+function SectorPagePanel({
+  sector,
+  onSaved,
+}: {
+  sector: IndustrySector;
+  onSaved: (sector: IndustrySector) => void;
+}) {
+  const autoSlug = slugify(sector.name) || "sector";
+  const [slugManual, setSlugManual] = useState(sector.slug);
+  const [slugTouched, setSlugTouched] = useState(
+    sector.slug !== "" && sector.slug !== slugify(sector.name),
+  );
+  const slug = slugTouched ? slugManual : autoSlug;
+  const [eyebrow, setEyebrow] = useState(sector.eyebrow ?? "");
+  const [headline, setHeadline] = useState(sector.headline ?? "");
+  const [body, setBody] = useState(sector.body ?? "");
+  const [heroImageUrl, setHeroImageUrl] = useState(sector.heroImageUrl ?? "");
+  const [whyPoints, setWhyPoints] = useState<WhyPoint[]>(sector.whyPoints ?? []);
+  const [caseStudyRefs, setCaseStudyRefs] = useState<CaseStudyRef[]>(sector.caseStudyRefs ?? []);
+  const [saving, setSaving] = useState(false);
+
+  async function savePage() {
+    setSaving(true);
+    const res = await fetch(`/api/admin/industry-sectors/${sector.id}`, {
+      method: "PATCH",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        slug: slug || autoSlug,
+        eyebrow: eyebrow || null,
+        headline: headline || null,
+        body: body || null,
+        heroImageUrl: heroImageUrl || null,
+        whyPoints: whyPoints.filter((p) => p.title.trim() && p.body.trim()),
+        caseStudyRefs: caseStudyRefs.filter((r) => r.label.trim() && r.href.trim()),
+      }),
+    });
+    if (res.ok) {
+      onSaved(normalizeSector((await res.json()) as IndustrySector));
+    }
+    setSaving(false);
+  }
+
+  return (
+    <div className="space-y-4 border-t border-[var(--diq_border2)] bg-[var(--diq_deep)]/40 p-4">
+      <AdminField label="Slug (URL)">
+        <AdminInput
+          value={slug}
+          onChange={(v) => {
+            setSlugTouched(true);
+            setSlugManual(v);
+          }}
+          placeholder={autoSlug}
+        />
+      </AdminField>
+      <p className="text-[11px] text-[var(--diq_mid)]">
+        Public page: /industries/{slug || autoSlug}
+      </p>
+      <AdminField label="Eyebrow">
+        <AdminInput value={eyebrow} onChange={setEyebrow} placeholder="Industry eyebrow" />
+      </AdminField>
+      <AdminField label="Headline">
+        <AdminInput value={headline} onChange={setHeadline} placeholder="Sector landing headline" />
+      </AdminField>
+      <AdminField label="Body">
+        <AdminTextarea value={body} onChange={setBody} rows={4} placeholder="Differentiated sector narrative…" />
+      </AdminField>
+      <AdminField label="Hero image URL">
+        <AdminInput value={heroImageUrl} onChange={setHeroImageUrl} placeholder="https://…" />
+      </AdminField>
+
+      <div>
+        <div className="mb-2 text-[11px] uppercase tracking-widest text-[var(--diq_mid)]">Why this industry</div>
+        <div className="space-y-3">
+          {whyPoints.map((point, idx) => (
+            <div key={idx} className="flex items-start gap-2 rounded border border-[var(--diq_border2)] p-3">
+              <div className="flex shrink-0 flex-col gap-1 pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (idx === 0) return;
+                    const next = [...whyPoints];
+                    [next[idx - 1], next[idx]] = [next[idx], next[idx - 1]];
+                    setWhyPoints(next);
+                  }}
+                  disabled={idx === 0}
+                  className="rounded px-1 text-xs text-[var(--diq_mid)] hover:text-foreground disabled:opacity-30"
+                >
+                  ↑
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (idx >= whyPoints.length - 1) return;
+                    const next = [...whyPoints];
+                    [next[idx + 1], next[idx]] = [next[idx], next[idx + 1]];
+                    setWhyPoints(next);
+                  }}
+                  disabled={idx === whyPoints.length - 1}
+                  className="rounded px-1 text-xs text-[var(--diq_mid)] hover:text-foreground disabled:opacity-30"
+                >
+                  ↓
+                </button>
+              </div>
+              <div className="flex-1 space-y-2">
+                <AdminInput
+                  value={point.title}
+                  onChange={(v) => setWhyPoints((prev) => prev.map((p, i) => (i === idx ? { ...p, title: v } : p)))}
+                  placeholder="Point title"
+                />
+                <AdminTextarea
+                  value={point.body}
+                  onChange={(v) => setWhyPoints((prev) => prev.map((p, i) => (i === idx ? { ...p, body: v } : p)))}
+                  rows={2}
+                  placeholder="Point body"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!confirm("Delete this point?")) return;
+                  setWhyPoints((prev) => prev.filter((_, i) => i !== idx));
+                }}
+                className="text-xs text-red-400 hover:text-red-300 shrink-0"
+              >
+                Delete
+              </button>
+            </div>
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={() => setWhyPoints((prev) => [...prev, { title: "", body: "" }])}
+          className="mt-2 text-xs text-[var(--gold)] hover:underline"
+        >
+          + Add why-point
+        </button>
+      </div>
+
+      <div>
+        <div className="mb-2 text-[11px] uppercase tracking-widest text-[var(--diq_mid)]">
+          Case study refs <span className="normal-case tracking-normal text-[var(--diq_mid)]">(renders when case studies ship)</span>
+        </div>
+        <div className="space-y-3">
+          {caseStudyRefs.map((ref, idx) => (
+            <div key={idx} className="flex items-center gap-2 rounded border border-[var(--diq_border2)] p-3">
+              <div className="grid flex-1 gap-2 sm:grid-cols-2">
+                <AdminInput
+                  value={ref.label}
+                  onChange={(v) => setCaseStudyRefs((prev) => prev.map((r, i) => (i === idx ? { ...r, label: v } : r)))}
+                  placeholder="Label"
+                />
+                <AdminInput
+                  value={ref.href}
+                  onChange={(v) => setCaseStudyRefs((prev) => prev.map((r, i) => (i === idx ? { ...r, href: v } : r)))}
+                  placeholder="/blog/example or https://…"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!confirm("Delete this ref?")) return;
+                  setCaseStudyRefs((prev) => prev.filter((_, i) => i !== idx));
+                }}
+                className="text-xs text-red-400 hover:text-red-300 shrink-0"
+              >
+                Delete
+              </button>
+            </div>
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={() => setCaseStudyRefs((prev) => [...prev, { label: "", href: "" }])}
+          className="mt-2 text-xs text-[var(--gold)] hover:underline"
+        >
+          + Add case study ref
+        </button>
+      </div>
+
+      <AdminSaveButton onClick={savePage} saving={saving} />
     </div>
   );
 }

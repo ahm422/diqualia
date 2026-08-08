@@ -12,7 +12,7 @@ async function request(path: string, init: RequestInit = {}) {
 
 async function main() {
   console.log("=== Public routes ===");
-  for (const path of ["/", "/about", "/services", "/process", "/industries", "/story", "/blog", "/contact", "/privacy", "/terms"]) {
+  for (const path of ["/", "/about", "/services", "/process", "/industries", "/industries/construction-built-environment", "/story", "/blog", "/contact", "/privacy", "/terms"]) {
     const res = await request(path);
     console.log(`${path} -> ${res.status}`);
   }

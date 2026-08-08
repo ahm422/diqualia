@@ -15,8 +15,11 @@ export default async function IndustriesAdminPage() {
 
   return (
     <div>
-      <AdminPageHeader title="Industries Page" description="Hero, sector tags, and Where Next section" />
-      <IndustriesPageEditor initialPage={page} initialSectors={sectors} />
+      <AdminPageHeader title="Industries Page" description="Hero, sector tags, landing pages, and Where Next section" />
+      <IndustriesPageEditor
+        initialPage={page}
+        initialSectors={sectors as Parameters<typeof IndustriesPageEditor>[0]["initialSectors"]}
+      />
     </div>
   );
 }
