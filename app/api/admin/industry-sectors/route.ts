@@ -1,15 +1,12 @@
 import "server-only";
 
 import { NextResponse } from "next/server";
-import { z } from "zod";
 
 import { requireAdminApi } from "@/lib/auth/require-admin-api";
 import { getDb } from "@/lib/cloudflare-env";
-import { revalidatePage } from "@/lib/revalidate-site";
-
-const PostSchema = z.object({
-  name: z.string().min(1).max(200),
-});
+import { industrySectorPostSchema } from "@/lib/schemas/admin/industries";
+import { revalidateIndustrySector, revalidatePage } from "@/lib/revalidate-site";
+import { uniqueSlug } from "@/lib/slugify";
 
 export async function GET() {
   const prisma = await getDb();
@@ -32,7 +29,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const parsed = PostSchema.safeParse(body);
+  const parsed = industrySectorPostSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid input" }, { status: 400 });
   }
@@ -40,10 +37,16 @@ export async function POST(request: Request) {
   const agg = await prisma.industrySector.aggregate({ _max: { order: true } });
   const nextOrder = (agg._max.order ?? -1) + 1;
 
+  const slug = await uniqueSlug(parsed.data.name, async (candidate) => {
+    const hit = await prisma.industrySector.findUnique({ where: { slug: candidate } });
+    return hit != null;
+  });
+
   const sector = await prisma.industrySector.create({
-    data: { name: parsed.data.name, order: nextOrder },
+    data: { name: parsed.data.name, slug, order: nextOrder },
   });
 
   revalidatePage("/industries");
+  revalidateIndustrySector(sector.slug);
   return NextResponse.json(sector, { status: 201 });
 }

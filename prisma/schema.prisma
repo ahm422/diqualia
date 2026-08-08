@@ -272,10 +272,17 @@ model IndustriesPage {
 }
 
 model IndustrySector {
-  id      Int     @id @default(autoincrement())
-  name    String
-  visible Boolean @default(false)
-  order   Int
+  id           Int     @id @default(autoincrement())
+  slug         String  @unique
+  name         String
+  visible      Boolean @default(false)
+  order        Int
+  eyebrow      String?
+  headline     String?
+  body         String?
+  heroImageUrl String? @map("hero_image_url")
+  whyPoints    Json?   @map("why_points")
+  caseStudyRefs Json?  @map("case_study_refs")
 
   @@map("industry_sectors")
 }

@@ -14,6 +14,7 @@ import {
   AdminImageField,
   useAdminSave,
 } from "@/components/admin";
+import { slugify } from "@/lib/slugify";
 
 export type BlogPostData = {
   id: string;
@@ -31,15 +32,6 @@ export type BlogPostData = {
 type Props = {
   initial?: BlogPostData | null;
 };
-
-function slugify(title: string): string {
-  return title
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 200);
-}
 
 export function BlogPostEditor({ initial }: Props) {
   const router = useRouter();

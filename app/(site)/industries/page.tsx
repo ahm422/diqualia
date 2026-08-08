@@ -107,23 +107,37 @@ export default async function IndustriesPage() {
         </div>
 
         <div className="mt-12 flex flex-wrap gap-2">
-          {sectors.map((sector) => (
-            <div
-              key={sector.id}
-              className="border px-4 py-3 text-[11px] tracking-[0.18em] uppercase"
-              style={{
-                borderColor: sector.visible
-                  ? "color-mix(in oklab, var(--green) 65%, transparent)"
-                  : "color-mix(in oklab, var(--border) 80%, transparent)",
-                background: "var(--bg-elev)",
-                color: sector.visible
-                  ? "color-mix(in oklab, var(--green) 85%, var(--foreground))"
-                  : "var(--muted-foreground)",
-              }}
-            >
-              {sector.name}
-            </div>
-          ))}
+          {sectors.map((sector) => {
+            const className = "border px-4 py-3 text-[11px] tracking-[0.18em] uppercase";
+            const style = {
+              borderColor: sector.visible
+                ? "color-mix(in oklab, var(--green) 65%, transparent)"
+                : "color-mix(in oklab, var(--border) 80%, transparent)",
+              background: "var(--bg-elev)",
+              color: sector.visible
+                ? "color-mix(in oklab, var(--green) 85%, var(--foreground))"
+                : "var(--muted-foreground)",
+            } as const;
+
+            if (sector.visible) {
+              return (
+                <Link
+                  key={sector.id}
+                  href={`/industries/${sector.slug}`}
+                  className={`${className} transition-opacity hover:opacity-80`}
+                  style={style}
+                >
+                  {sector.name}
+                </Link>
+              );
+            }
+
+            return (
+              <div key={sector.id} className={className} style={style}>
+                {sector.name}
+              </div>
+            );
+          })}
         </div>
       </section>
 
