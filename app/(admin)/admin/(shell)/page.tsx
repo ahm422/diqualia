@@ -26,6 +26,7 @@ export default async function AdminDashboard() {
           ["How We Work", "/admin/process"],
           ["Industries", "/admin/industries"],
           ["Story", "/admin/story"],
+          ["Blog", "/admin/blog"],
           ["Contact", "/admin/contact"],
           ["Site Settings", "/admin/site-settings"],
         ].map(([label, href]) => (

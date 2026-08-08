@@ -342,3 +342,20 @@ model FooterNavItem {
 
   @@map("footer_nav_items")
 }
+
+// ─── Blog / Insights ─────────────────────────────────────────────────────────
+
+model BlogPost {
+  id            String    @id @default(uuid())
+  slug          String    @unique
+  title         String
+  excerpt       String
+  body          String
+  coverImageUrl String?   @map("cover_image_url")
+  status        String    @default("draft") // draft | published
+  publishedAt   DateTime? @map("published_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@map("blog_posts")
+}

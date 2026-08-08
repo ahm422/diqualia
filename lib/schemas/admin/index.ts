@@ -7,3 +7,4 @@ export * from "./industries";
 export * from "./story";
 export * from "./contact";
 export * from "./site-settings";
+export * from "./blog";

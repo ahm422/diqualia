@@ -58,7 +58,10 @@
   "r2_buckets": [
     {
       "binding": "R2",
-      "bucket_name": "diqualia-assets"
+      "bucket_name": "diqualia-assets",
+      // Remote so local `next dev` uploads land in the real bucket and are
+      // reachable at R2_PUBLIC_URL (r2.dev). Local emulation is invisible to the CDN.
+      "remote": true
     }
   ],
   "send_email": [
