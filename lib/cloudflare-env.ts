@@ -24,3 +24,8 @@ export async function getEmail() {
   const { env } = await getCloudflareContext({ async: true });
   return env.EMAIL;
 }
+
+export async function getAI() {
+  const { env } = await getCloudflareContext({ async: true });
+  return env.AI;
+}
