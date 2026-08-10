@@ -69,6 +69,12 @@
       "name": "EMAIL"
     }
   ],
+  "ai": {
+    "binding": "AI",
+    // Workers AI is always remote; explicit flag suppresses wrangler warnings
+    // and matches R2's remote binding pattern for local next/preview.
+    "remote": true
+  },
   "vars": {
     "NODE_ENV": "production",
     "R2_PUBLIC_URL": "https://pub-your-r2-bucket-id.r2.dev"
