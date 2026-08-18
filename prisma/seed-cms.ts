@@ -21,9 +21,10 @@ export async function seedCms(prisma: PrismaClient): Promise<void> {
       { href: "/industries", label: "Industries", order: 3, visible: true },
       { href: "/story", label: "Story", order: 4, visible: true },
       { href: "/blog", label: "Insights", order: 5, visible: true },
+      { href: "/careers", label: "Careers", order: 6, visible: true },
     ],
   });
-  console.log("NavItem ready (6)");
+  console.log("NavItem ready (7)");
 
   // ─── CtaButton ────────────────────────────────────────────────────────────
   await prisma.ctaButton.upsert({
@@ -686,6 +687,110 @@ export async function seedCms(prisma: PrismaClient): Promise<void> {
   });
   console.log("ContactPage ready");
 
+  // ─── CareerPage ───────────────────────────────────────────────────────────
+  await prisma.careerPage.upsert({
+    where: { id: 1 },
+    create: {
+      id: 1,
+      eyebrow: "Careers",
+      headlineLine1: "Build intelligence.",
+      headlineLine2: "Join the unit.",
+      body: "DiQualia is a small research unit. We hire people who like hard problems, clean writing, and markets that do not fit a template.",
+      cultureEyebrow: "Culture",
+      cultureHeadline: "A unit, not a factory.",
+      cultureBody:
+        "We work in small teams, share the research, and ship intelligence that sales and leadership can actually use. No theatre. No filler decks.",
+      benefits: [
+        "Remote-first with overlap hours",
+        "Deep-work calendar by default",
+        "Original research, not recycled reports",
+        "Direct access to founders and clients",
+        "Clear ownership of your workstream",
+      ],
+      applyEyebrow: "How to apply",
+      applyHeadline: "Send a note. Attach a resume.",
+      applyBody:
+        "PDF, DOC, or DOCX up to 5 MB. Include a short cover note with the niche you know, a piece of work you are proud of, and why this role. We reply with next steps.",
+    },
+    update: {
+      eyebrow: "Careers",
+      headlineLine1: "Build intelligence.",
+      headlineLine2: "Join the unit.",
+      body: "DiQualia is a small research unit. We hire people who like hard problems, clean writing, and markets that do not fit a template.",
+      cultureEyebrow: "Culture",
+      cultureHeadline: "A unit, not a factory.",
+      cultureBody:
+        "We work in small teams, share the research, and ship intelligence that sales and leadership can actually use. No theatre. No filler decks.",
+      benefits: [
+        "Remote-first with overlap hours",
+        "Deep-work calendar by default",
+        "Original research, not recycled reports",
+        "Direct access to founders and clients",
+        "Clear ownership of your workstream",
+      ],
+      applyEyebrow: "How to apply",
+      applyHeadline: "Send a note. Attach a resume.",
+      applyBody:
+        "PDF, DOC, or DOCX up to 5 MB. Include a short cover note with the niche you know, a piece of work you are proud of, and why this role. We reply with next steps.",
+    },
+  });
+  console.log("CareerPage ready");
+
+  const openings = [
+    {
+      slug: "research-analyst",
+      title: "Research Analyst",
+      department: "Intelligence",
+      location: "Remote",
+      type: "Full-time",
+      description:
+        "Map niche B2B markets, interview buyers, and turn findings into briefs that move pipeline. You will own a vertical, keep a living account of competitors and buying committees, and write for operators — not for slide theatre.",
+      requirements: [
+        "2+ years in research, strategy, or B2B marketing",
+        "Comfort with qualitative interviews and desk research",
+        "Clear, concise writing",
+        "Curiosity about unsexy, high-consideration markets",
+      ],
+      order: 0,
+      visible: true,
+    },
+    {
+      slug: "strategy-associate",
+      title: "Strategy Associate",
+      department: "Strategy",
+      location: "Remote",
+      type: "Full-time",
+      description:
+        "Translate research into positioning, messaging, and go-to-market sequences for niche operators. You will sit between intelligence and delivery — tightening briefs, pressure-testing offers, and helping clients act.",
+      requirements: [
+        "1–3 years in consulting, product marketing, or operator strategy",
+        "Ability to turn messy inputs into a sequenced plan",
+        "Strong written communication",
+        "Comfort working across research and client delivery",
+      ],
+      order: 1,
+      visible: true,
+    },
+  ];
+
+  for (const opening of openings) {
+    await prisma.jobOpening.upsert({
+      where: { slug: opening.slug },
+      create: opening,
+      update: {
+        title: opening.title,
+        department: opening.department,
+        location: opening.location,
+        type: opening.type,
+        description: opening.description,
+        requirements: opening.requirements,
+        order: opening.order,
+        visible: opening.visible,
+      },
+    });
+  }
+  console.log("JobOpening ready (2)");
+
   // ─── FooterSettings ───────────────────────────────────────────────────────
   await prisma.footerSettings.upsert({
     where: { id: 1 },
@@ -717,12 +822,13 @@ export async function seedCms(prisma: PrismaClient): Promise<void> {
       { href: "/industries", label: "Industries", group: "primary", order: 3 },
       { href: "/story", label: "Story", group: "primary", order: 4 },
       { href: "/blog", label: "Insights", group: "primary", order: 5 },
+      { href: "/careers", label: "Careers", group: "primary", order: 6 },
       { href: "/contact", label: "Contact", group: "secondary", order: 0 },
       { href: "/privacy", label: "Privacy", group: "secondary", order: 1 },
       { href: "/terms", label: "Terms", group: "secondary", order: 2 },
     ],
   });
-  console.log("FooterNavItem ready (9)");
+  console.log("FooterNavItem ready (10)");
 
   console.log("CMS seed complete.");
 }

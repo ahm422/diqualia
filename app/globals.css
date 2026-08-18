@@ -291,9 +291,25 @@ body:has(a:hover) .diq-curR {
   }
 }
 
+.diq-fadeUp {
+  opacity: 0;
+  animation: diq_fadeUp var(--diq-fade-dur, 0.8s) ease var(--diq-fade-delay, 0s) forwards;
+}
+
+.diq-gridDrift {
+  animation: diq_gridDrift 60s linear infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .diq-nav {
     transition: none;
+  }
+
+  .diq-fadeUp,
+  .diq-gridDrift {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
   }
 }
 
@@ -513,6 +529,10 @@ html.dark .diq-logoDark {
   letter-spacing: clamp(2px, 0.5vw, 3px);
   text-transform: uppercase;
   border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
 }
 .diq-navCta:hover {
   background: var(--gold);
@@ -587,6 +607,14 @@ html.dark .diq-logoDark {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+@keyframes diq_gridDrift {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 80px 80px;
   }
 }
 @keyframes diq_ticker {
@@ -921,6 +949,374 @@ html.dark .diq-proseMuted {
 .diq-markdown strong {
   color: var(--foreground);
   font-weight: 600;
+}
+
+/* ============================
+   Homepage
+   ============================ */
+
+.diq-homeHero {
+  padding-bottom: clamp(48px, 7vw, 80px);
+}
+
+.diq-homeOrb {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(2px);
+}
+
+.diq-homeOrb--gold {
+  top: -18%;
+  right: -12%;
+  width: min(70vw, 720px);
+  height: min(70vw, 720px);
+  background: radial-gradient(circle, color-mix(in oklab, var(--gold) 14%, transparent) 0%, transparent 62%);
+  animation: diq_orb 14s ease-in-out infinite;
+}
+
+.diq-homeOrb--green {
+  bottom: -28%;
+  left: -10%;
+  width: min(52vw, 560px);
+  height: min(52vw, 560px);
+  background: radial-gradient(circle, color-mix(in oklab, var(--green) 12%, transparent) 0%, transparent 65%);
+  animation: diq_orb 18s ease-in-out infinite reverse;
+}
+
+.diq-homeOrb--cta {
+  top: 50%;
+  left: 50%;
+  width: min(80vw, 900px);
+  height: min(50vw, 520px);
+  transform: translate(-50%, -50%);
+  background: radial-gradient(ellipse, color-mix(in oklab, var(--gold) 12%, transparent) 0%, transparent 68%);
+}
+
+.diq-homeHud {
+  border: 1px solid var(--diq_border);
+  border-top: 2px solid var(--gold);
+  background: color-mix(in oklab, var(--diq_surface) 88%, transparent);
+  box-shadow:
+    0 24px 64px color-mix(in oklab, var(--ink) 18%, transparent),
+    inset 0 1px 0 color-mix(in oklab, var(--gold) 12%, transparent);
+  animation: diq_homeFloat 7s ease-in-out infinite;
+}
+
+@media (prefers-reduced-transparency: no-preference) {
+  .diq-homeHud {
+    backdrop-filter: blur(18px) saturate(1.2);
+  }
+}
+
+.diq-homeHudTick {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  pointer-events: none;
+  z-index: 2;
+}
+.diq-homeHudTick--tl {
+  top: -1px;
+  left: -1px;
+  border-top: 2px solid var(--gold);
+  border-left: 2px solid var(--gold);
+}
+.diq-homeHudTick--tr {
+  top: -1px;
+  right: -1px;
+  border-top: 2px solid var(--gold);
+  border-right: 2px solid var(--gold);
+}
+.diq-homeHudTick--bl {
+  bottom: -1px;
+  left: -1px;
+  border-bottom: 2px solid var(--gold);
+  border-left: 2px solid var(--gold);
+}
+.diq-homeHudTick--br {
+  bottom: -1px;
+  right: -1px;
+  border-bottom: 2px solid var(--gold);
+  border-right: 2px solid var(--gold);
+}
+
+.diq-homeHudScan {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    color-mix(in oklab, var(--gold) 10%, transparent) 48%,
+    transparent 100%
+  );
+  height: 42%;
+  animation: diq_homeScan 5.5s ease-in-out infinite;
+  opacity: 0.55;
+}
+
+.diq-homeLiveDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--green);
+  box-shadow: 0 0 0 0 color-mix(in oklab, var(--green) 55%, transparent);
+  animation: diq_homeLive 1.8s ease-out infinite;
+}
+
+.diq-homeScroll {
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 9px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--diq_mid);
+}
+.diq-homeScroll i {
+  display: block;
+  width: 1px;
+  height: 28px;
+  background: linear-gradient(180deg, var(--gold), transparent);
+  animation: diq_homeScroll 1.6s ease-in-out infinite;
+}
+
+.diq-homeMarquee {
+  background: var(--diq_surface);
+  padding: 16px 0;
+  mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+}
+.diq-homeMarqueeTrack {
+  display: inline-flex;
+  width: max-content;
+  animation: diq_ticker 36s linear infinite;
+}
+.diq-homeMarquee:hover .diq-homeMarqueeTrack {
+  animation-play-state: paused;
+}
+.diq-homeMarqueeItem {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--diq_mid);
+  padding: 0 40px;
+  border-right: 1px solid var(--diq_border);
+  white-space: nowrap;
+}
+.diq-homeMarqueeItem b {
+  color: var(--gold);
+  font-weight: 400;
+}
+
+.diq-homeCard {
+  background: var(--diq_ink);
+  transition:
+    background 0.35s ease,
+    transform 0.35s ease,
+    box-shadow 0.35s ease;
+  position: relative;
+}
+.diq-homeCard--deep {
+  background: var(--diq_deep);
+}
+.diq-homeCard::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--gold);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+a.diq-homeCard:hover,
+.diq-homeCard:hover {
+  background: color-mix(in oklab, var(--diq_surface) 82%, var(--diq_ink));
+}
+a.diq-homeCard:hover::before,
+.diq-homeCard:hover::before {
+  opacity: 1;
+}
+a.diq-homeCard:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--gold) 70%, #ffffff);
+  outline-offset: -2px;
+}
+
+.diq-homeProcess {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  position: relative;
+  padding-left: 24px;
+}
+.diq-homeProcessStep {
+  position: relative;
+  padding: 8px 0 32px 36px;
+  border-left: 1px solid var(--diq_border);
+}
+.diq-homeProcessStep:last-child {
+  padding-bottom: 0;
+}
+.diq-homeProcessNum {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--diq_border);
+  background: var(--diq_deep);
+  color: var(--gold);
+  font-family: var(--font-display), ui-serif, serif;
+  font-size: 18px;
+  font-weight: 600;
+  position: relative;
+  margin-left: -61px;
+}
+.diq-homeChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 12px 18px;
+  border: 1px solid var(--diq_border);
+  color: var(--diq_ivory);
+  text-decoration: none;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  transition: border-color 0.3s ease, color 0.3s ease, background 0.3s ease;
+}
+.diq-homeChip:hover,
+.diq-homeChip:focus-visible {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: color-mix(in oklab, var(--gold) 8%, transparent);
+}
+.diq-homeChip:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--gold) 70%, #ffffff);
+  outline-offset: 3px;
+}
+
+.diq-homeCtaFrame {
+  padding: clamp(28px, 5vw, 56px) clamp(16px, 4vw, 32px);
+  border: 1px solid var(--diq_border);
+  background: color-mix(in oklab, var(--diq_surface) 42%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--gold) 10%, transparent);
+}
+
+@media (min-width: 961px) {
+  .diq-homeProcess {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0 20px;
+    padding-left: 0;
+  }
+  .diq-homeProcess::before {
+    content: "";
+    position: absolute;
+    top: 24px;
+    left: 8%;
+    right: 8%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--diq_border), transparent);
+  }
+  .diq-homeProcessStep {
+    border-left: none;
+    padding: 0;
+  }
+  .diq-homeProcessNum {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 960px) {
+  .diq-homeMarquee {
+    mask-image: linear-gradient(90deg, transparent, #000 4%, #000 96%, transparent);
+  }
+  .diq-homeMarqueeItem {
+    padding: 0 28px;
+    font-size: 9px;
+  }
+  .diq-homeHud {
+    animation: none;
+  }
+}
+
+@keyframes diq_orb {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translate3d(2%, -3%, 0) scale(1.06);
+    opacity: 0.82;
+  }
+}
+@keyframes diq_homeFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+@keyframes diq_homeScan {
+  0% {
+    transform: translateY(-20%);
+    opacity: 0;
+  }
+  18% {
+    opacity: 0.55;
+  }
+  82% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateY(160%);
+    opacity: 0;
+  }
+}
+@keyframes diq_homeLive {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--green) 50%, transparent);
+  }
+  70% {
+    box-shadow: 0 0 0 8px transparent;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+@keyframes diq_homeScroll {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scaleY(0.7);
+    transform-origin: top;
+  }
+  50% {
+    opacity: 1;
+    transform: scaleY(1);
+    transform-origin: top;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .diq-homeOrb,
+  .diq-homeHud,
+  .diq-homeHudScan,
+  .diq-homeLiveDot,
+  .diq-homeScroll i,
+  .diq-homeMarqueeTrack {
+    animation: none !important;
+  }
+  .diq-homeCard,
+  .diq-homeChip {
+    transition: none;
+  }
 }
 
 @media (max-width: 960px) {

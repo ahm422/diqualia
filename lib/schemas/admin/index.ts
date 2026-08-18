@@ -8,3 +8,4 @@ export * from "./story";
 export * from "./contact";
 export * from "./site-settings";
 export * from "./blog";
+export * from "./career";

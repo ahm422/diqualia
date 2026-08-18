@@ -17,7 +17,9 @@ export function BrandLogo({
   width?: number;
   src?: string | null;
 }) {
-  const src = customSrc ?? (variant === "white" ? "/Di Qualia svg white.svg" : "/Di Qualia Svg Black.svg");
+  const src =
+    customSrc ??
+    (variant === "white" ? "/Di Qualia White Logo-03.svg" : "/Di Qualia Black Logo-04.svg");
 
   return (
     <Image
@@ -25,7 +27,7 @@ export function BrandLogo({
       alt={decorative ? "" : "Diqualia"}
       aria-hidden={decorative ? true : undefined}
       width={width}
-      height={Math.round((width * 156.52) / 500)}
+      height={Math.round((width * 156.5) / 500)}
       priority
       className={className}
       style={{ height: "auto", width }}
