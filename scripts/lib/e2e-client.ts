@@ -54,13 +54,20 @@ export function logOk(msg: string) {
   console.log(`  ✓ ${msg}`);
 }
 
+export class E2eFail extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "E2eFail";
+  }
+}
+
 export function assert(cond: unknown, msg: string): asserts cond {
   if (!cond) fail(msg);
 }
 
 export function fail(msg: string): never {
   console.error(`\n✗ FAIL [step ${step}]: ${msg}`);
-  process.exit(1);
+  throw new E2eFail(msg);
 }
 
 export function stepLabel(label: string) {
@@ -139,6 +146,19 @@ export function r2ObjectExists(key: string): boolean {
   }
 }
 
+const LOOPBACK_HOSTS = new Set(["127.0.0.1", "localhost", "::1", "[::1]"]);
+
+function refuseBase(base: string, detail: string): never {
+  console.error(`✗ Refusing --base ${base}: ${detail}`);
+  console.error(
+    "This suite mutates the D1 bound to --base via admin PATCH/POST. It must never be pointed at a shared, preview, workers.dev, or production database.",
+  );
+  console.error(
+    "Allowed target: local npm run preview / npm run cf:preview on 127.0.0.1, localhost, or [::1] only.",
+  );
+  process.exit(1);
+}
+
 export function parseArgs(argv: string[]) {
   let base = "http://127.0.0.1:8787";
 
@@ -146,6 +166,17 @@ export function parseArgs(argv: string[]) {
     if (argv[i] === "--base" && argv[i + 1]) {
       base = argv[++i];
     }
+  }
+
+  let url: URL;
+  try {
+    url = new URL(base);
+  } catch {
+    refuseBase(base, "not a valid URL");
+  }
+
+  if (!LOOPBACK_HOSTS.has(url.hostname)) {
+    refuseBase(base, `hostname "${url.hostname}" is not loopback (shared/preview/prod D1 risk)`);
   }
 
   return { base };
