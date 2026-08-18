@@ -37,7 +37,13 @@
   --diq_border2: rgba(202, 168, 75, 0.1);
   --diq_grid: rgba(202, 168, 75, 0.06);
 
-  --diq_nav_scrolled_bg: rgba(248, 246, 240, 0.92);
+  --diq_nav_scrolled_bg: rgba(248, 246, 240, 0.82);
+  --diq_nav_scrolled_shadow: 0 8px 28px rgba(10, 11, 13, 0.08);
+  --diq_nav_scrolled_blur: blur(18px) saturate(1.15);
+  --diq_nav_inset-y: 12px;
+  --diq_nav_inset-x: clamp(10px, 2vw, 20px);
+  --diq_nav_scrolled_max: 1120px;
+  --diq_nav_scrolled_radius: 18px;
   --diq_footer_bg: var(--paper);
 
   /* Semantic theme tokens (light default; `html.dark` overrides) */
@@ -130,7 +136,8 @@ html.dark {
   --diq_border2: rgba(202, 168, 75, 0.07);
   --diq_grid: rgba(202, 168, 75, 0.04);
 
-  --diq_nav_scrolled_bg: rgba(8, 9, 12, 0.96);
+  --diq_nav_scrolled_bg: rgba(8, 9, 12, 0.78);
+  --diq_nav_scrolled_shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
   --diq_footer_bg: #050507;
 
   --background: var(--ink);
@@ -237,7 +244,19 @@ body:has(a:hover) .diq-curR {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  transition: all 0.5s ease;
+  transition:
+    top 0.5s ease,
+    left 0.5s ease,
+    right 0.5s ease,
+    margin 0.5s ease,
+    padding 0.5s ease,
+    max-width 0.5s ease,
+    width 0.5s ease,
+    border-radius 0.5s ease,
+    background 0.5s ease,
+    backdrop-filter 0.5s ease,
+    border-color 0.5s ease,
+    box-shadow 0.5s ease;
 }
 
 .diq-navInner {
@@ -247,10 +266,38 @@ body:has(a:hover) .diq-curR {
 }
 
 .diq-nav.scrolled {
+  top: var(--diq_nav_inset-y);
+  left: var(--diq_nav_inset-x);
+  right: var(--diq_nav_inset-x);
+  max-width: var(--diq_nav_scrolled_max);
+  margin-inline: auto;
+  padding: 14px 22px;
+  border-radius: var(--diq_nav_scrolled_radius);
   background: var(--diq_nav_scrolled_bg);
-  backdrop-filter: blur(28px);
-  border-bottom: 1px solid var(--diq_border);
-  padding: 14px var(--diq-gutter);
+  border: 1px solid var(--diq_border);
+  box-shadow: var(--diq_nav_scrolled_shadow);
+}
+
+@media (prefers-reduced-transparency: no-preference) {
+  .diq-nav.scrolled {
+    backdrop-filter: blur(18px) saturate(1.15);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .diq-nav {
+    transition: none;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --diq_nav_scrolled_bg: rgba(248, 246, 240, 0.98);
+    --diq_nav_scrolled_blur: none;
+  }
+  html.dark {
+    --diq_nav_scrolled_bg: rgba(8, 9, 12, 0.98);
+  }
 }
 
 .diq-navLogo {
@@ -564,9 +611,14 @@ html.dark .diq-logoDark {
 }
 
 @media (max-width: 960px) {
-  .diq-nav,
-  .diq-nav.scrolled {
+  .diq-nav {
     padding: 16px var(--diq-gutter);
+  }
+  .diq-nav.scrolled {
+    --diq_nav_inset-y: 8px;
+    --diq_nav_inset-x: 8px;
+    --diq_nav_scrolled_radius: 14px;
+    padding: 10px 14px;
   }
   .diq-navLinks {
     display: none;
