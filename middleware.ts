@@ -11,19 +11,28 @@ export async function middleware(request: NextRequest) {
   const isLoginPage = pathname === "/admin/login";
   const token = getTokenFromRequest(request);
 
-  let user: { email: string } | null = null;
-  if (token) {
+  // Next.js edge middleware inlines `process.env.*` at build time. Wrangler
+  // secrets (JWT_SECRET, ADMIN_EMAIL) exist only at Worker runtime, so JWT
+  // verify here often no-ops in production. Never treat a missing env var as
+  // a valid session (`undefined === undefined` caused /admin ↔ /admin/login).
+  let isValidAdmin = false;
+  const expectedEmail = process.env.ADMIN_EMAIL;
+  if (token && expectedEmail && process.env.JWT_SECRET) {
     try {
-      user = await verifyAdminToken(token);
-    } catch { /* invalid or expired */ }
+      const user = await verifyAdminToken(token);
+      isValidAdmin = user.email === expectedEmail;
+    } catch {
+      /* invalid or expired */
+    }
   }
-
-  const isValidAdmin = user?.email === process.env.ADMIN_EMAIL;
 
   if (isLoginPage && isValidAdmin) {
     return NextResponse.redirect(new URL("/admin", request.url));
   }
-  if (!isLoginPage && !isValidAdmin) {
+
+  // Cookie present but unverifiable on the edge: let the server (requireAdmin)
+  // decide with runtime secrets. Only bounce when there is no session cookie.
+  if (!isLoginPage && !isValidAdmin && !token) {
     const next = encodeURIComponent(pathname);
     return NextResponse.redirect(new URL(`/admin/login?next=${next}`, request.url));
   }

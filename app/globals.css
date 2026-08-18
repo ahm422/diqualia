@@ -44,6 +44,8 @@
   --diq_nav_inset-x: clamp(10px, 2vw, 20px);
   --diq_nav_scrolled_max: 1120px;
   --diq_nav_scrolled_radius: 18px;
+  /* Scrolled-nav occupancy (inset + pad + logo) + gap — sticky offsets, not rest height */
+  --diq-stickyTop: calc(var(--diq_nav_inset-y) + 14px + 41px + 14px + 12px);
   --diq_footer_bg: var(--paper);
 
   /* Semantic theme tokens (light default; `html.dark` overrides) */
@@ -611,6 +613,9 @@ html.dark .diq-logoDark {
 }
 
 @media (max-width: 960px) {
+  :root {
+    --diq-stickyTop: calc(8px + 10px + 41px + 10px + 12px);
+  }
   .diq-nav {
     padding: 16px var(--diq-gutter);
   }
@@ -653,6 +658,54 @@ html.dark .diq-logoDark {
 
 .diq-hero {
   padding: var(--diq-heroTop) var(--diq-gutter) clamp(72px, 10vw, 100px);
+}
+
+.diq-pageTop {
+  padding-top: var(--diq-heroTop);
+}
+
+/* Readable secondary type on paper (light) and ink (dark) */
+.diq-kicker {
+  color: color-mix(in oklab, var(--gold) 62%, var(--ink));
+}
+html.dark .diq-kicker {
+  color: var(--gold-lt);
+}
+.diq-proseMuted {
+  color: color-mix(in oklab, var(--ink) 78%, var(--paper));
+}
+html.dark .diq-proseMuted {
+  color: color-mix(in oklab, var(--paper) 88%, var(--mist));
+}
+
+.diq-serviceTabsTrack {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+}
+.diq-serviceTabsTrack::-webkit-scrollbar {
+  display: none;
+}
+.diq-serviceTab {
+  scroll-snap-align: start;
+}
+.diq-serviceTab:hover {
+  border-color: color-mix(in oklab, var(--gold) 55%, transparent);
+  opacity: 1;
+}
+.diq-serviceTab[aria-selected="true"]:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.diq-serviceTabsArrow:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+.diq-serviceTab:focus-visible,
+.diq-serviceTabsArrow:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--gold) 70%, #ffffff);
+  outline-offset: 3px;
 }
 
 .diq-sectionY {

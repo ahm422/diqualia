@@ -15,7 +15,7 @@ export async function requireAdminApi(): Promise<AdminSession | NextResponse> {
 
   try {
     const { sub: id, email } = await verifyAdminToken(token);
-    if (email !== process.env.ADMIN_EMAIL) {
+    if (!process.env.ADMIN_EMAIL || email !== process.env.ADMIN_EMAIL) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     return { id, email };

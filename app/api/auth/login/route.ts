@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
 
   const { email, password } = parsed.data;
 
-  if (email !== process.env.ADMIN_EMAIL) {
+  if (!process.env.ADMIN_EMAIL || email !== process.env.ADMIN_EMAIL) {
     return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
   }
 
