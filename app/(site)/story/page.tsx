@@ -88,7 +88,7 @@ export default async function StoryPage() {
 
   if (!page) {
     return (
-      <main className="py-20 text-center text-sm" style={{ color: "var(--text-faint)" }}>
+      <main className="diq-pageTop pb-20 text-center text-sm" style={{ color: "var(--text-faint)" }}>
         Story content coming soon.
       </main>
     );
@@ -101,7 +101,7 @@ export default async function StoryPage() {
   return (
     <div>
       {/* Top back link */}
-      <div className="mx-auto w-full max-w-6xl px-6 pt-8">
+      <div className="diq-pageTop mx-auto w-full max-w-6xl px-6">
         <Link
           href="/"
           className="inline-flex items-center gap-2 text-[11px] tracking-[0.22em] uppercase no-underline"
@@ -112,7 +112,7 @@ export default async function StoryPage() {
       </div>
 
       {/* HERO */}
-      <section className="relative flex min-h-[calc(100vh-80px)] flex-col items-center justify-center overflow-hidden px-6 pb-20 pt-14 text-center">
+      <section className="relative flex min-h-[calc(100vh-var(--diq-heroTop))] flex-col items-center justify-center overflow-hidden px-6 pb-20 pt-6 text-center">
         <div
           className="pointer-events-none absolute left-1/2 top-1/2 h-[520px] w-[720px] -translate-x-1/2 -translate-y-1/2"
           style={{

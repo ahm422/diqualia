@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (rotated.adminUser.email !== process.env.ADMIN_EMAIL) {
+  if (!process.env.ADMIN_EMAIL || rotated.adminUser.email !== process.env.ADMIN_EMAIL) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

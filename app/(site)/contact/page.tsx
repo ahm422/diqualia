@@ -28,7 +28,7 @@ export default async function ContactPage() {
 
   if (!page) {
     return (
-      <main className="py-20 text-center text-sm text-muted-foreground">
+      <main className="diq-pageTop pb-20 text-center text-sm text-muted-foreground">
         Contact content coming soon.
       </main>
     );

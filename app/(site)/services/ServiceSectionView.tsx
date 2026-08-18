@@ -50,7 +50,7 @@ function SectionHeader({ displayNum, eyebrow, title, body }: { displayNum: strin
       <div>
         <Eyebrow>{eyebrow}</Eyebrow>
         <SectionTitle>{title}</SectionTitle>
-        <p className="mt-6 text-[15px] leading-8 text-muted-foreground">{body}</p>
+        <p className="diq-proseMuted mt-6 text-[15px] leading-8">{body}</p>
       </div>
     </div>
   );
@@ -71,7 +71,7 @@ function S01Layout({ section }: { section: Section }) {
       />
       <div className="grid grid-cols-1 gap-10 bg-card p-10 md:grid-cols-2 md:gap-14 md:p-12">
         <div>
-          <div className="text-[11px] tracking-[0.22em] uppercase" style={{ color: "color-mix(in oklab, var(--gold) 35%, transparent)" }}>
+          <div className="diq-kicker text-[11px] tracking-[0.22em] uppercase">
             Core Intelligence Service · {section.tabId.replace("s", "").padStart(2, "0")}
           </div>
           <div
@@ -80,12 +80,12 @@ function S01Layout({ section }: { section: Section }) {
           >
             {section.cardTitle}
           </div>
-          <p className="mt-4 text-[13px] leading-7 text-muted-foreground">{section.cardBody}</p>
+          <p className="diq-proseMuted mt-4 text-[13px] leading-7">{section.cardBody}</p>
 
           {receiveItems.length > 0 && (
             <div className="mt-7 border-t pt-6" style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
-              <div className="text-[10px] tracking-[0.22em] uppercase text-primary">What You Receive</div>
-              <ul className="mt-4 space-y-3 text-[12px] text-muted-foreground">
+              <div className="diq-kicker text-[10px] tracking-[0.22em] uppercase">What You Receive</div>
+              <ul className="diq-proseMuted mt-4 space-y-3 text-[12px]">
                 {receiveItems.map((item) => (
                   <li key={item.id} className="flex items-start gap-3">
                     <span aria-hidden className="text-primary">→</span>
@@ -108,7 +108,7 @@ function S01Layout({ section }: { section: Section }) {
               }}
             >
               <div className="text-[13px] tracking-[0.06em] text-foreground">{item.title}</div>
-              <p className="mt-2 text-[12px] leading-7 text-muted-foreground">{item.body}</p>
+              <p className="diq-proseMuted mt-2 text-[12px] leading-7">{item.body}</p>
             </div>
           ))}
         </div>
@@ -128,7 +128,7 @@ function S02Layout({ section }: { section: Section }) {
     >
       {cards.map((card) => (
         <div key={card.groupLabel} className="p-10" style={{ background: sectionBg === "var(--bg-elev)" ? "var(--bg)" : "var(--bg-elev)" }}>
-          <div className="text-[11px] tracking-[0.22em] uppercase" style={{ color: "color-mix(in oklab, var(--gold) 35%, transparent)" }}>
+          <div className="diq-kicker text-[11px] tracking-[0.22em] uppercase">
             {card.groupLabel}
           </div>
           <div
@@ -137,11 +137,11 @@ function S02Layout({ section }: { section: Section }) {
           >
             {card.title}
           </div>
-          <p className="mt-4 text-[12px] leading-7 text-muted-foreground">{card.body}</p>
+          <p className="diq-proseMuted mt-4 text-[12px] leading-7">{card.body}</p>
           {card.deliverables.length > 0 && (
             <div className="mt-6 border-t pt-5" style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
-              <div className="text-[10px] tracking-[0.22em] uppercase text-primary">Deliverables</div>
-              <ul className="mt-3 space-y-2 text-[12px] text-muted-foreground">
+              <div className="diq-kicker text-[10px] tracking-[0.22em] uppercase">Deliverables</div>
+              <ul className="diq-proseMuted mt-3 space-y-2 text-[12px]">
                 {card.deliverables.map((d) => (
                   <li key={d} className="flex items-start gap-3">
                     <span aria-hidden className="text-primary">→</span>

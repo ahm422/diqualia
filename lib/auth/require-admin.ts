@@ -19,7 +19,7 @@ export async function requireAdmin() {
     redirect("/admin/login");
   }
 
-  if (payload.email !== process.env.ADMIN_EMAIL) redirect("/admin/login");
+  if (!process.env.ADMIN_EMAIL || payload.email !== process.env.ADMIN_EMAIL) redirect("/admin/login");
 
   return { id: payload.sub, email: payload.email };
 }
