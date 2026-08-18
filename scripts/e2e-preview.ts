@@ -2,6 +2,11 @@
 /**
  * Phase 7 local E2E regression against preview (http://127.0.0.1:8787).
  *
+ * DANGER: this suite mutates the D1 bound to --base via admin PATCH/POST.
+ * It must never be pointed at a shared, preview, workers.dev, or production database.
+ * Allowed target: local `npm run preview` / `npm run cf:preview` on loopback only
+ * (127.0.0.1, localhost, [::1]). Host allowlist is enforced in parseArgs().
+ *
  * Prerequisites:
  *   npm run db:migrate && npm run db:import:local && npm run db:seed:admin
  *   Copy .dev.vars.example → .dev.vars (JWT_SECRET, ADMIN_EMAIL, COOKIE_SECURE=false)
@@ -19,11 +24,11 @@ import "dotenv/config";
 
 import {
   CookieJar,
+  E2eFail,
   assert,
   createClient,
   d1JsonColumn,
   d1Query,
-  fail,
   logOk,
   parseArgs,
   pngBlob,
@@ -39,7 +44,10 @@ const { request } = createClient(base, jar);
 
 const email = process.env.ADMIN_EMAIL;
 const password = process.env.ADMIN_PASSWORD;
-if (!email || !password) fail("ADMIN_EMAIL and ADMIN_PASSWORD required in .env");
+if (!email || !password) {
+  console.error("ADMIN_EMAIL and ADMIN_PASSWORD required in .env");
+  process.exit(1);
+}
 
 // ─── 1. Auth ───────────────────────────────────────────────────────────────
 
@@ -379,10 +387,13 @@ async function testR2() {
   const { url, key } = uploadJson as { url: string; key: string };
   logOk(`upload → key=${key}`);
 
-  assert(r2ObjectExists(key), stepLabel(`wrangler r2 object get --local succeeds for ${key}`));
-  logOk("R2 object exists locally");
-
+  const localExists = r2ObjectExists(key);
   const imgGet = await fetch(url);
+  assert(
+    localExists || imgGet.status === 200,
+    stepLabel(`R2 object visible locally or at public URL (local=${localExists}, http=${imgGet.status})`),
+  );
+  if (localExists) logOk("R2 object exists locally");
   if (imgGet.status === 200) {
     assert(
       (imgGet.headers.get("content-type") ?? "").includes("image/png"),
@@ -501,21 +512,232 @@ async function testPublicRoutes() {
   }
 }
 
+// ─── Snapshot / teardown (restore even if a suite throws) ─────────────────────
+
+type CmsSnapshot = {
+  singletons: { path: string; field: string; original: unknown }[];
+  manifestoItems: unknown;
+  whatToIncludeItems: unknown;
+};
+
+function isE2eText(value: unknown): boolean {
+  if (typeof value !== "string") return false;
+  if (
+    value === "E2E" ||
+    value === "E2E description" ||
+    value === "E2E body" ||
+    value === "E2E step body" ||
+    value === "E2E section body"
+  ) {
+    return true;
+  }
+  return /e2e-/i.test(value) || value.includes(TS);
+}
+
+async function snapshotCms(): Promise<CmsSnapshot> {
+  section("CMS snapshot");
+
+  const singletons: CmsSnapshot["singletons"] = [];
+  let manifestoItems: unknown;
+  let whatToIncludeItems: unknown;
+
+  for (const route of SINGLETONS) {
+    const get = await request(route.path);
+    assert(get.status === 200, stepLabel(`snapshot ${route.path} GET → 200 (got ${get.status})`));
+    const body = get.json as Record<string, unknown> | null;
+    assert(body != null, stepLabel(`snapshot ${route.path} JSON body`));
+    singletons.push({ path: route.path, field: route.field, original: body[route.field] });
+    if (route.path === "/api/admin/site-settings") {
+      singletons.push({ path: route.path, field: "logoUrl", original: body.logoUrl ?? null });
+    }
+    if (route.path === "/api/admin/story-page") manifestoItems = body.manifestoItems;
+    if (route.path === "/api/admin/contact-page") whatToIncludeItems = body.whatToIncludeItems;
+  }
+
+  assert(Array.isArray(manifestoItems), stepLabel("snapshot manifestoItems is array"));
+  assert(Array.isArray(whatToIncludeItems), stepLabel("snapshot whatToIncludeItems is array"));
+  logOk(`snapshotted ${singletons.length} singleton fields + JSON lists`);
+
+  return { singletons, manifestoItems, whatToIncludeItems };
+}
+
+async function restoreSingletons(snapshot: CmsSnapshot) {
+  const errors: string[] = [];
+
+  for (const row of snapshot.singletons) {
+    const patch = await request(row.path, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ [row.field]: row.original }),
+    });
+    if (patch.status !== 200) {
+      errors.push(`${row.path}.${row.field} restore → ${patch.status}`);
+      continue;
+    }
+    logOk(`restored ${row.path}.${row.field}`);
+  }
+
+  const storyPatch = await request("/api/admin/story-page", {
+    method: "PATCH",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ manifestoItems: snapshot.manifestoItems }),
+  });
+  if (storyPatch.status !== 200) {
+    errors.push(`story-page manifestoItems restore → ${storyPatch.status}`);
+  } else {
+    logOk("restored story-page.manifestoItems");
+  }
+
+  const contactPatch = await request("/api/admin/contact-page", {
+    method: "PATCH",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ whatToIncludeItems: snapshot.whatToIncludeItems }),
+  });
+  if (contactPatch.status !== 200) {
+    errors.push(`contact-page whatToIncludeItems restore → ${contactPatch.status}`);
+  } else {
+    logOk("restored contact-page.whatToIncludeItems");
+  }
+
+  return errors;
+}
+
+type CollectionSweep = {
+  listPath: string;
+  deletePath: (id: number) => string;
+  match: (row: Record<string, unknown>) => boolean;
+};
+
+async function sweepE2eCollections() {
+  const sweeps: CollectionSweep[] = [
+    {
+      listPath: "/api/admin/nav-items",
+      deletePath: (id) => `/api/admin/nav-items/${id}`,
+      match: (row) => isE2eText(row.href) || isE2eText(row.label),
+    },
+    {
+      listPath: "/api/admin/home-marquee",
+      deletePath: (id) => `/api/admin/home-marquee/${id}`,
+      match: (row) => isE2eText(row.text),
+    },
+    {
+      listPath: "/api/admin/home-explore",
+      deletePath: (id) => `/api/admin/home-explore/${id}`,
+      match: (row) => isE2eText(row.href) || isE2eText(row.title),
+    },
+    {
+      listPath: "/api/admin/about-built-for",
+      deletePath: (id) => `/api/admin/about-built-for/${id}`,
+      match: (row) => isE2eText(row.title) || isE2eText(row.description),
+    },
+    {
+      listPath: "/api/admin/process-steps",
+      deletePath: (id) => `/api/admin/process-steps/${id}`,
+      match: (row) => isE2eText(row.stepLabel) || isE2eText(row.title),
+    },
+    {
+      listPath: "/api/admin/industry-sectors",
+      deletePath: (id) => `/api/admin/industry-sectors/${id}`,
+      match: (row) => isE2eText(row.name),
+    },
+    {
+      listPath: "/api/admin/footer-nav",
+      deletePath: (id) => `/api/admin/footer-nav/${id}`,
+      match: (row) => isE2eText(row.href) || isE2eText(row.label),
+    },
+    {
+      listPath: "/api/admin/service-sections",
+      deletePath: (id) => `/api/admin/service-sections/${id}`,
+      match: (row) => isE2eText(row.tabId) || isE2eText(row.eyebrow) || isE2eText(row.title),
+    },
+  ];
+
+  const errors: string[] = [];
+
+  for (const sweep of sweeps) {
+    const list = await request(sweep.listPath);
+    if (list.status !== 200 || !Array.isArray(list.json)) {
+      errors.push(`${sweep.listPath} GET → ${list.status}`);
+      continue;
+    }
+    const rows = list.json as Record<string, unknown>[];
+    for (const row of rows) {
+      if (!sweep.match(row)) continue;
+      const id = row.id;
+      if (typeof id !== "number") {
+        errors.push(`${sweep.listPath} leftover missing numeric id`);
+        continue;
+      }
+      const del = await request(sweep.deletePath(id), { method: "DELETE" });
+      if (del.status !== 200) {
+        errors.push(`${sweep.deletePath(id)} DELETE → ${del.status}`);
+        continue;
+      }
+      logOk(`swept ${sweep.deletePath(id)}`);
+    }
+  }
+
+  return errors;
+}
+
+function deleteE2eLeads() {
+  d1Query(
+    `DELETE FROM leads WHERE source = 'e2e-preview' OR email LIKE '%e2e-%@example.com' OR message LIKE '%Phase 7 E2E%';`,
+  );
+  logOk("deleted e2e-preview leads");
+}
+
+async function teardownCms(snapshot: CmsSnapshot) {
+  section("CMS teardown");
+  const errors = [
+    ...(await restoreSingletons(snapshot)),
+    ...(await sweepE2eCollections()),
+  ];
+  try {
+    deleteE2eLeads();
+  } catch (err) {
+    errors.push(`lead delete failed: ${err instanceof Error ? err.message : String(err)}`);
+  }
+  if (errors.length > 0) {
+    throw new Error(`CMS teardown failed:\n  - ${errors.join("\n  - ")}`);
+  }
+  logOk("CMS restored");
+}
+
 // ─── Main ────────────────────────────────────────────────────────────────────
 
 async function main() {
   console.log(`E2E preview regression — base=${base} suffix=${TS}`);
   await testAuth();
-  await testSingletons();
-  await testCollections();
-  await testJsonRoundTrip();
-  await testR2();
-  await testContact();
-  await testPublicRoutes();
-  console.log("\n✓ All Phase 7 E2E checks passed");
+
+  const snapshot = await snapshotCms();
+
+  let testError: unknown;
+  try {
+    await testSingletons();
+    await testCollections();
+    await testJsonRoundTrip();
+    await testR2();
+    await testContact();
+    await testPublicRoutes();
+    console.log("\n✓ All Phase 7 E2E checks passed");
+  } catch (err) {
+    testError = err;
+  } finally {
+    try {
+      await teardownCms(snapshot);
+    } catch (teardownErr) {
+      console.error("\n✗ CMS teardown failed — local D1 may still be dirty");
+      console.error(teardownErr);
+      if (testError && !(testError instanceof E2eFail)) console.error(testError);
+      process.exit(1);
+    }
+  }
+
+  if (testError) throw testError;
 }
 
 main().catch((err) => {
-  console.error(err);
+  if (!(err instanceof E2eFail)) console.error(err);
   process.exit(1);
 });

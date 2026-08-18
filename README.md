@@ -28,7 +28,7 @@ npm run db:seed:admin
 ```bash
 npm run build
 npm run preview   # http://127.0.0.1:8787
-npm run cf:e2e    # regression against preview
+npm run cf:e2e    # local loopback only — never point at shared/preview/prod D1
 ```
 
 For fast UI iteration you can also use `npm run dev` (Next only; no Worker bindings — contact email is skipped gracefully).
