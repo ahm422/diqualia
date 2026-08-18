@@ -9,6 +9,7 @@ export const SITE_PATHS = [
   "/contact",
   "/story",
   "/blog",
+  "/careers",
 ] as const;
 
 /** Revalidate a single public page */
@@ -24,6 +25,11 @@ export function revalidateBlogPost(slug: string) {
 /** Revalidate a dynamic industry sector path (not in SITE_PATHS) */
 export function revalidateIndustrySector(slug: string) {
   revalidatePath(`/industries/${slug}`);
+}
+
+/** Revalidate a dynamic job opening path (not in SITE_PATHS) */
+export function revalidateJobOpening(slug: string) {
+  revalidatePath(`/careers/${slug}`);
 }
 
 /** Revalidate SiteHeader/SiteFooter layout data shown on every public page */

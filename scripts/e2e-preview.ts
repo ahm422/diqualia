@@ -140,11 +140,44 @@ const SINGLETONS: SingletonRoute[] = [
   { path: "/api/admin/industries-page", field: "eyebrow", value: `Industries ${TS}` },
   { path: "/api/admin/story-page", field: "eyebrow", value: `Story ${TS}` },
   { path: "/api/admin/contact-page", field: "eyebrow", value: `Contact ${TS}` },
+  { path: "/api/admin/career-page", field: "eyebrow", value: `Careers ${TS}` },
   { path: "/api/admin/footer", field: "tagline1", value: `Tagline ${TS}` },
 ];
 
-async function testSingletons() {
+/** Seed defaults used when a snapshot is already dirty from a previous E2E run. */
+const SINGLETON_FALLBACKS: Record<string, unknown> = {
+  "/api/admin/site-settings:siteName": "DiQualia",
+  "/api/admin/cta-button:label": "Talk to Us",
+  "/api/admin/home-hero:eyebrow": "Marketing Intelligence & Research",
+  "/api/admin/home-explore-section:eyebrow": "Explore",
+  "/api/admin/home-where-next:eyebrow": "Begin With Intelligence",
+  "/api/admin/about-hero:eyebrow": "About",
+  "/api/admin/about-where-next:eyebrow": "Where next",
+  "/api/admin/services-page:eyebrow": "Our Intelligence Services",
+  "/api/admin/process-page:eyebrow": "How We Work",
+  "/api/admin/industries-page:eyebrow": "Industries",
+  "/api/admin/story-page:eyebrow": "Our Story",
+  "/api/admin/contact-page:eyebrow": "Contact",
+  "/api/admin/career-page:eyebrow": "Careers",
+  "/api/admin/footer:tagline1": "Marketing Intelligence & Research",
+};
+
+function singletonKey(path: string, field: string) {
+  return `${path}:${field}`;
+}
+
+function sanitizeSnapshotValue(path: string, field: string, original: unknown): unknown {
+  if (!isE2eText(original)) return original;
+  const fallback = SINGLETON_FALLBACKS[singletonKey(path, field)];
+  return fallback !== undefined ? fallback : original;
+}
+
+async function testSingletons(snapshot: CmsSnapshot) {
   section("Admin singleton PATCH");
+
+  const originals = new Map(
+    snapshot.singletons.map((row) => [singletonKey(row.path, row.field), row.original]),
+  );
 
   for (const route of SINGLETONS) {
     const unauth = await fetch(`${base}${route.path}`);
@@ -163,7 +196,19 @@ async function testSingletons() {
       body: JSON.stringify({ [route.field]: route.value }),
     });
     assert(patch.status === 200, stepLabel(`${route.path} PATCH → 200 (got ${patch.status})`));
-    logOk(`${route.path} GET/PATCH`);
+    assert(
+      (patch.json as Record<string, unknown>)[route.field] === route.value,
+      stepLabel(`${route.path} PATCH wrote ${route.field}`),
+    );
+
+    const original = originals.get(singletonKey(route.path, route.field));
+    const restore = await request(route.path, {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ [route.field]: original }),
+    });
+    assert(restore.status === 200, stepLabel(`${route.path} restore → 200 (got ${restore.status})`));
+    logOk(`${route.path} GET/PATCH/restore`);
   }
 }
 
@@ -243,6 +288,20 @@ async function testCollections() {
     "/api/admin/footer-nav",
     { href: `/e2e-${TS}`, label: `Footer ${TS}`, group: "primary" },
     { label: `Footer patched ${TS}` },
+  );
+
+  await collectionCrud(
+    "/api/admin/job-openings",
+    {
+      title: `Opening ${TS}`,
+      slug: TS,
+      department: "Intelligence",
+      location: "Remote",
+      type: "Full-time",
+      description: `E2E opening body ${TS}`,
+      requirements: [`Req ${TS}`],
+    },
+    { title: `Opening patched ${TS}` },
   );
 
   const sectionRes = await request("/api/admin/service-sections", {
@@ -366,6 +425,32 @@ async function testJsonRoundTrip() {
   );
   assert(Array.isArray(d1Contact), stepLabel("D1 what_to_include_items is JSON array"));
   logOk("contact-page whatToIncludeItems round-trip");
+
+  const careerItems = [`Benefit A ${TS}`, `Benefit B ${TS}`];
+  const careerPatch = await request("/api/admin/career-page", {
+    method: "PATCH",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ benefits: careerItems }),
+  });
+  assert(careerPatch.status === 200, stepLabel(`career-page PATCH benefits → 200 (got ${careerPatch.status})`));
+
+  const careerGet = await request("/api/admin/career-page");
+  const gotCareer = (careerGet.json as { benefits?: unknown })?.benefits;
+  assert(Array.isArray(gotCareer), stepLabel("career benefits is array"));
+  assert(
+    JSON.stringify(gotCareer) === JSON.stringify(careerItems),
+    stepLabel("career benefits round-trip"),
+  );
+
+  const careerHtml = await request("/careers");
+  assert(careerHtml.status === 200, stepLabel(`GET /careers → 200 (got ${careerHtml.status})`));
+  for (const line of careerItems) {
+    assert(careerHtml.text.includes(line), stepLabel(`/careers HTML contains "${line}"`));
+  }
+
+  const d1Career = d1JsonColumn("SELECT benefits FROM career_page WHERE id = 1;", "benefits");
+  assert(Array.isArray(d1Career), stepLabel("D1 career_page.benefits is JSON array"));
+  logOk("career-page benefits round-trip");
 }
 
 // ─── 5. R2 upload + delete ───────────────────────────────────────────────────
@@ -486,6 +571,99 @@ async function testContact() {
   logOk("CF Email Service send is best-effort (lead saved regardless of delivery)");
 }
 
+function pdfBlob(): Blob {
+  return new Blob(["%PDF-1.4\n1 0 obj\n<<>>\nendobj\ntrailer\n%%EOF\n"], { type: "application/pdf" });
+}
+
+async function testCareers() {
+  section("Careers apply + hidden opening");
+
+  const hiddenSlug = `e2e-hidden-${TS}`;
+  const hidden = await request("/api/admin/job-openings", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      title: `Hidden ${TS}`,
+      slug: hiddenSlug,
+      department: "Intelligence",
+      location: "Remote",
+      type: "Full-time",
+      description: `Hidden opening ${TS}`,
+      visible: false,
+    }),
+  });
+  assert(hidden.status === 201, stepLabel(`hidden opening POST → 201 (got ${hidden.status})`));
+  const hiddenId = (hidden.json as { id?: number })?.id;
+  assert(hiddenId != null, stepLabel("hidden opening returns id"));
+
+  try {
+    const hiddenPublic = await request(`/careers/${hiddenSlug}`);
+    assert(
+      hiddenPublic.status === 404,
+      stepLabel(`GET /careers/${hiddenSlug} hidden → 404 (got ${hiddenPublic.status})`),
+    );
+    logOk("hidden opening 404s on public site");
+  } finally {
+    await request(`/api/admin/job-openings/${hiddenId}`, { method: "DELETE" }).catch(() => {});
+  }
+
+  const trapEmail = `trap-${TS}@example.com`;
+  const trap = new FormData();
+  trap.append("name", `Trap ${TS}`);
+  trap.append("email", trapEmail);
+  trap.append("jobSlug", "research-analyst");
+  trap.append("website", "https://spam.example");
+  const trapRes = await fetch(`${base}/api/careers/apply`, { method: "POST", body: trap, redirect: "manual" });
+  const trapJson = (await trapRes.json()) as { error?: string };
+  assert(trapRes.status === 400, stepLabel(`apply honeypot → 400 (got ${trapRes.status})`));
+  assert(trapJson.error === "Invalid submission", stepLabel("honeypot error Invalid submission"));
+  const trapList = await request("/api/admin/job-applications");
+  assert(trapList.status === 200, stepLabel(`GET job-applications after honeypot → 200 (got ${trapList.status})`));
+  const trapApps = trapList.json as { email?: string }[];
+  assert(
+    Array.isArray(trapApps) && !trapApps.some((row) => row.email === trapEmail),
+    stepLabel("honeypot created no job_applications row"),
+  );
+  logOk("honeypot apply → 400, no row");
+
+  const applyEmail = `${TS}@example.com`;
+  const apply = new FormData();
+  apply.append("name", `Applicant ${TS}`);
+  apply.append("email", applyEmail);
+  apply.append("jobSlug", "research-analyst");
+  apply.append("coverNote", `Cover ${TS}`);
+  apply.append("resume", pdfBlob(), "resume.pdf");
+  const applyRes = await fetch(`${base}/api/careers/apply`, { method: "POST", body: apply, redirect: "manual" });
+  const applyJson = (await applyRes.json()) as Record<string, unknown>;
+  assert(applyRes.status === 200, stepLabel(`apply happy path → 200 (got ${applyRes.status})`));
+  assert(applyJson.ok === true, stepLabel("apply ok:true"));
+  assert(typeof applyJson.id === "string", stepLabel("apply returns id"));
+  assert(!("url" in applyJson), stepLabel("apply JSON has no url"));
+  assert(!("resumeKey" in applyJson), stepLabel("apply JSON has no resumeKey"));
+  logOk(`apply created id=${applyJson.id}`);
+
+  const detail = await request(`/api/admin/job-applications/${applyJson.id}`);
+  assert(detail.status === 200, stepLabel(`GET job-application detail → 200 (got ${detail.status})`));
+  const row = detail.json as { jobTitle?: string; resumeKey?: string };
+  assert(row.jobTitle === "Research Analyst", stepLabel("denormalized job_title persisted"));
+  assert(typeof row.resumeKey === "string" && row.resumeKey.startsWith("resumes/"), stepLabel("resume_key under resumes/"));
+  const resumeKey = row.resumeKey;
+
+  const inbox = await request("/api/admin/job-applications");
+  assert(inbox.status === 200, stepLabel(`GET job-applications → 200 (got ${inbox.status})`));
+  const apps = inbox.json as { id: string }[];
+  assert(Array.isArray(apps) && apps.some((row) => row.id === applyJson.id), stepLabel("inbox includes new application"));
+
+  const resumeGet = await request(`/api/admin/job-applications/${applyJson.id}/resume`);
+  assert(resumeGet.status === 200, stepLabel(`admin resume GET → 200 (got ${resumeGet.status})`));
+  const localResume = r2ObjectExists(resumeKey!);
+  assert(
+    localResume || resumeGet.status === 200,
+    stepLabel(`resume in local R2 or admin stream (local=${localResume})`),
+  );
+  logOk("admin resume download → 200");
+}
+
 // ─── 7. Public routes ────────────────────────────────────────────────────────
 
 async function testPublicRoutes() {
@@ -500,6 +678,8 @@ async function testPublicRoutes() {
     "/industries/construction-built-environment",
     "/story",
     "/blog",
+    "/careers",
+    "/careers/research-analyst",
     "/contact",
     "/privacy",
     "/terms",
@@ -518,6 +698,7 @@ type CmsSnapshot = {
   singletons: { path: string; field: string; original: unknown }[];
   manifestoItems: unknown;
   whatToIncludeItems: unknown;
+  careerBenefits: unknown;
 };
 
 function isE2eText(value: unknown): boolean {
@@ -540,25 +721,32 @@ async function snapshotCms(): Promise<CmsSnapshot> {
   const singletons: CmsSnapshot["singletons"] = [];
   let manifestoItems: unknown;
   let whatToIncludeItems: unknown;
+  let careerBenefits: unknown;
 
   for (const route of SINGLETONS) {
     const get = await request(route.path);
     assert(get.status === 200, stepLabel(`snapshot ${route.path} GET → 200 (got ${get.status})`));
     const body = get.json as Record<string, unknown> | null;
     assert(body != null, stepLabel(`snapshot ${route.path} JSON body`));
-    singletons.push({ path: route.path, field: route.field, original: body[route.field] });
+    singletons.push({
+      path: route.path,
+      field: route.field,
+      original: sanitizeSnapshotValue(route.path, route.field, body[route.field]),
+    });
     if (route.path === "/api/admin/site-settings") {
       singletons.push({ path: route.path, field: "logoUrl", original: body.logoUrl ?? null });
     }
     if (route.path === "/api/admin/story-page") manifestoItems = body.manifestoItems;
     if (route.path === "/api/admin/contact-page") whatToIncludeItems = body.whatToIncludeItems;
+    if (route.path === "/api/admin/career-page") careerBenefits = body.benefits;
   }
 
   assert(Array.isArray(manifestoItems), stepLabel("snapshot manifestoItems is array"));
   assert(Array.isArray(whatToIncludeItems), stepLabel("snapshot whatToIncludeItems is array"));
+  assert(Array.isArray(careerBenefits), stepLabel("snapshot careerBenefits is array"));
   logOk(`snapshotted ${singletons.length} singleton fields + JSON lists`);
 
-  return { singletons, manifestoItems, whatToIncludeItems };
+  return { singletons, manifestoItems, whatToIncludeItems, careerBenefits };
 }
 
 async function restoreSingletons(snapshot: CmsSnapshot) {
@@ -597,6 +785,17 @@ async function restoreSingletons(snapshot: CmsSnapshot) {
     errors.push(`contact-page whatToIncludeItems restore → ${contactPatch.status}`);
   } else {
     logOk("restored contact-page.whatToIncludeItems");
+  }
+
+  const careerPatch = await request("/api/admin/career-page", {
+    method: "PATCH",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ benefits: snapshot.careerBenefits }),
+  });
+  if (careerPatch.status !== 200) {
+    errors.push(`career-page benefits restore → ${careerPatch.status}`);
+  } else {
+    logOk("restored career-page.benefits");
   }
 
   return errors;
@@ -650,6 +849,11 @@ async function sweepE2eCollections() {
       deletePath: (id) => `/api/admin/service-sections/${id}`,
       match: (row) => isE2eText(row.tabId) || isE2eText(row.eyebrow) || isE2eText(row.title),
     },
+    {
+      listPath: "/api/admin/job-openings",
+      deletePath: (id) => `/api/admin/job-openings/${id}`,
+      match: (row) => isE2eText(row.slug) || isE2eText(row.title),
+    },
   ];
 
   const errors: string[] = [];
@@ -687,6 +891,23 @@ function deleteE2eLeads() {
   logOk("deleted e2e-preview leads");
 }
 
+function deleteE2eApplications() {
+  d1Query(
+    `DELETE FROM job_applications WHERE email LIKE '%e2e-%@example.com' OR name LIKE '%e2e-%' OR job_title LIKE '%e2e-%';`,
+  );
+  logOk("deleted e2e-preview job_applications");
+}
+
+function restorePublicCtaIfDirty() {
+  d1Query(
+    `UPDATE cta_buttons SET label = 'Talk to Us', href = '/contact' WHERE label LIKE '%e2e-%';`,
+  );
+  const rows = d1Query(`SELECT label FROM cta_buttons WHERE id = 1;`) as { label?: string }[];
+  const label = rows[0]?.label ?? "";
+  assert(!/e2e-/i.test(label), stepLabel(`cta_buttons.label is public copy (got ${label})`));
+  logOk(`cta_buttons.label = ${label}`);
+}
+
 async function teardownCms(snapshot: CmsSnapshot) {
   section("CMS teardown");
   const errors = [
@@ -695,6 +916,8 @@ async function teardownCms(snapshot: CmsSnapshot) {
   ];
   try {
     deleteE2eLeads();
+    deleteE2eApplications();
+    restorePublicCtaIfDirty();
   } catch (err) {
     errors.push(`lead delete failed: ${err instanceof Error ? err.message : String(err)}`);
   }
@@ -714,11 +937,12 @@ async function main() {
 
   let testError: unknown;
   try {
-    await testSingletons();
+    await testSingletons(snapshot);
     await testCollections();
     await testJsonRoundTrip();
     await testR2();
     await testContact();
+    await testCareers();
     await testPublicRoutes();
     console.log("\n✓ All Phase 7 E2E checks passed");
   } catch (err) {

@@ -366,3 +366,58 @@ model BlogPost {
 
   @@map("blog_posts")
 }
+
+// ─── Careers ────────────────────────────────────────────────────────────────
+
+model CareerPage {
+  id             Int    @id @default(1)
+  eyebrow        String
+  headlineLine1  String @map("headline_line1")
+  headlineLine2  String @map("headline_line2")
+  body           String
+  cultureEyebrow String @map("culture_eyebrow")
+  cultureHeadline String @map("culture_headline")
+  cultureBody    String @map("culture_body")
+  benefits       Json
+  applyEyebrow   String @map("apply_eyebrow")
+  applyHeadline  String @map("apply_headline")
+  applyBody      String @map("apply_body")
+
+  @@map("career_page")
+}
+
+model JobOpening {
+  id           Int              @id @default(autoincrement())
+  slug         String           @unique
+  title        String
+  department   String
+  location     String
+  type         String
+  description  String
+  requirements Json
+  order        Int
+  visible      Boolean          @default(true)
+  createdAt    DateTime         @default(now()) @map("created_at")
+  updatedAt    DateTime         @updatedAt @map("updated_at")
+  applications JobApplication[]
+
+  @@map("job_openings")
+}
+
+model JobApplication {
+  id           String      @id @default(uuid())
+  name         String
+  email        String
+  phone        String?
+  jobOpeningId Int?        @map("job_opening_id")
+  jobTitle     String      @map("job_title")
+  coverNote    String?     @map("cover_note")
+  resumeKey    String      @map("resume_key")
+  status       String      @default("new")
+  submittedAt  DateTime    @default(now()) @map("submitted_at")
+  jobOpening   JobOpening? @relation(fields: [jobOpeningId], references: [id], onDelete: SetNull)
+
+  @@index([jobOpeningId])
+  @@index([status])
+  @@map("job_applications")
+}
