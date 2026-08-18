@@ -58,13 +58,17 @@ function PullQuote({ quote, cite }: { quote: React.ReactNode; cite: string }) {
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 text-[180px] leading-none"
-        style={{ fontFamily: "var(--font-display)", color: "color-mix(in oklab, var(--gold) 8%, transparent)" }}
+        className="pointer-events-none absolute inset-x-0 top-0 z-0 flex h-[4.5rem] justify-center overflow-hidden"
       >
-        "
+        <span
+          className="diq-ghostQuote mt-1 text-[6.5rem] leading-none"
+          style={{ fontFamily: "var(--font-display)" }}
+        >
+          {"\u201C"}
+        </span>
       </div>
       <blockquote
-        className="mx-auto max-w-4xl"
+        className="relative z-10 mx-auto max-w-4xl pt-10"
         style={{
           fontFamily: "var(--font-display)",
           fontWeight: 300,
@@ -75,7 +79,7 @@ function PullQuote({ quote, cite }: { quote: React.ReactNode; cite: string }) {
       >
         <span className="text-foreground">{quote}</span>
       </blockquote>
-      <div className="mt-6 text-[11px] tracking-[0.22em] uppercase" style={{ color: "var(--text-muted)" }}>
+      <div className="relative z-10 mt-6 text-[11px] tracking-[0.22em] uppercase" style={{ color: "var(--text-muted)" }}>
         {cite}
       </div>
     </section>
@@ -139,7 +143,7 @@ export default async function StoryPage() {
           <p className="mx-auto mt-10 max-w-[64ch] text-[16px] leading-9" style={{ color: "var(--text-muted)" }}>
             {page.body}
           </p>
-          <div className="mt-14 flex flex-col items-center gap-4 text-[11px] tracking-[0.22em] uppercase" style={{ color: "color-mix(in oklab, var(--text-muted) 65%, transparent)" }}>
+          <div className="mt-14 flex flex-col items-center gap-4 text-[11px] tracking-[0.22em] uppercase" style={{ color: "var(--text-muted)" }}>
             <span
               aria-hidden
               className="inline-block h-14 w-px"
@@ -202,8 +206,8 @@ export default async function StoryPage() {
               >
                 <div className="p-10" style={{ background: "var(--bg-elev)" }}>
                   <div
-                    className="text-[52px] leading-none"
-                    style={{ fontFamily: "var(--font-display)", fontWeight: 300, color: "color-mix(in oklab, var(--gold) 18%, transparent)" }}
+                    className="diq-ghostNum text-[52px] leading-none"
+                    style={{ fontFamily: "var(--font-display)", fontWeight: 300 }}
                   >
                     {page.dxNum1}
                   </div>
@@ -216,8 +220,8 @@ export default async function StoryPage() {
                 </div>
                 <div className="p-10" style={{ background: "var(--bg-elev)" }}>
                   <div
-                    className="text-[52px] leading-none"
-                    style={{ fontFamily: "var(--font-display)", fontWeight: 300, color: "color-mix(in oklab, var(--gold) 18%, transparent)" }}
+                    className="diq-ghostNum text-[52px] leading-none"
+                    style={{ fontFamily: "var(--font-display)", fontWeight: 300 }}
                   >
                     {page.dxNum2}
                   </div>
@@ -372,8 +376,8 @@ export default async function StoryPage() {
                 Chapter Six
               </div>
               <div
-                className="mt-3 text-[72px] leading-none"
-                style={{ fontFamily: "var(--font-display)", fontWeight: 300, color: "color-mix(in oklab, var(--gold) 18%, transparent)" }}
+                className="diq-ghostNum mt-3 text-[72px] leading-none"
+                style={{ fontFamily: "var(--font-display)", fontWeight: 300 }}
               >
                 06
               </div>

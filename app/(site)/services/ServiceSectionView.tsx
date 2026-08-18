@@ -42,8 +42,8 @@ function SectionHeader({ displayNum, eyebrow, title, body }: { displayNum: strin
   return (
     <div className="grid grid-cols-1 gap-12 md:grid-cols-[220px_1fr] md:gap-16">
       <div
-        className="text-[72px] leading-none"
-        style={{ fontFamily: "var(--font-display)", fontWeight: 300, color: "color-mix(in oklab, var(--gold) 12%, transparent)" }}
+        className="diq-ghostNum text-[72px] leading-none"
+        style={{ fontFamily: "var(--font-display)", fontWeight: 300 }}
       >
         {displayNum}
       </div>

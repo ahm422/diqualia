@@ -186,8 +186,8 @@ export default async function ServicesPage() {
               <div key={num} className="p-8" style={{ background: "var(--bg-elev)" }}>
                 <div className="text-[10px] tracking-[0.22em] uppercase" style={{ color: "var(--gold)" }}>{tag}</div>
                 <div
-                  className="mt-4 text-[36px] leading-none"
-                  style={{ fontFamily: "var(--font-display)", fontWeight: 300, color: "color-mix(in oklab, var(--gold) 18%, transparent)" }}
+                  className="diq-ghostNum mt-4 text-[36px] leading-none"
+                  style={{ fontFamily: "var(--font-display)", fontWeight: 300 }}
                 >
                   {num}
                 </div>
