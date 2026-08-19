@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { Container } from "@/app/components/Container";
+import { Button } from "@/components/ui/button";
 import { getDb } from "@/lib/cloudflare-env";
 
 export const revalidate = 60;
@@ -107,7 +109,7 @@ export default async function ServicesPage() {
           }}
         />
 
-        <div className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-12 px-6 pb-16 pt-20 md:grid-cols-2 md:items-end md:gap-20 md:pb-20 md:pt-28">
+        <Container className="grid grid-cols-1 gap-12 pb-16 pt-20 md:grid-cols-2 md:items-end md:gap-20 md:pb-20 md:pt-28">
           <div>
             <Eyebrow>{page.eyebrow}</Eyebrow>
             <h1
@@ -145,7 +147,7 @@ export default async function ServicesPage() {
               ))}
             </div>
           </div>
-        </div>
+        </Container>
       </section>
 
       <ServicesTabs tabs={tabs} />
@@ -161,7 +163,7 @@ export default async function ServicesPage() {
 
       {/* INTELLIGENCE PROCESS STRIP */}
       <section className="border-b" style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
-        <div className="mx-auto w-full max-w-6xl px-6 py-20">
+        <Container className="py-20">
           <Eyebrow>How Every Service Begins</Eyebrow>
           <h2
             className="mt-4 text-foreground"
@@ -196,12 +198,12 @@ export default async function ServicesPage() {
               </div>
             ))}
           </div>
-        </div>
+        </Container>
       </section>
 
       {/* ENGAGEMENT MODELS */}
       <section className="border-b" style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
-        <div className="mx-auto w-full max-w-6xl px-6 py-20">
+        <Container className="py-20">
           <Eyebrow>How We Engage</Eyebrow>
           <h2
             className="mt-4 text-foreground"
@@ -297,25 +299,18 @@ export default async function ServicesPage() {
                     ))}
                   </ul>
                 </div>
-                <a
-                  href="/contact"
-                  className="mt-8 block border px-4 py-3 text-center text-[11px] tracking-[0.22em] uppercase no-underline transition-colors"
-                  style={{
-                    borderColor: featured ? "var(--gold)" : "color-mix(in oklab, var(--border) 80%, transparent)",
-                    color: featured ? "var(--gold)" : "var(--text-muted)",
-                  }}
-                >
-                  {cta}
-                </a>
+                <Button asChild variant="secondary" className="mt-8 w-full">
+                  <a href="/contact">{cta}</a>
+                </Button>
               </div>
             ))}
           </div>
-        </div>
+        </Container>
       </section>
 
       {/* WHY DIQUALIA GRID */}
       <section className="border-b" style={{ background: "var(--bg-elev)", borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
-        <div className="mx-auto w-full max-w-6xl px-6 py-20">
+        <Container className="py-20">
           <Eyebrow>Why DiQualia</Eyebrow>
           <h2
             className="mt-4 text-foreground"
@@ -359,7 +354,7 @@ export default async function ServicesPage() {
               </div>
             ))}
           </div>
-        </div>
+        </Container>
       </section>
 
       {/* CONTACT CTA STRIP */}
@@ -372,7 +367,7 @@ export default async function ServicesPage() {
             backgroundSize: "64px 64px",
           }}
         />
-        <div className="relative mx-auto w-full max-w-3xl px-6 py-20">
+        <Container size="narrow" className="relative py-20">
           <div className="text-[11px] tracking-[0.35em] uppercase" style={{ color: "color-mix(in oklab, var(--ink) 55%, transparent)" }}>
             {page.ctaEyebrow}
           </div>
@@ -392,9 +387,9 @@ export default async function ServicesPage() {
             {page.ctaBody}
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-            <Link href={page.ctaBtn1Href} className="diq-btnGold" style={{ padding: "15px 32px" }}>
-              {page.ctaBtn1Label}
-            </Link>
+            <Button asChild variant="primary">
+              <Link href={page.ctaBtn1Href}>{page.ctaBtn1Label}</Link>
+            </Button>
             <a
               href={`mailto:${page.ctaEmailHref}`}
               className="inline-block border-b-2 pb-1 text-[22px] no-underline"
@@ -409,7 +404,7 @@ export default async function ServicesPage() {
               {page.ctaEmailHref}
             </a>
           </div>
-        </div>
+        </Container>
       </section>
     </div>
   );

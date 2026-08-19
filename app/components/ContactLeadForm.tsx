@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 
+import { Button } from "@/components/ui/button";
+
 type SubmitState =
   | { status: "idle" }
   | { status: "submitting" }
@@ -121,9 +123,9 @@ export function ContactLeadForm() {
       </div>
 
       <div className="mt-8 flex flex-wrap items-center gap-4">
-        <button type="submit" className="diq-btnGhost" disabled={!canSubmit || state.status === "submitting"}>
+        <Button type="submit" variant="secondary" disabled={!canSubmit || state.status === "submitting"}>
           {state.status === "submitting" ? "Sending…" : "Send"}
-        </button>
+        </Button>
         <div className="text-[12px] leading-7 text-muted-foreground">
           {state.status === "idle" ? "Email or message is required." : null}
           {state.status === "success" ? "Received — we’ll reply with next steps." : null}

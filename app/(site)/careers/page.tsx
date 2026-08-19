@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { Container } from "@/app/components/Container";
 import { getDb } from "@/lib/cloudflare-env";
 
 export const revalidate = 60;
@@ -98,7 +99,7 @@ export default async function CareersPage() {
             opacity: 0.35,
           }}
         />
-        <div className="diq-padX relative mx-auto w-full max-w-6xl pb-16 pt-20 md:pb-20 md:pt-28">
+        <Container className="relative pb-16 pt-20 md:pb-20 md:pt-28">
           <Eyebrow>{page.eyebrow}</Eyebrow>
           <h1
             className="mt-8 text-foreground"
@@ -118,14 +119,14 @@ export default async function CareersPage() {
           <p className="mt-8 max-w-[70ch] text-[15px] leading-8 text-muted-foreground">
             {page.body}
           </p>
-        </div>
+        </Container>
       </section>
 
       <section
         className="border-b"
         style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}
       >
-        <div className="diq-padX mx-auto grid w-full max-w-6xl grid-cols-2 gap-px md:grid-cols-2" style={{ background: "color-mix(in oklab, var(--border) 100%, transparent)" }}>
+        <Container className="grid grid-cols-2 gap-px md:grid-cols-2" style={{ background: "color-mix(in oklab, var(--border) 100%, transparent)" }}>
           {[
             { value: String(openings.length).padStart(2, "0"), label: "Open roles" },
             { value: String(departmentCount).padStart(2, "0"), label: departmentCount === 1 ? "Department" : "Departments" },
@@ -140,11 +141,11 @@ export default async function CareersPage() {
               <div className="mt-3 text-[11px] tracking-[0.22em] uppercase text-muted-foreground">{stat.label}</div>
             </div>
           ))}
-        </div>
+        </Container>
       </section>
 
       <section className="diq-sectionY" style={{ background: "var(--diq_ink)" }}>
-        <div className="diq-padX mx-auto w-full max-w-6xl">
+        <Container>
           <Eyebrow>{page.cultureEyebrow}</Eyebrow>
           <h2
             className="mt-6 text-foreground"
@@ -177,11 +178,11 @@ export default async function CareersPage() {
               ))}
             </ul>
           ) : null}
-        </div>
+        </Container>
       </section>
 
       <section className="diq-sectionY border-t" style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
-        <div className="diq-padX mx-auto w-full max-w-6xl">
+        <Container>
           <Eyebrow>How we hire</Eyebrow>
           <div className="mt-12 grid grid-cols-1 gap-px md:grid-cols-4" style={{ background: "color-mix(in oklab, var(--border) 100%, transparent)" }}>
             {hireSteps.map((step) => (
@@ -198,11 +199,11 @@ export default async function CareersPage() {
               </div>
             ))}
           </div>
-        </div>
+        </Container>
       </section>
 
       <section className="diq-sectionY border-t" style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
-        <div className="diq-padX mx-auto w-full max-w-6xl">
+        <Container>
           <Eyebrow>Open roles</Eyebrow>
           {openings.length === 0 ? (
             <p className="mt-8 max-w-[62ch] text-[15px] leading-8 text-muted-foreground">
@@ -242,7 +243,7 @@ export default async function CareersPage() {
               ))}
             </div>
           )}
-        </div>
+        </Container>
       </section>
 
       <section
@@ -252,7 +253,7 @@ export default async function CareersPage() {
           borderTopColor: "color-mix(in oklab, var(--border) 80%, transparent)",
         }}
       >
-        <div className="diq-padX mx-auto w-full max-w-5xl py-20 text-center">
+        <Container className="py-20 text-center">
           <Eyebrow center>{page.applyEyebrow}</Eyebrow>
           <h2
             className="mx-auto mt-8 max-w-3xl text-foreground"
@@ -269,7 +270,7 @@ export default async function CareersPage() {
           <p className="mx-auto mt-6 max-w-[62ch] text-[15px] leading-8 text-muted-foreground">
             {page.applyBody}
           </p>
-        </div>
+        </Container>
       </section>
     </div>
   );

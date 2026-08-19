@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { Container } from "@/app/components/Container";
 import { CareerApplyForm } from "@/app/components/CareerApplyForm";
 import { Markdown } from "@/app/components/Markdown";
 import { ShareRoleButton } from "@/app/components/ShareRoleButton";
+import { Button } from "@/components/ui/button";
 import { getDb } from "@/lib/cloudflare-env";
 
 export const revalidate = 60;
@@ -93,7 +95,7 @@ export default async function JobOpeningPage({ params }: PageProps) {
               "radial-gradient(ellipse 70% 50% at 80% 0%, color-mix(in oklab, var(--gold) 10%, transparent), transparent 50%)",
           }}
         />
-        <div className="diq-padX relative mx-auto w-full max-w-6xl pb-14 pt-20 md:pt-28">
+        <Container className="relative pb-14 pt-20 md:pt-28">
           <Link
             href="/careers"
             className="text-[11px] tracking-[0.22em] uppercase transition-colors hover:text-primary"
@@ -115,10 +117,10 @@ export default async function JobOpeningPage({ params }: PageProps) {
           >
             {opening.title}
           </h1>
-        </div>
+        </Container>
       </header>
 
-      <div className="diq-padX mx-auto grid w-full max-w-6xl grid-cols-1 gap-12 py-14 md:grid-cols-[minmax(0,1fr)_280px] md:gap-16 md:py-20">
+      <Container className="grid grid-cols-1 gap-12 py-14 md:grid-cols-[minmax(0,1fr)_280px] md:gap-16 md:py-20">
         <div>
           <div className="text-[11px] tracking-[0.22em] uppercase text-primary">About</div>
           <div className="mt-6">
@@ -168,13 +170,9 @@ export default async function JobOpeningPage({ params }: PageProps) {
                 </div>
               ))}
             </dl>
-            <a
-              href="#apply"
-              className="diq-btnGold mt-8 inline-block w-full text-center"
-              style={{ padding: "14px 20px" }}
-            >
-              Apply now
-            </a>
+            <Button asChild variant="primary" className="mt-8 w-full">
+              <a href="#apply">Apply now</a>
+            </Button>
             <div className="mt-5 flex flex-col gap-3">
               <ShareRoleButton title={opening.title} />
               <Link
@@ -187,14 +185,14 @@ export default async function JobOpeningPage({ params }: PageProps) {
             </div>
           </div>
         </aside>
-      </div>
+      </Container>
 
       {related.length > 0 ? (
         <section
           className="border-t"
           style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}
         >
-          <div className="diq-padX mx-auto w-full max-w-6xl py-16">
+          <Container className="py-16">
             <div className="text-[11px] tracking-[0.22em] uppercase text-primary">Related roles</div>
             <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
               {related.map((role) => (
@@ -226,7 +224,7 @@ export default async function JobOpeningPage({ params }: PageProps) {
                 </Link>
               ))}
             </div>
-          </div>
+          </Container>
         </section>
       ) : null}
     </article>

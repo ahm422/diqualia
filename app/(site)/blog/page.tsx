@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
+import { Container } from "@/app/components/Container";
 import { getDb } from "@/lib/cloudflare-env";
 
 export const revalidate = 60;
@@ -56,7 +57,7 @@ export default async function BlogIndexPage() {
             opacity: 0.9,
           }}
         />
-        <div className="relative mx-auto w-full max-w-6xl px-6 pb-16 pt-20 md:pb-20 md:pt-28">
+        <Container className="relative pb-16 pt-20 md:pb-20 md:pt-28">
           <Eyebrow>Insights</Eyebrow>
           <h1
             className="mt-8 text-foreground"
@@ -77,10 +78,10 @@ export default async function BlogIndexPage() {
             Research observations, delivery lessons, and points of view — published when
             they are ready.
           </p>
-        </div>
+        </Container>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-6 py-20">
+      <Container as="section" className="py-20">
         {posts.length === 0 ? (
           <p className="text-[15px] leading-8" style={{ color: "var(--text-faint)" }}>
             No published insights yet. Check back soon.
@@ -148,7 +149,7 @@ export default async function BlogIndexPage() {
             ))}
           </ul>
         )}
-      </section>
+      </Container>
     </div>
   );
 }

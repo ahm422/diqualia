@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { Container } from "@/app/components/Container";
+import { Button } from "@/components/ui/button";
 import { getDb } from "@/lib/cloudflare-env";
 
 export const revalidate = 60;
@@ -59,7 +61,7 @@ export default async function IndustriesPage() {
             opacity: 0.35,
           }}
         />
-        <div className="mx-auto w-full max-w-6xl px-6 pb-16 pt-20 md:pb-20 md:pt-28">
+        <Container className="relative pb-16 pt-20 md:pb-20 md:pt-28">
           <Eyebrow>{page.eyebrow}</Eyebrow>
           <H1>
             {page.headlineLine1}
@@ -72,17 +74,17 @@ export default async function IndustriesPage() {
             {page.body}
           </p>
           <div className="mt-10 flex flex-wrap items-center gap-4">
-            <Link href="/services" className="diq-btnGhost">
-              Services
-            </Link>
-            <Link href="/contact" className="diq-btnGold">
-              Talk to Us
-            </Link>
+            <Button asChild variant="secondary">
+              <Link href="/services">Services</Link>
+            </Button>
+            <Button asChild variant="primary">
+              <Link href="/contact">Talk to Us</Link>
+            </Button>
           </div>
-        </div>
+        </Container>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-6 py-20">
+      <Container as="section" className="py-20">
         <div className="grid grid-cols-1 gap-12 md:grid-cols-[1fr_320px] md:items-start">
           <div>
             <div className="text-[13px] tracking-[0.06em] text-foreground" style={{ fontFamily: "var(--font-display)", fontWeight: 400 }}>
@@ -139,10 +141,10 @@ export default async function IndustriesPage() {
             );
           })}
         </div>
-      </section>
+      </Container>
 
       <section className="border-t" style={{ background: "var(--bg)", borderTopColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
-        <div className="mx-auto w-full max-w-6xl px-6 py-20">
+        <Container className="py-20">
           <div className="grid grid-cols-1 gap-12 md:grid-cols-2 md:items-center">
             <div>
               <Eyebrow>{page.whereNextEyebrow}</Eyebrow>
@@ -164,15 +166,15 @@ export default async function IndustriesPage() {
               </p>
             </div>
             <div className="flex flex-wrap gap-4 md:justify-end">
-              <Link href="/contact" className="diq-btnGold">
-                Contact
-              </Link>
-              <Link href="/process" className="diq-btnGhost">
-                How We Work
-              </Link>
+              <Button asChild variant="primary">
+                <Link href="/contact">Contact</Link>
+              </Button>
+              <Button asChild variant="secondary">
+                <Link href="/process">How We Work</Link>
+              </Button>
             </div>
           </div>
-        </div>
+        </Container>
       </section>
     </div>
   );

@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
+import { Button } from "@/components/ui/button";
+
 type ChatMessage = {
   role: "user" | "assistant";
   content: string;
@@ -138,22 +140,24 @@ export function ChatWidget() {
               <div className="mt-1 text-[12px] text-muted-foreground">Ask about DiQualia</div>
             </div>
             <div className="flex items-center gap-2">
-              <button
+              <Button
                 type="button"
-                className="diq-btnGhost !px-3 !py-1.5 text-[10px]"
+                variant="secondary"
+                size="sm"
                 onClick={clearChat}
                 disabled={streaming || messages.length === 0}
               >
                 Clear
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
-                className="diq-btnGhost !px-3 !py-1.5 text-[10px]"
+                variant="secondary"
+                size="sm"
                 onClick={() => setOpen(false)}
                 aria-label="Close chat"
               >
                 Close
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -222,27 +226,23 @@ export function ChatWidget() {
                   Contact
                 </Link>
               </p>
-              <button
-                type="submit"
-                className="diq-btnGhost !px-3 !py-1.5 text-[10px]"
-                disabled={streaming || !input.trim()}
-              >
+              <Button type="submit" variant="secondary" size="sm" disabled={streaming || !input.trim()}>
                 {streaming ? "…" : "Send"}
-              </button>
+              </Button>
             </div>
           </form>
         </div>
       ) : null}
 
-      <button
+      <Button
         type="button"
-        className="diq-btnGhost shadow-sm"
+        variant="secondary"
         onClick={() => setOpen((v) => !v)}
         aria-label={open ? "Close chat assistant" : "Open chat assistant"}
         aria-expanded={open}
       >
         {open ? "Chat" : "Ask DiQualia"}
-      </button>
+      </Button>
     </div>
   );
 }

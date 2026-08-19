@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { Container } from "@/app/components/Container";
+
 export type ServiceTab = {
   id: string; // e.g. "s01"
   label: string;
@@ -130,7 +132,7 @@ export function ServicesTabs({ tabs }: { tabs: ServiceTab[] }) {
       </div>
 
       {/* Mobile compact stepper */}
-      <div className="mx-auto flex w-full max-w-6xl items-center gap-2 px-3 py-2.5 md:hidden">
+      <Container className="flex items-center gap-2 py-2.5 md:hidden">
         <div className="min-w-0 flex-1">
           <div className="flex min-w-0 items-baseline gap-2">
             <span aria-hidden className="shrink-0 font-mono text-[10px] tracking-[0.14em] text-primary">
@@ -193,10 +195,10 @@ export function ServicesTabs({ tabs }: { tabs: ServiceTab[] }) {
             </span>
           ) : null}
         </div>
-      </div>
+      </Container>
 
       {/* Desktop / tablet connected rail */}
-      <div className="relative mx-auto hidden w-full max-w-6xl px-3 md:block sm:px-6">
+      <Container className="relative hidden md:block">
         <div
           ref={trackRef}
           role="tablist"
@@ -229,7 +231,7 @@ export function ServicesTabs({ tabs }: { tabs: ServiceTab[] }) {
             );
           })}
         </div>
-      </div>
+      </Container>
     </div>
   );
 }

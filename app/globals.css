@@ -12,8 +12,12 @@
   /* Large watermark nums: mix gold with ink so 3:1 holds on paper (transparent mix cannot) */
   --gold-ghost: color-mix(in oklab, var(--gold) 82%, var(--ink));
 
-  /* Fluid layout primitives */
-  --diq-gutter: clamp(18px, 5vw, 72px);
+  /* Fluid layout primitives — no max-width cap; gutters are the only side inset */
+  --diq-max: none;
+  --diq-gutter: clamp(1.25rem, 4vw, 5rem);
+  /* Named exception — nav/footer collapse. Tailwind breakpoints are min-width;
+     var() cannot be used in @media, so queries stay at 960px and must not be mapped to lg (1024). */
+  --breakpoint-nav: 960px;
   --diq-sectionY: clamp(56px, 8vw, 100px);
   --diq-heroTop: clamp(110px, 16vw, 140px);
   --diq-ctaY: clamp(64px, 10vw, 120px);
@@ -86,7 +90,8 @@
 
   --radius: 12px;
 
-  /* Legacy compat (to be migrated out of components) */
+  /* Deprecated aliases — prefer --background / --card / --foreground / --muted-foreground.
+     Do not add a third palette. --shadow is a 1px stroke; never apply it to buttons. */
   --bg: var(--background);
   --bg-elev: var(--card);
   --panel: var(--muted);
@@ -120,6 +125,17 @@
   --color-ring: var(--ring);
 
   --radius-lg: var(--radius);
+  --radius-pill: 999px;
+
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-gold: var(--gold);
+  --color-gold-lt: var(--gold-lt);
+
+  --breakpoint-3xl: 1920px;
+
+  --spacing-gutter: var(--diq-gutter);
+  --max-width-container: var(--diq-max);
 
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
@@ -243,13 +259,22 @@ body:has(a:hover) .diq-curR {
   border-color: rgba(202, 168, 75, 0.65);
 }
 
+.diq-container,
+.diq-navInner {
+  width: 100%;
+  max-width: var(--diq-max);
+  margin-inline: auto;
+  padding-inline: var(--diq-gutter);
+}
+
 .diq-nav {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 200;
-  padding: 26px var(--diq-gutter);
+  padding-block: 26px;
+  padding-inline: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -268,10 +293,9 @@ body:has(a:hover) .diq-curR {
     box-shadow 0.5s ease;
 }
 
-.diq-navInner {
-  width: 100%;
-  max-width: 1300px;
-  margin: 0 auto;
+.diq-nav.scrolled .diq-navInner {
+  max-width: none;
+  padding-inline: 0;
 }
 
 .diq-nav.scrolled {
@@ -475,14 +499,6 @@ body:has(a:hover) .diq-curR {
   padding-top: 16px;
 }
 
-.diq-themeToggle :where(button) {
-  border: 1px solid color-mix(in oklab, var(--primary) 35%, transparent);
-  color: var(--primary);
-}
-.diq-themeToggle :where(button:hover) {
-  background: color-mix(in oklab, var(--primary) 16%, transparent);
-}
-
 .diq-logo {
   display: inline-flex;
   align-items: center;
@@ -520,36 +536,17 @@ html.dark .diq-logoDark {
   border-bottom-color: color-mix(in oklab, var(--primary) 70%, transparent);
 }
 
-.diq-navCta {
-  border: 1px solid var(--gold);
-  color: var(--gold);
-  padding: 10px 22px;
-  text-decoration: none;
-  transition: all 0.3s;
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: clamp(11px, 1.1vw, 12px);
-  letter-spacing: clamp(2px, 0.5vw, 3px);
-  text-transform: uppercase;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  white-space: nowrap;
-}
-.diq-navCta:hover {
-  background: var(--gold);
-  color: var(--diq_ink);
-  font-weight: 500;
-}
-
 .diq-footer {
   background: var(--diq_footer_bg);
-  padding: 52px var(--diq-gutter);
+  padding-block: 52px;
+  border-top: 1px solid var(--diq_border);
+}
+
+.diq-footerInner {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 32px;
   align-items: center;
-  border-top: 1px solid var(--diq_border);
 }
 
 .diq-fBrand .diq-fTag,
@@ -647,12 +644,14 @@ html.dark .diq-logoDark {
   transform: translateY(0);
 }
 
+/* --breakpoint-nav: 960px — do not map to lg (1024). var() is invalid in @media. */
 @media (max-width: 960px) {
   :root {
     --diq-stickyTop: calc(8px + 10px + 41px + 10px + 12px);
   }
   .diq-nav {
-    padding: 16px var(--diq-gutter);
+    padding-block: 16px;
+    padding-inline: 0;
   }
   .diq-nav.scrolled {
     --diq_nav_inset-y: 8px;
@@ -676,23 +675,20 @@ html.dark .diq-logoDark {
     display: block;
   }
   .diq-footer {
+    padding-block: 36px;
+  }
+  .diq-footerInner {
     grid-template-columns: 1fr;
     text-align: center;
-    padding: 36px var(--diq-gutter);
   }
   .diq-fCopy {
     text-align: center;
   }
 }
 
-/* Layout helpers that match the reference 72px/24px gutters */
-.diq-padX {
-  padding-left: var(--diq-gutter);
-  padding-right: var(--diq-gutter);
-}
-
 .diq-hero {
-  padding: var(--diq-heroTop) var(--diq-gutter) clamp(72px, 10vw, 100px);
+  padding-block: var(--diq-heroTop) clamp(72px, 10vw, 100px);
+  padding-inline: 0;
 }
 
 .diq-pageTop {
@@ -833,7 +829,8 @@ html.dark .diq-proseMuted {
 }
 
 .diq-cta {
-  padding: var(--diq-ctaY) var(--diq-gutter);
+  padding-block: var(--diq-ctaY);
+  padding-inline: 0;
 }
 
 .diq-statement {
@@ -869,54 +866,7 @@ html.dark .diq-proseMuted {
   }
 }
 
-.diq-btnGold {
-  background: color-mix(in oklab, var(--gold) 88%, var(--ink));
-  color: var(--diq_ink);
-  border: 1px solid var(--ink);
-  padding: 14px clamp(22px, 6vw, 44px);
-  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
-  font-size: clamp(11px, 1.1vw, 12px);
-  font-weight: 500;
-  letter-spacing: clamp(2px, 0.5vw, 3px);
-  text-transform: uppercase;
-  text-decoration: none;
-  transition: all 0.35s;
-  display: inline-block;
-  min-height: 44px;
-  line-height: 1;
-  border-radius: 999px;
-}
-.diq-btnGold:hover {
-  background: color-mix(in oklab, var(--gold) 70%, #ffffff);
-  transform: translateY(-2px);
-  box-shadow: 0 16px 48px rgba(202, 168, 75, 0.22);
-}
-
-.diq-btnGhost {
-  border: 1px solid color-mix(in oklab, var(--diq_ivory) 20%, transparent);
-  color: var(--diq_pale);
-  padding: 14px clamp(22px, 6vw, 44px);
-  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
-  font-size: clamp(11px, 1.1vw, 12px);
-  font-weight: 300;
-  letter-spacing: clamp(2px, 0.5vw, 3px);
-  text-transform: uppercase;
-  text-decoration: none;
-  transition: all 0.35s;
-  display: inline-block;
-  min-height: 44px;
-  line-height: 1;
-  border-radius: 999px;
-}
-.diq-btnGhost:hover {
-  border-color: var(--gold);
-  color: var(--gold);
-}
-
-.diq-btnGold:focus-visible,
-.diq-btnGhost:focus-visible,
 .diq-navLink:focus-visible,
-.diq-navCta:focus-visible,
 .diq-navMenuBtn:focus-visible,
 .diq-sheetLink:focus-visible,
 .diq-sheetClose:focus-visible,
@@ -1415,14 +1365,16 @@ a.diq-homeCard:focus-visible {
 
 @media (max-width: 960px) {
   .diq-hero {
-    padding: var(--diq-heroTop) var(--diq-gutter) clamp(56px, 8vw, 80px);
+    padding-block: var(--diq-heroTop) clamp(56px, 8vw, 80px);
+    padding-inline: 0;
   }
   .diq-sectionY {
     padding-top: var(--diq-sectionY);
     padding-bottom: var(--diq-sectionY);
   }
   .diq-cta {
-    padding: var(--diq-ctaY) var(--diq-gutter);
+    padding-block: var(--diq-ctaY);
+    padding-inline: 0;
   }
   .diq-statement {
     padding: var(--diq-statementPad);

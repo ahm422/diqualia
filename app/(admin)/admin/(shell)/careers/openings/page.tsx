@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { getDb } from "@/lib/cloudflare-env";
+import { Button } from "@/components/ui/button";
 
 import { CareersSubNav } from "../CareersSubNav";
 import { JobOpeningsList } from "./JobOpeningsList";
@@ -21,12 +22,9 @@ export default async function JobOpeningsAdminPage() {
           <h1 className="font-sans text-2xl font-medium text-foreground">Job openings</h1>
           <p className="mt-1 text-sm text-[var(--diq_mid)]">Public roles listed on /careers</p>
         </div>
-        <Link
-          href="/admin/careers/openings/new"
-          className="shrink-0 rounded border border-[var(--gold)] px-4 py-2 text-xs uppercase tracking-widest text-[var(--gold)] transition-colors hover:bg-[var(--gold)] hover:text-[var(--diq_ink)]"
-        >
-          New opening
-        </Link>
+        <Button asChild variant="secondary" className="shrink-0">
+          <Link href="/admin/careers/openings/new">New opening</Link>
+        </Button>
       </div>
       <CareersSubNav />
       <JobOpeningsList initialOpenings={openings} />

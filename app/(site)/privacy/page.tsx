@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 
+import { Container } from "@/app/components/Container";
+
 export const metadata: Metadata = {
   title: "Privacy — DiQualia",
 };
 
 export default function PrivacyPage() {
   return (
-    <div className="diq-pageTop mx-auto w-full max-w-3xl px-6 pb-20">
+    <Container size="narrow" className="diq-pageTop pb-20">
       <h1 className="text-3xl" style={{ fontFamily: "var(--font-display)", color: "var(--text)" }}>
         Privacy
       </h1>
@@ -17,7 +19,7 @@ export default function PrivacyPage() {
         </a>
         .
       </p>
-    </div>
+    </Container>
   );
 }
 

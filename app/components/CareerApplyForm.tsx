@@ -2,6 +2,8 @@
 
 import { useMemo, useRef, useState, type DragEvent, type FormEvent } from "react";
 
+import { Button } from "@/components/ui/button";
+
 const MAX_BYTES = 5 * 1024 * 1024;
 const ALLOWED_EXT = new Set(["pdf", "doc", "docx"]);
 const ALLOWED_MIME = new Set([
@@ -330,9 +332,9 @@ export function CareerApplyForm({ jobSlug, headline }: { jobSlug: string; headli
       ) : null}
 
       <div className="mt-8 flex flex-wrap items-center gap-4">
-        <button type="submit" className="diq-btnGhost" disabled={!canSubmit || state.status === "submitting"}>
+        <Button type="submit" variant="secondary" disabled={!canSubmit || state.status === "submitting"}>
           {state.status === "submitting" ? "Sending…" : "Submit application"}
-        </button>
+        </Button>
         <div className="text-[12px] leading-7 text-muted-foreground">
           {state.status === "idle" ? "Name, email, and resume are required." : null}
           {state.status === "success" ? "Received — we’ll reply with next steps." : null}

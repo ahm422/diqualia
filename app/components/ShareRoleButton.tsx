@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { Button } from "@/components/ui/button";
+
 export function ShareRoleButton({ title }: { title: string }) {
   const [copied, setCopied] = useState(false);
 
@@ -25,13 +27,14 @@ export function ShareRoleButton({ title }: { title: string }) {
   }
 
   return (
-    <button
+    <Button
       type="button"
       onClick={share}
-      className="text-left text-[11px] tracking-[0.22em] uppercase transition-colors hover:text-primary"
-      style={{ color: "var(--text-muted)" }}
+      variant="ghost"
+      size="sm"
+      className="h-auto justify-start px-0 text-muted-foreground hover:text-primary"
     >
       {copied ? "Link copied" : "Share this role"}
-    </button>
+    </Button>
   );
 }
