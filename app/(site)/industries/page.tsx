@@ -110,7 +110,7 @@ export default async function IndustriesPage() {
 
         <div className="mt-12 flex flex-wrap gap-2">
           {sectors.map((sector) => {
-            const className = "border px-4 py-3 text-[11px] tracking-[0.18em] uppercase";
+            const className = "max-w-full min-w-0 break-words border px-4 py-3 text-[11px] tracking-[0.18em] uppercase";
             const style = {
               borderColor: sector.visible
                 ? "color-mix(in oklab, var(--gold) 65%, transparent)"

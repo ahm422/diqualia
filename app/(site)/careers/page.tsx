@@ -184,7 +184,7 @@ export default async function CareersPage() {
       <section className="diq-sectionY border-t" style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
         <Container>
           <Eyebrow>How we hire</Eyebrow>
-          <div className="mt-12 grid grid-cols-1 gap-px md:grid-cols-4" style={{ background: "color-mix(in oklab, var(--border) 100%, transparent)" }}>
+          <div className="mt-12 grid grid-cols-1 gap-px sm:grid-cols-2 lg:grid-cols-4" style={{ background: "color-mix(in oklab, var(--border) 100%, transparent)" }}>
             {hireSteps.map((step) => (
               <div key={step.num} className="p-8" style={{ background: "var(--bg-elev)" }}>
                 <div className="text-[10px] tracking-[0.22em] uppercase text-primary">{step.label}</div>

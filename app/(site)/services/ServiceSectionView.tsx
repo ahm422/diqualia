@@ -2,7 +2,7 @@ import { Container } from "@/app/components/Container";
 import type { ServiceItemData } from "./group-items";
 import { groupItems } from "./group-items";
 
-type Section = {
+export type ServiceSectionData = {
   id: number;
   tabId: string;
   eyebrow: string;
@@ -57,7 +57,7 @@ function SectionHeader({ displayNum, eyebrow, title, body }: { displayNum: strin
   );
 }
 
-function S01Layout({ section }: { section: Section }) {
+function S01Layout({ section }: { section: ServiceSectionData }) {
   const featureItems = section.items.filter((i) => i.groupLabel === null && i.body !== null);
   const receiveItems = section.items.filter((i) => i.groupLabel === "What You Receive" && i.body === null);
 
@@ -118,7 +118,7 @@ function S01Layout({ section }: { section: Section }) {
   );
 }
 
-function S02Layout({ section }: { section: Section }) {
+function S02Layout({ section }: { section: ServiceSectionData }) {
   const cards = groupItems(section.items);
   const sectionBg = section.order % 2 === 1 ? "var(--bg-elev)" : "var(--bg)";
 
@@ -158,8 +158,27 @@ function S02Layout({ section }: { section: Section }) {
   );
 }
 
-export function ServiceSectionView({ section, displayNum }: { section: Section; displayNum: string }) {
+export function ServiceSectionView({
+  section,
+  displayNum,
+  embedded = false,
+}: {
+  section: ServiceSectionData;
+  displayNum: string;
+  embedded?: boolean;
+}) {
   const isS01Style = section.cardTitle !== null;
+  const layouts = isS01Style ? <S01Layout section={section} /> : <S02Layout section={section} />;
+
+  if (embedded) {
+    return (
+      <div className="pb-4">
+        <p className="diq-proseMuted max-w-[72ch] text-[15px] leading-8">{section.body}</p>
+        {layouts}
+      </div>
+    );
+  }
+
   const bgStyle = section.order % 2 === 1 ? { background: "var(--bg-elev)" } : {};
 
   return (
@@ -170,7 +189,7 @@ export function ServiceSectionView({ section, displayNum }: { section: Section; 
     >
       <Container className="py-20">
         <SectionHeader displayNum={displayNum} eyebrow={section.eyebrow} title={section.title} body={section.body} />
-        {isS01Style ? <S01Layout section={section} /> : <S02Layout section={section} />}
+        {layouts}
       </Container>
     </section>
   );

@@ -38,7 +38,7 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 
 function IntelligenceHud({ stats }: { stats: HeroStat[] }) {
   return (
-    <div className="diq-homeHud relative w-full overflow-hidden lg:w-[300px] lg:shrink-0">
+    <div className="diq-homeHud diq-homeHud--bleed relative w-full overflow-hidden lg:w-[300px] lg:shrink-0">
       <span aria-hidden className="diq-homeHudTick diq-homeHudTick--tl" />
       <span aria-hidden className="diq-homeHudTick diq-homeHudTick--tr" />
       <span aria-hidden className="diq-homeHudTick diq-homeHudTick--bl" />
@@ -221,9 +221,9 @@ export default async function Home() {
           style={{ background: "linear-gradient(90deg, transparent, var(--diq_border), transparent)" }}
         />
 
-        <Container className="relative z-[1] flex flex-1 flex-col justify-center">
-          <div className="flex flex-col items-stretch gap-10 lg:flex-row lg:items-center lg:justify-between lg:gap-16">
-            <div className="min-w-0 max-w-[820px] flex-1">
+        <div className="relative z-[1] flex flex-1 flex-col justify-center gap-10 lg:flex-row lg:items-center lg:justify-between lg:gap-0">
+          <Container className="min-w-0 flex-1">
+            <div className="min-w-0 max-w-[820px]">
               <p
                 className="diq-fadeUp mb-[clamp(16px,3vw,28px)] flex flex-wrap items-center gap-3"
                 style={{
@@ -302,18 +302,18 @@ export default async function Home() {
                 </Button>
               </div>
             </div>
+          </Container>
 
-            <div
-              className="diq-fadeUp w-full lg:w-auto"
-              style={{
-                "--diq-fade-dur": "1s",
-                "--diq-fade-delay": "0.55s",
-              } as CSSProperties}
-            >
-              <IntelligenceHud stats={heroStats} />
-            </div>
+          <div
+            className="diq-fadeUp w-full px-[var(--diq-gutter)] lg:w-auto lg:shrink-0 lg:px-0"
+            style={{
+              "--diq-fade-dur": "1s",
+              "--diq-fade-delay": "0.55s",
+            } as CSSProperties}
+          >
+            <IntelligenceHud stats={heroStats} />
           </div>
-        </Container>
+        </div>
 
         <div className="diq-homeScroll relative z-[1] mt-10 hidden md:flex" aria-hidden>
           <span>Scroll</span>
@@ -348,7 +348,7 @@ export default async function Home() {
         >
           <Container className="relative">
             {aboutHero && (
-              <div className="diq-reveal max-w-[920px]">
+              <div className="diq-reveal">
                 <Eyebrow>{aboutHero.eyebrow}</Eyebrow>
                 <h2
                   className="mt-6"
@@ -420,7 +420,7 @@ export default async function Home() {
         <section className="diq-sectionY relative" style={{ background: "var(--diq_ink)" }}>
           <Container>
             <div className="diq-reveal flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-              <div className="max-w-[720px]">
+              <div>
                 <Eyebrow>{servicesPage?.eyebrow ?? "Intelligence services"}</Eyebrow>
                 <h2
                   className="mt-6"
@@ -504,7 +504,7 @@ export default async function Home() {
         >
           <Container>
             <div className="diq-reveal flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-              <div className="max-w-[720px]">
+              <div>
                 <Eyebrow>{processPage?.eyebrow ?? "How we work"}</Eyebrow>
                 <h2
                   className="mt-6"
@@ -574,7 +574,7 @@ export default async function Home() {
         <section className="diq-sectionY" style={{ background: "var(--diq_ink)", borderTop: "1px solid var(--diq_border)" }}>
           <Container>
             <div className="diq-reveal flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-              <div className="max-w-[720px]">
+              <div>
                 <Eyebrow>{industriesPage?.eyebrow ?? "Industries"}</Eyebrow>
                 <h2
                   className="mt-6"
@@ -627,7 +627,7 @@ export default async function Home() {
           />
           <div aria-hidden className="diq-homeOrb diq-homeOrb--cta pointer-events-none" />
           <Container>
-          <div className="diq-reveal diq-homeCtaFrame relative z-[1] mx-auto max-w-[860px]">
+          <div className="diq-reveal diq-homeCtaFrame relative z-[1]">
             <p
               className="mb-[18px] flex items-center justify-center gap-3"
               style={{

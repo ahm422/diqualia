@@ -8,8 +8,7 @@ import { getDb } from "@/lib/cloudflare-env";
 
 export const revalidate = 60;
 
-import { ServiceSectionView } from "./ServiceSectionView";
-import { ServicesTabs } from "./ServicesTabs";
+import { ServicesAccordion } from "./ServicesAccordion";
 
 export const metadata: Metadata = {
   title: "Services — DiQualia",
@@ -23,22 +22,6 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
       <span aria-hidden className="inline-block h-px w-8 bg-primary" />
       {children}
     </div>
-  );
-}
-
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return (
-    <h2
-      className="mt-4 text-foreground"
-      style={{
-        fontFamily: "var(--font-display)",
-        fontWeight: 300,
-        fontSize: "clamp(2rem, 3.6vw, 3.1rem)",
-        lineHeight: 1.1,
-      }}
-    >
-      {children}
-    </h2>
   );
 }
 
@@ -81,7 +64,24 @@ export default async function ServicesPage() {
 
   if (!page) notFound();
 
-  const tabs = sections.map((s) => ({ id: s.tabId, label: s.title }));
+  const accordionSections = sections.map((section, i) => ({
+    id: section.id,
+    tabId: section.tabId,
+    eyebrow: section.eyebrow,
+    title: section.title,
+    body: section.body,
+    cardTitle: section.cardTitle,
+    cardBody: section.cardBody,
+    order: section.order,
+    displayNum: (i + 1).toString().padStart(2, "0"),
+    items: section.items.map((item) => ({
+      id: item.id,
+      groupLabel: item.groupLabel,
+      title: item.title,
+      body: item.body,
+      order: item.order,
+    })),
+  }));
   const stats = [
     { value: page.stat1Value, label: page.stat1Label },
     { value: page.stat2Value, label: page.stat2Label },
@@ -150,16 +150,7 @@ export default async function ServicesPage() {
         </Container>
       </section>
 
-      <ServicesTabs tabs={tabs} />
-
-      {/* SERVICE SECTIONS */}
-      {sections.map((section, i) => (
-        <ServiceSectionView
-          key={section.id}
-          section={section}
-          displayNum={(i + 1).toString().padStart(2, "0")}
-        />
-      ))}
+      <ServicesAccordion sections={accordionSections} />
 
       {/* INTELLIGENCE PROCESS STRIP */}
       <section className="border-b" style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
@@ -177,7 +168,7 @@ export default async function ServicesPage() {
             The DiQualia Intelligence Process
           </h2>
 
-          <div className="mt-12 grid grid-cols-1 gap-px md:grid-cols-5" style={{ background: "color-mix(in oklab, var(--border) 100%, transparent)" }}>
+          <div className="mt-12 grid grid-cols-1 gap-px md:grid-cols-3 xl:grid-cols-5" style={{ background: "color-mix(in oklab, var(--border) 100%, transparent)" }}>
             {[
               ["Step One", "01", "Sector Immersion", "We spend the first week doing nothing but learning your industry — its language, rhythms, buyers, and dynamics. No strategy until we know your market deeply."],
               ["Step Two", "02", "Buyer Mapping", "We identify and profile your ideal buyers — building precise, evidence-based profiles that inform every piece of outreach and content we create."],
@@ -367,7 +358,7 @@ export default async function ServicesPage() {
             backgroundSize: "64px 64px",
           }}
         />
-        <Container size="narrow" className="relative py-20">
+        <Container className="relative py-20">
           <div className="text-[11px] tracking-[0.35em] uppercase" style={{ color: "color-mix(in oklab, var(--ink) 55%, transparent)" }}>
             {page.ctaEyebrow}
           </div>
@@ -387,7 +378,7 @@ export default async function ServicesPage() {
             {page.ctaBody}
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-            <Button asChild variant="primary">
+            <Button asChild variant="onGold">
               <Link href={page.ctaBtn1Href}>{page.ctaBtn1Label}</Link>
             </Button>
             <a

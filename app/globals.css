@@ -1081,6 +1081,12 @@ html.dark .diq-proseMuted {
   border-top: 2px solid var(--gold);
   border-right: 2px solid var(--gold);
 }
+@media (min-width: 1024px) {
+  .diq-homeHud--bleed .diq-homeHudTick--tr,
+  .diq-homeHud--bleed .diq-homeHudTick--br {
+    right: 0;
+  }
+}
 .diq-homeHudTick--bl {
   bottom: -1px;
   left: -1px;

@@ -13,6 +13,8 @@ const buttonVariants = cva(
           "border border-gold bg-gold text-ink hover:bg-gold-lt",
         primary:
           "border border-gold bg-gold text-ink hover:bg-gold-lt",
+        onGold:
+          "border-[var(--ink)] bg-[var(--ink)] text-paper hover:bg-[color-mix(in_oklab,var(--ink)_82%,white)] hover:text-gold",
         destructive:
           "border border-destructive bg-destructive text-destructive-foreground hover:bg-destructive/90",
         outline:

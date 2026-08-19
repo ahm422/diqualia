@@ -143,7 +143,7 @@ export default async function AboutPage() {
           not tactics that expire.
         </H2>
 
-        <div className="mt-12 grid grid-cols-1 gap-px md:grid-cols-2" style={{ background: "color-mix(in oklab, var(--border) 100%, transparent)" }}>
+        <div className="mt-12 grid grid-cols-1 gap-px sm:grid-cols-2 lg:grid-cols-4" style={{ background: "color-mix(in oklab, var(--border) 100%, transparent)" }}>
           {builtForItems.map((item) => (
             <div key={item.id} className="p-10" style={{ background: "var(--bg)" }}>
               <div className="text-[16px] text-foreground" style={{ fontFamily: "var(--font-display)", fontWeight: 400 }}>
