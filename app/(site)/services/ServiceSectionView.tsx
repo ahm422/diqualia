@@ -1,3 +1,4 @@
+import { Container } from "@/app/components/Container";
 import type { ServiceItemData } from "./group-items";
 import { groupItems } from "./group-items";
 
@@ -167,10 +168,10 @@ export function ServiceSectionView({ section, displayNum }: { section: Section; 
       className="border-b"
       style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)", ...bgStyle }}
     >
-      <div className="mx-auto w-full max-w-6xl px-6 py-20">
+      <Container className="py-20">
         <SectionHeader displayNum={displayNum} eyebrow={section.eyebrow} title={section.title} body={section.body} />
         {isS01Style ? <S01Layout section={section} /> : <S02Layout section={section} />}
-      </div>
+      </Container>
     </section>
   );
 }

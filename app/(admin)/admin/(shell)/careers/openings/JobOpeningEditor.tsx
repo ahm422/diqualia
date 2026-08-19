@@ -13,6 +13,7 @@ import {
   AdminSaveButton,
   useAdminSave,
 } from "@/components/admin";
+import { Button } from "@/components/ui/button";
 import { slugify } from "@/lib/slugify";
 
 const JOB_TYPES = ["Full-time", "Part-time", "Contract", "Internship"] as const;
@@ -297,14 +298,15 @@ export function JobOpeningEditor({ initial }: Props) {
             <AdminSaveButton onClick={handleSave} saving={saving} />
           )}
           {!isNew && (
-            <button
+            <Button
               type="button"
+              variant="destructive"
+              className="mt-4"
               onClick={handleDelete}
               disabled={deleting}
-              className="mt-4 rounded border border-red-400/40 px-4 py-2 text-xs uppercase tracking-widest text-red-400 hover:bg-red-400/10 disabled:opacity-50"
             >
               {deleting ? "Deleting…" : "Delete"}
-            </button>
+            </Button>
           )}
         </div>
       </AdminSection>

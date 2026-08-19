@@ -5,25 +5,30 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-pill font-sans text-[clamp(11px,1.1vw,12px)] font-medium uppercase tracking-[clamp(2px,0.5vw,3px)] transition-[background-color,color,border-color,transform] duration-300 focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-[color-mix(in_oklab,var(--gold)_70%,white)] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        default:
+          "border border-gold bg-gold text-ink hover:bg-gold-lt",
+        primary:
+          "border border-gold bg-gold text-ink hover:bg-gold-lt",
         destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+          "border border-destructive bg-destructive text-destructive-foreground hover:bg-destructive/90",
         outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+          "border border-gold bg-transparent text-gold hover:bg-gold hover:text-ink",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
+          "border border-gold bg-transparent text-gold hover:bg-gold hover:text-ink",
+        ghost:
+          "border border-transparent bg-transparent text-inherit hover:text-gold",
+        link:
+          "border border-transparent bg-transparent text-inherit hover:text-gold",
       },
       size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-8",
-        icon: "h-10 w-10",
+        default: "min-h-11 px-[clamp(1.375rem,6vw,2.75rem)] py-3.5 leading-none",
+        sm: "min-h-9 px-5 py-2.5 leading-none",
+        lg: "min-h-12 px-10 py-4 leading-none",
+        icon: "size-9 shrink-0 rounded-full p-0",
       },
     },
     defaultVariants: {

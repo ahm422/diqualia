@@ -99,7 +99,6 @@ export function ThemeToggle() {
       aria-label={pressed ? "Switch to light theme" : "Switch to dark theme"}
       variant="ghost"
       size="icon"
-      className="rounded-full"
     >
       {pressed ? <Moon aria-hidden className="text-primary" /> : <Sun aria-hidden className="text-primary" />}
       <span className="sr-only">{pressed ? "Dark theme" : "Light theme"}</span>

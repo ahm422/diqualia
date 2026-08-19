@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 
+import { Button } from "@/components/ui/button";
 import { BrandLogo } from "./BrandLogo";
 import { ThemeToggle } from "./ThemeToggle";
 
@@ -100,9 +101,9 @@ export function SiteHeaderClient({ navItems, mobileNavItems, cta, logoUrl, siteN
                   </Link>
                 ))}
                 {cta && (
-                  <Link href={cta.href} className="diq-navCta">
-                    {cta.label}
-                  </Link>
+                  <Button asChild variant="secondary" size="sm">
+                    <Link href={cta.href}>{cta.label}</Link>
+                  </Button>
                 )}
               </div>
 
@@ -174,9 +175,11 @@ export function SiteHeaderClient({ navItems, mobileNavItems, cta, logoUrl, siteN
 
             {cta && (
               <div className="diq-sheetCta">
-                <Link href={cta.href} className="diq-navCta" onClick={() => setMenuOpen(false)}>
-                  {cta.label}
-                </Link>
+                <Button asChild variant="secondary" className="w-full">
+                  <Link href={cta.href} onClick={() => setMenuOpen(false)}>
+                    {cta.label}
+                  </Link>
+                </Button>
               </div>
             )}
           </div>

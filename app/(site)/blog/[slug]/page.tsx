@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { Container } from "@/app/components/Container";
 import { Markdown } from "@/app/components/Markdown";
 import { getDb } from "@/lib/cloudflare-env";
 
@@ -67,7 +68,7 @@ export default async function BlogPostPage({ params }: PageProps) {
               "radial-gradient(ellipse 70% 50% at 80% 0%, color-mix(in oklab, var(--gold) 10%, transparent), transparent 50%)",
           }}
         />
-        <div className="relative mx-auto w-full max-w-3xl px-6 pb-14 pt-20 md:pt-28">
+        <Container size="narrow" className="relative pb-14 pt-20 md:pt-28">
           <Link
             href="/blog"
             className="text-[11px] tracking-[0.22em] uppercase transition-colors hover:text-primary"
@@ -98,13 +99,12 @@ export default async function BlogPostPage({ params }: PageProps) {
           <p className="mt-6 max-w-[62ch] text-[15px] leading-8 text-muted-foreground">
             {post.excerpt}
           </p>
-        </div>
+        </Container>
       </header>
 
       {post.coverImageUrl ? (
-        <div className="mx-auto w-full max-w-5xl px-6 pt-10">
-          <div
-            className="relative aspect-[21/9] w-full overflow-hidden"
+        <Container className="pt-10">
+          <div className="relative mx-auto aspect-[21/9] w-full max-w-5xl overflow-hidden"
             style={{
               border: "1px solid color-mix(in oklab, var(--border) 80%, transparent)",
             }}
@@ -118,12 +118,12 @@ export default async function BlogPostPage({ params }: PageProps) {
               priority
             />
           </div>
-        </div>
+        </Container>
       ) : null}
 
-      <div className="mx-auto w-full max-w-3xl px-6 py-14 md:py-20">
+      <Container size="narrow" className="py-14 md:py-20">
         <Markdown source={post.body} />
-      </div>
+      </Container>
     </article>
   );
 }

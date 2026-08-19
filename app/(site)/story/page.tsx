@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { Container } from "@/app/components/Container";
 import { getDb } from "@/lib/cloudflare-env";
 
 export const revalidate = 60;
@@ -51,7 +52,7 @@ function Prose({ children }: { children: React.ReactNode }) {
 function PullQuote({ quote, cite }: { quote: React.ReactNode; cite: string }) {
   return (
     <section
-      className="relative overflow-hidden border-y px-6 py-20 text-center"
+      className="relative overflow-hidden border-y py-20 text-center"
       style={{
         borderColor: "color-mix(in oklab, var(--border) 80%, transparent)",
       }}
@@ -67,21 +68,23 @@ function PullQuote({ quote, cite }: { quote: React.ReactNode; cite: string }) {
           {"\u201C"}
         </span>
       </div>
-      <blockquote
-        className="relative z-10 mx-auto max-w-4xl pt-10"
-        style={{
-          fontFamily: "var(--font-display)",
-          fontWeight: 300,
-          fontStyle: "italic",
-          fontSize: "clamp(1.6rem, 3vw, 3rem)",
-          lineHeight: 1.25,
-        }}
-      >
-        <span className="text-foreground">{quote}</span>
-      </blockquote>
-      <div className="relative z-10 mt-6 text-[11px] tracking-[0.22em] uppercase" style={{ color: "var(--text-muted)" }}>
-        {cite}
-      </div>
+      <Container>
+        <blockquote
+          className="relative z-10 mx-auto max-w-4xl pt-10"
+          style={{
+            fontFamily: "var(--font-display)",
+            fontWeight: 300,
+            fontStyle: "italic",
+            fontSize: "clamp(1.6rem, 3vw, 3rem)",
+            lineHeight: 1.25,
+          }}
+        >
+          <span className="text-foreground">{quote}</span>
+        </blockquote>
+        <div className="relative z-10 mt-6 text-[11px] tracking-[0.22em] uppercase" style={{ color: "var(--text-muted)" }}>
+          {cite}
+        </div>
+      </Container>
     </section>
   );
 }
@@ -105,7 +108,7 @@ export default async function StoryPage() {
   return (
     <div>
       {/* Top back link */}
-      <div className="diq-pageTop mx-auto w-full max-w-6xl px-6">
+      <Container className="diq-pageTop">
         <Link
           href="/"
           className="inline-flex items-center gap-2 text-[11px] tracking-[0.22em] uppercase no-underline"
@@ -113,10 +116,10 @@ export default async function StoryPage() {
         >
           <span aria-hidden>←</span> Back to Home
         </Link>
-      </div>
+      </Container>
 
       {/* HERO */}
-      <section className="relative flex min-h-[calc(100vh-var(--diq-heroTop))] flex-col items-center justify-center overflow-hidden px-6 pb-20 pt-6 text-center">
+      <section className="relative flex min-h-[calc(100vh-var(--diq-heroTop))] flex-col items-center justify-center overflow-hidden pb-20 pt-6 text-center">
         <div
           className="pointer-events-none absolute left-1/2 top-1/2 h-[520px] w-[720px] -translate-x-1/2 -translate-y-1/2"
           style={{
@@ -125,7 +128,8 @@ export default async function StoryPage() {
           }}
         />
 
-        <div className="relative mx-auto w-full max-w-4xl">
+        <Container className="relative">
+          <div className="relative mx-auto w-full max-w-4xl">
           <Eyebrow center>{page.eyebrow}</Eyebrow>
           <h1
             className="mt-10 text-foreground"
@@ -151,11 +155,12 @@ export default async function StoryPage() {
             />
             Read the story
           </div>
-        </div>
+          </div>
+        </Container>
       </section>
 
       {/* CHAPTER 2 */}
-      <section className="mx-auto w-full max-w-6xl px-6 py-20">
+      <Container as="section" className="py-20">
         <div className="grid grid-cols-1 gap-12 md:grid-cols-2 md:gap-24">
           <div>
             <Eyebrow>The Problem We Saw</Eyebrow>
@@ -183,7 +188,7 @@ export default async function StoryPage() {
             </Prose>
           </div>
         </div>
-      </section>
+      </Container>
 
       <PullQuote
         quote={
@@ -197,7 +202,7 @@ export default async function StoryPage() {
 
       {/* CHAPTER 3 — Double Experience */}
       <section style={{ background: "var(--bg-elev)" }}>
-        <div className="mx-auto w-full max-w-6xl px-6 py-20">
+        <Container className="py-20">
           <div className="grid grid-cols-1 gap-12 md:grid-cols-2 md:gap-24">
             <div className="order-2 md:order-1">
               <div
@@ -269,11 +274,11 @@ export default async function StoryPage() {
               </div>
             </div>
           </div>
-        </div>
+        </Container>
       </section>
 
       {/* CHAPTER 4 */}
-      <section className="mx-auto w-full max-w-6xl px-6 py-20">
+      <Container as="section" className="py-20">
         <Eyebrow>Why Now</Eyebrow>
         <H2>
           Real intelligence
@@ -325,11 +330,11 @@ export default async function StoryPage() {
             </div>
           ))}
         </div>
-      </section>
+      </Container>
 
       {/* MANIFESTO */}
       <section style={{ background: "var(--bg-elev)" }}>
-        <div className="mx-auto w-full max-w-5xl px-6 py-24 text-center">
+        <Container className="py-24 text-center">
           <Eyebrow center>What We Believe</Eyebrow>
           <h2
             className="mx-auto mt-8 max-w-[680px] text-foreground"
@@ -364,12 +369,12 @@ export default async function StoryPage() {
               </div>
             ))}
           </div>
-        </div>
+        </Container>
       </section>
 
       {/* FOUNDING VISION */}
       <section style={{ background: "var(--bg-elev)" }}>
-        <div className="mx-auto w-full max-w-6xl px-6 py-20">
+        <Container className="py-20">
           <div className="grid grid-cols-1 gap-12 md:grid-cols-[260px_1fr] md:gap-20">
             <div className="md:sticky md:top-28">
               <div className="text-[11px] tracking-[0.22em] uppercase" style={{ color: "var(--text-muted)" }}>
@@ -418,7 +423,7 @@ export default async function StoryPage() {
               </div>
             </div>
           </div>
-        </div>
+        </Container>
       </section>
 
       <PullQuote
@@ -433,7 +438,7 @@ export default async function StoryPage() {
       />
 
       {/* TAGLINE CLOSER */}
-      <section className="relative overflow-hidden px-6 py-24 text-center">
+      <section className="relative overflow-hidden py-24 text-center">
         <div
           className="pointer-events-none absolute left-1/2 top-1/2 h-[420px] w-[680px] -translate-x-1/2 -translate-y-1/2"
           style={{
@@ -441,6 +446,7 @@ export default async function StoryPage() {
               "radial-gradient(ellipse, color-mix(in oklab, var(--gold) 12%, transparent) 0%, transparent 70%)",
           }}
         />
+        <Container className="relative">
         <div className="relative mx-auto w-full max-w-4xl">
           {[
             ["Intelligence", false],
@@ -463,6 +469,7 @@ export default async function StoryPage() {
             </div>
           ))}
         </div>
+        </Container>
       </section>
     </div>
   );

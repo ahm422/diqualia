@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { getDb } from "@/lib/cloudflare-env";
+import { Button } from "@/components/ui/button";
 
 import { BlogPostsList } from "./BlogPostsList";
 
@@ -22,12 +23,9 @@ export default async function BlogAdminPage() {
             Draft and publish Insights posts. Drafts stay off the public site.
           </p>
         </div>
-        <Link
-          href="/admin/blog/new"
-          className="shrink-0 rounded border border-[var(--gold)] px-4 py-2 text-xs uppercase tracking-widest text-[var(--gold)] transition-colors hover:bg-[var(--gold)] hover:text-[var(--diq_ink)]"
-        >
-          New post
-        </Link>
+        <Button asChild variant="secondary" className="shrink-0">
+          <Link href="/admin/blog/new">New post</Link>
+        </Button>
       </div>
       <BlogPostsList initialPosts={posts} />
     </div>

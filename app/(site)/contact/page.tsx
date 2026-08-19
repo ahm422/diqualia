@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { getDb } from "@/lib/cloudflare-env";
+import { Container } from "@/app/components/Container";
 import { ContactLeadForm } from "@/app/components/ContactLeadForm";
+import { Button } from "@/components/ui/button";
+import { getDb } from "@/lib/cloudflare-env";
 
 export const revalidate = 60;
 
@@ -52,7 +54,7 @@ export default async function ContactPage() {
           }}
         />
 
-        <div className="mx-auto w-full max-w-6xl px-6 pb-16 pt-20 md:pb-20 md:pt-28">
+        <Container className="relative pb-16 pt-20 md:pb-20 md:pt-28">
           <Eyebrow>{page.eyebrow}</Eyebrow>
           <h1
             className="mt-8 text-foreground"
@@ -72,10 +74,10 @@ export default async function ContactPage() {
           <p className="mt-8 max-w-[70ch] text-[15px] leading-8 text-muted-foreground">
             {page.body}
           </p>
-        </div>
+        </Container>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-6 py-20">
+      <Container as="section" className="py-20">
         <div className="grid grid-cols-1 gap-14 md:grid-cols-2 md:gap-20">
           <div className="border p-10" style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)", background: "var(--bg-elev)" }}>
             <div className="text-[10px] tracking-[0.22em] uppercase text-primary">{page.emailLabel}</div>
@@ -123,16 +125,20 @@ export default async function ContactPage() {
               </ul>
 
               <div className="mt-10 flex flex-wrap gap-4">
-                <Link href="/services" className="diq-btnGhost">Services</Link>
-                <Link href="/process" className="diq-btnGhost">How We Work</Link>
+                <Button asChild variant="secondary">
+                  <Link href="/services">Services</Link>
+                </Button>
+                <Button asChild variant="secondary">
+                  <Link href="/process">How We Work</Link>
+                </Button>
               </div>
             </div>
           </div>
         </div>
-      </section>
+      </Container>
 
       <section className="border-t" style={{ background: "var(--bg-elev)", borderTopColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
-        <div className="mx-auto w-full max-w-5xl px-6 py-20 text-center">
+        <Container className="py-20 text-center">
           <Eyebrow center>{page.expectationEyebrow}</Eyebrow>
           <p
             className="mx-auto mt-8 max-w-3xl text-foreground"
@@ -146,7 +152,7 @@ export default async function ContactPage() {
           >
             {page.expectationText}
           </p>
-        </div>
+        </Container>
       </section>
     </div>
   );

@@ -2,6 +2,8 @@ import type { CSSProperties } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { Container } from "@/app/components/Container";
+import { Button } from "@/components/ui/button";
 import { getDb } from "@/lib/cloudflare-env";
 
 export const revalidate = 60;
@@ -219,7 +221,7 @@ export default async function Home() {
           style={{ background: "linear-gradient(90deg, transparent, var(--diq_border), transparent)" }}
         />
 
-        <div className="relative z-[1] mx-auto flex w-full max-w-[1300px] flex-1 flex-col justify-center">
+        <Container className="relative z-[1] flex flex-1 flex-col justify-center">
           <div className="flex flex-col items-stretch gap-10 lg:flex-row lg:items-center lg:justify-between lg:gap-16">
             <div className="min-w-0 max-w-[820px] flex-1">
               <p
@@ -292,12 +294,12 @@ export default async function Home() {
                   "--diq-fade-delay": "0.68s",
                 } as CSSProperties}
               >
-                <Link href={hero.btn1Href} className="diq-btnGold w-full text-center sm:w-auto">
-                  {hero.btn1Label}
-                </Link>
-                <Link href={hero.btn2Href} className="diq-btnGhost w-full text-center sm:w-auto">
-                  {hero.btn2Label}
-                </Link>
+                <Button asChild variant="primary" className="w-full text-center sm:w-auto">
+                  <Link href={hero.btn1Href}>{hero.btn1Label}</Link>
+                </Button>
+                <Button asChild variant="secondary" className="w-full text-center sm:w-auto">
+                  <Link href={hero.btn2Href}>{hero.btn2Label}</Link>
+                </Button>
               </div>
             </div>
 
@@ -311,7 +313,7 @@ export default async function Home() {
               <IntelligenceHud stats={heroStats} />
             </div>
           </div>
-        </div>
+        </Container>
 
         <div className="diq-homeScroll relative z-[1] mt-10 hidden md:flex" aria-hidden>
           <span>Scroll</span>
@@ -344,7 +346,7 @@ export default async function Home() {
           className="diq-sectionY relative overflow-hidden"
           style={{ background: "var(--diq_deep)", borderTop: "1px solid var(--diq_border)" }}
         >
-          <div className="diq-padX relative mx-auto max-w-[1300px]">
+          <Container className="relative">
             {aboutHero && (
               <div className="diq-reveal max-w-[920px]">
                 <Eyebrow>{aboutHero.eyebrow}</Eyebrow>
@@ -409,14 +411,14 @@ export default async function Home() {
                 ))}
               </div>
             )}
-          </div>
+          </Container>
         </section>
       )}
 
       {/* SERVICES */}
       {services.length > 0 && (
         <section className="diq-sectionY relative" style={{ background: "var(--diq_ink)" }}>
-          <div className="diq-padX mx-auto max-w-[1300px]">
+          <Container>
             <div className="diq-reveal flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
               <div className="max-w-[720px]">
                 <Eyebrow>{servicesPage?.eyebrow ?? "Intelligence services"}</Eyebrow>
@@ -434,9 +436,9 @@ export default async function Home() {
                   {servicesPage ? highlightYou(servicesPage.headline) : "What we do for you."}
                 </h2>
               </div>
-              <Link href="/services" className="diq-btnGhost self-start md:self-auto">
-                All services
-              </Link>
+              <Button asChild variant="secondary" className="self-start md:self-auto">
+                <Link href="/services">All services</Link>
+              </Button>
             </div>
 
             <div className="mt-12 grid grid-cols-1 gap-px md:grid-cols-2 xl:grid-cols-3" style={{ background: "var(--diq_border2)" }}>
@@ -490,7 +492,7 @@ export default async function Home() {
                 </Link>
               ))}
             </div>
-          </div>
+          </Container>
         </section>
       )}
 
@@ -500,7 +502,7 @@ export default async function Home() {
           className="diq-sectionY relative overflow-hidden"
           style={{ background: "var(--diq_deep)", borderTop: "1px solid var(--diq_border)" }}
         >
-          <div className="diq-padX mx-auto max-w-[1300px]">
+          <Container>
             <div className="diq-reveal flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
               <div className="max-w-[720px]">
                 <Eyebrow>{processPage?.eyebrow ?? "How we work"}</Eyebrow>
@@ -526,9 +528,9 @@ export default async function Home() {
                   )}
                 </h2>
               </div>
-              <Link href="/process" className="diq-btnGhost self-start md:self-auto">
-                Full process
-              </Link>
+              <Button asChild variant="secondary" className="self-start md:self-auto">
+                <Link href="/process">Full process</Link>
+              </Button>
             </div>
 
             <div className="diq-homeProcess mt-14">
@@ -563,14 +565,14 @@ export default async function Home() {
                 </article>
               ))}
             </div>
-          </div>
+          </Container>
         </section>
       )}
 
       {/* INDUSTRIES */}
       {sectors.length > 0 && (
         <section className="diq-sectionY" style={{ background: "var(--diq_ink)", borderTop: "1px solid var(--diq_border)" }}>
-          <div className="diq-padX mx-auto max-w-[1300px]">
+          <Container>
             <div className="diq-reveal flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-[720px]">
                 <Eyebrow>{industriesPage?.eyebrow ?? "Industries"}</Eyebrow>
@@ -596,9 +598,9 @@ export default async function Home() {
                   )}
                 </h2>
               </div>
-              <Link href="/industries" className="diq-btnGhost self-start lg:self-auto">
-                All industries
-              </Link>
+              <Button asChild variant="secondary" className="self-start lg:self-auto">
+                <Link href="/industries">All industries</Link>
+              </Button>
             </div>
             <div className="diq-reveal mt-10 flex flex-wrap gap-3">
               {sectors.map((sector) => (
@@ -607,7 +609,7 @@ export default async function Home() {
                 </Link>
               ))}
             </div>
-          </div>
+          </Container>
         </section>
       )}
 
@@ -624,6 +626,7 @@ export default async function Home() {
             }}
           />
           <div aria-hidden className="diq-homeOrb diq-homeOrb--cta pointer-events-none" />
+          <Container>
           <div className="diq-reveal diq-homeCtaFrame relative z-[1] mx-auto max-w-[860px]">
             <p
               className="mb-[18px] flex items-center justify-center gap-3"
@@ -675,10 +678,11 @@ export default async function Home() {
             >
               {whereNext.body}
             </p>
-            <Link href={whereNext.btnHref} className="diq-btnGold">
-              {whereNext.btnLabel}
-            </Link>
+            <Button asChild variant="primary">
+              <Link href={whereNext.btnHref}>{whereNext.btnLabel}</Link>
+            </Button>
           </div>
+          </Container>
         </section>
       )}
     </div>

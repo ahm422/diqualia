@@ -3,6 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { Container } from "@/app/components/Container";
+import { Button } from "@/components/ui/button";
 import { getDb } from "@/lib/cloudflare-env";
 
 export const revalidate = 60;
@@ -130,7 +132,7 @@ export default async function IndustrySectorPage({ params }: PageProps) {
           />
         )}
 
-        <div className="relative mx-auto w-full max-w-6xl px-6 pb-16 pt-20 md:pb-20 md:pt-28">
+        <Container className="relative pb-16 pt-20 md:pb-20 md:pt-28">
           <Link
             href="/industries"
             className="text-[11px] tracking-[0.22em] uppercase transition-colors hover:text-primary"
@@ -158,18 +160,18 @@ export default async function IndustrySectorPage({ params }: PageProps) {
             </p>
           ) : null}
           <div className="mt-10 flex flex-wrap items-center gap-4">
-            <Link href="/contact" className="diq-btnGold">
-              Talk to Us
-            </Link>
-            <Link href="/process" className="diq-btnGhost">
-              How We Work
-            </Link>
+            <Button asChild variant="primary">
+              <Link href="/contact">Talk to Us</Link>
+            </Button>
+            <Button asChild variant="secondary">
+              <Link href="/process">How We Work</Link>
+            </Button>
           </div>
-        </div>
+        </Container>
       </section>
 
       {whyPoints.length > 0 ? (
-        <section className="mx-auto w-full max-w-6xl px-6 py-20">
+        <Container as="section" className="py-20">
           <Eyebrow>Why this industry</Eyebrow>
           <h2
             className="mt-6 text-foreground"
@@ -195,7 +197,7 @@ export default async function IndustrySectorPage({ params }: PageProps) {
               </div>
             ))}
           </div>
-        </section>
+        </Container>
       ) : null}
 
       {caseStudyRefs.length > 0 ? (
@@ -203,7 +205,7 @@ export default async function IndustrySectorPage({ params }: PageProps) {
           className="border-t"
           style={{ borderTopColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}
         >
-          <div className="mx-auto w-full max-w-6xl px-6 py-20">
+          <Container className="py-20">
             <Eyebrow>Selected work</Eyebrow>
             <h2
               className="mt-6 text-foreground"
@@ -228,7 +230,7 @@ export default async function IndustrySectorPage({ params }: PageProps) {
                 </li>
               ))}
             </ul>
-          </div>
+          </Container>
         </section>
       ) : null}
 
@@ -239,7 +241,7 @@ export default async function IndustrySectorPage({ params }: PageProps) {
           borderTopColor: "color-mix(in oklab, var(--border) 80%, transparent)",
         }}
       >
-        <div className="mx-auto w-full max-w-6xl px-6 py-20">
+        <Container className="py-20">
           <div className="grid grid-cols-1 gap-12 md:grid-cols-2 md:items-center">
             <div>
               <Eyebrow>Next step</Eyebrow>
@@ -262,15 +264,15 @@ export default async function IndustrySectorPage({ params }: PageProps) {
               </p>
             </div>
             <div className="flex flex-wrap gap-4 md:justify-end">
-              <Link href="/contact" className="diq-btnGold">
-                Contact
-              </Link>
-              <Link href="/industries" className="diq-btnGhost">
-                All industries
-              </Link>
+              <Button asChild variant="primary">
+                <Link href="/contact">Contact</Link>
+              </Button>
+              <Button asChild variant="secondary">
+                <Link href="/industries">All industries</Link>
+              </Button>
             </div>
           </div>
-        </div>
+        </Container>
       </section>
     </div>
   );

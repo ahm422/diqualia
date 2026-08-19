@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { Container } from "@/app/components/Container";
+import { Button } from "@/components/ui/button";
 import { getDb } from "@/lib/cloudflare-env";
 
 export const revalidate = 60;
@@ -115,7 +117,7 @@ export default async function AboutPage() {
             opacity: 0.35,
           }}
         />
-        <div className="mx-auto w-full max-w-6xl px-6 pb-16 pt-20 md:pb-20 md:pt-28">
+        <Container className="relative pb-16 pt-20 md:pb-20 md:pt-28">
           <Eyebrow>{hero.eyebrow}</Eyebrow>
           <H1>{renderHeroHeadline(hero.headline)}</H1>
           <p className="mt-8 max-w-[68ch] text-[15px] leading-8 text-muted-foreground">
@@ -123,17 +125,17 @@ export default async function AboutPage() {
           </p>
 
           <div className="mt-10 flex flex-wrap items-center gap-4">
-            <Link href="/services" className="diq-btnGold">
-              Explore Services
-            </Link>
-            <Link href="/contact" className="diq-btnGhost">
-              Talk to Us
-            </Link>
+            <Button asChild variant="primary">
+              <Link href="/services">Explore Services</Link>
+            </Button>
+            <Button asChild variant="secondary">
+              <Link href="/contact">Talk to Us</Link>
+            </Button>
           </div>
-        </div>
+        </Container>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-6 py-20">
+      <Container as="section" className="py-20">
         <Eyebrow>What we&apos;re built for</Eyebrow>
         <H2>
           Intelligence that compounds —
@@ -151,22 +153,22 @@ export default async function AboutPage() {
             </div>
           ))}
         </div>
-      </section>
+      </Container>
 
       {whereNext && (
         <section className="border-t" style={{ background: "var(--bg-elev)", borderTopColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
-          <div className="mx-auto w-full max-w-6xl px-6 py-20">
+          <Container className="py-20">
             <Eyebrow>{whereNext.eyebrow}</Eyebrow>
             <H2>{renderWhereNextHeadline(whereNext.headline)}</H2>
             <div className="mt-10 flex flex-wrap gap-4">
-              <Link href={whereNext.btn1Href} className="diq-btnGhost">
-                {whereNext.btn1Label}
-              </Link>
-              <Link href={whereNext.btn2Href} className="diq-btnGold">
-                {whereNext.btn2Label}
-              </Link>
+              <Button asChild variant="secondary">
+                <Link href={whereNext.btn1Href}>{whereNext.btn1Label}</Link>
+              </Button>
+              <Button asChild variant="primary">
+                <Link href={whereNext.btn2Href}>{whereNext.btn2Label}</Link>
+              </Button>
             </div>
-          </div>
+          </Container>
         </section>
       )}
     </div>
