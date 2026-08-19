@@ -974,12 +974,12 @@ html.dark .diq-proseMuted {
   animation: diq_orb 14s ease-in-out infinite;
 }
 
-.diq-homeOrb--green {
+.diq-homeOrb--gold2 {
   bottom: -28%;
   left: -10%;
   width: min(52vw, 560px);
   height: min(52vw, 560px);
-  background: radial-gradient(circle, color-mix(in oklab, var(--green) 12%, transparent) 0%, transparent 65%);
+  background: radial-gradient(circle, color-mix(in oklab, var(--gold) 12%, transparent) 0%, transparent 65%);
   animation: diq_orb 18s ease-in-out infinite reverse;
 }
 
@@ -1059,8 +1059,8 @@ html.dark .diq-proseMuted {
   width: 6px;
   height: 6px;
   border-radius: 999px;
-  background: var(--green);
-  box-shadow: 0 0 0 0 color-mix(in oklab, var(--green) 55%, transparent);
+  background: var(--gold);
+  box-shadow: 0 0 0 0 color-mix(in oklab, var(--gold) 55%, transparent);
   animation: diq_homeLive 1.8s ease-out infinite;
 }
 
@@ -1281,7 +1281,7 @@ a.diq-homeCard:focus-visible {
 }
 @keyframes diq_homeLive {
   0% {
-    box-shadow: 0 0 0 0 color-mix(in oklab, var(--green) 50%, transparent);
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--gold) 50%, transparent);
   }
   70% {
     box-shadow: 0 0 0 8px transparent;

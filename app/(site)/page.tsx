@@ -66,7 +66,7 @@ function IntelligenceHud({ stats }: { stats: HeroStat[] }) {
               fontSize: 8,
               letterSpacing: "2px",
               textTransform: "uppercase",
-              color: "var(--green)",
+              color: "var(--gold)",
             }}
           >
             Live
@@ -207,7 +207,7 @@ export default async function Home() {
           }}
         />
         <div aria-hidden className="diq-homeOrb diq-homeOrb--gold pointer-events-none" />
-        <div aria-hidden className="diq-homeOrb diq-homeOrb--green pointer-events-none" />
+        <div aria-hidden className="diq-homeOrb diq-homeOrb--gold2 pointer-events-none" />
         <div
           aria-hidden
           className="absolute left-0 right-0 top-[88px] h-px"
@@ -229,12 +229,12 @@ export default async function Home() {
                   fontSize: 10,
                   letterSpacing: "5px",
                   textTransform: "uppercase",
-                  color: "var(--green)",
+                  color: "var(--gold)",
                   "--diq-fade-dur": "0.7s",
                   "--diq-fade-delay": "0.15s",
                 } as CSSProperties}
               >
-                <span aria-hidden className="inline-block h-px w-7" style={{ background: "var(--green)" }} />
+                <span aria-hidden className="inline-block h-px w-7" style={{ background: "var(--gold)" }} />
                 {hero.eyebrow}
               </p>
               <h1
