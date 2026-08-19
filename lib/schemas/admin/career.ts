@@ -9,6 +9,17 @@ export const jobApplicationStatusEnum = z.enum(["new", "reviewing", "rejected", 
 
 export const stringList = z.array(z.string().min(1).max(500));
 
+/** Optional short field: omit unchanged on PATCH; empty string stores null. */
+const optionalNullShort = z
+  .string()
+  .max(200)
+  .optional()
+  .transform((v) => {
+    if (v === undefined) return undefined;
+    const trimmed = v.trim();
+    return trimmed.length === 0 ? null : trimmed;
+  });
+
 export const careerPagePatchSchema = z.object({
   eyebrow: shortStr.optional(),
   headlineLine1: shortStr.optional(),
@@ -32,6 +43,12 @@ export const jobOpeningCreateSchema = z.object({
   type: jobTypeEnum,
   description: blogBodyStr,
   requirements: stringList.optional(),
+  responsibilities: stringList.optional(),
+  niceToHave: stringList.optional().nullable(),
+  seniority: optionalNullShort,
+  salaryRange: optionalNullShort,
+  remote: optionalNullShort,
+  teamNote: optionalNullShort,
   visible: z.boolean().optional(),
   order: orderNum.optional(),
 });
@@ -45,6 +62,12 @@ export const jobOpeningPatchSchema = z.object({
   type: jobTypeEnum.optional(),
   description: blogBodyStr.optional(),
   requirements: stringList.optional(),
+  responsibilities: stringList.optional(),
+  niceToHave: stringList.optional().nullable(),
+  seniority: optionalNullShort,
+  salaryRange: optionalNullShort,
+  remote: optionalNullShort,
+  teamNote: optionalNullShort,
   visible: z.boolean().optional(),
   order: orderNum.optional(),
 });

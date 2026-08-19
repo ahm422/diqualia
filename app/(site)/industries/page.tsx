@@ -111,11 +111,11 @@ export default async function IndustriesPage() {
             const className = "border px-4 py-3 text-[11px] tracking-[0.18em] uppercase";
             const style = {
               borderColor: sector.visible
-                ? "color-mix(in oklab, var(--green) 65%, transparent)"
+                ? "color-mix(in oklab, var(--gold) 65%, transparent)"
                 : "color-mix(in oklab, var(--border) 80%, transparent)",
               background: "var(--bg-elev)",
               color: sector.visible
-                ? "color-mix(in oklab, var(--green) 85%, var(--foreground))"
+                ? "var(--gold)"
                 : "var(--muted-foreground)",
             } as const;
 

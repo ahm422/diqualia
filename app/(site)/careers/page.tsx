@@ -53,6 +53,35 @@ export default async function CareersPage() {
     ? (page.benefits as string[]).filter(Boolean)
     : [];
 
+  const departmentCount = new Set(openings.map((o) => o.department).filter(Boolean)).size;
+
+  const hireSteps = [
+    {
+      num: "01",
+      label: "Apply",
+      title: "Send a note and a resume",
+      body: "PDF, DOC, or DOCX. A short cover note on the niche you know and a piece of work you are proud of.",
+    },
+    {
+      num: "02",
+      label: "Review",
+      title: "We read the work",
+      body: "Intelligence and delivery review the application against the role. No automated filter theatre.",
+    },
+    {
+      num: "03",
+      label: "Conversation",
+      title: "A working conversation",
+      body: "If there is a fit, we talk about a market, a brief, and how you think — not a panel gauntlet.",
+    },
+    {
+      num: "04",
+      label: "Offer",
+      title: "A clear next step",
+      body: "We reply with next steps. If we make an offer, it is specific about the work, not a vague pipeline.",
+    },
+  ];
+
   return (
     <div>
       <section
@@ -92,6 +121,28 @@ export default async function CareersPage() {
         </div>
       </section>
 
+      <section
+        className="border-b"
+        style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}
+      >
+        <div className="diq-padX mx-auto grid w-full max-w-6xl grid-cols-2 gap-px md:grid-cols-2" style={{ background: "color-mix(in oklab, var(--border) 100%, transparent)" }}>
+          {[
+            { value: String(openings.length).padStart(2, "0"), label: "Open roles" },
+            { value: String(departmentCount).padStart(2, "0"), label: departmentCount === 1 ? "Department" : "Departments" },
+          ].map((stat) => (
+            <div key={stat.label} className="px-8 py-10" style={{ background: "var(--bg-elev)" }}>
+              <div
+                className="diq-ghostNum text-[36px] leading-none"
+                style={{ fontFamily: "var(--font-display)", fontWeight: 300 }}
+              >
+                {stat.value}
+              </div>
+              <div className="mt-3 text-[11px] tracking-[0.22em] uppercase text-muted-foreground">{stat.label}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       <section className="diq-sectionY" style={{ background: "var(--diq_ink)" }}>
         <div className="diq-padX mx-auto w-full max-w-6xl">
           <Eyebrow>{page.cultureEyebrow}</Eyebrow>
@@ -126,6 +177,27 @@ export default async function CareersPage() {
               ))}
             </ul>
           ) : null}
+        </div>
+      </section>
+
+      <section className="diq-sectionY border-t" style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
+        <div className="diq-padX mx-auto w-full max-w-6xl">
+          <Eyebrow>How we hire</Eyebrow>
+          <div className="mt-12 grid grid-cols-1 gap-px md:grid-cols-4" style={{ background: "color-mix(in oklab, var(--border) 100%, transparent)" }}>
+            {hireSteps.map((step) => (
+              <div key={step.num} className="p-8" style={{ background: "var(--bg-elev)" }}>
+                <div className="text-[10px] tracking-[0.22em] uppercase text-primary">{step.label}</div>
+                <div
+                  className="diq-ghostNum mt-4 text-[36px] leading-none"
+                  style={{ fontFamily: "var(--font-display)", fontWeight: 300 }}
+                >
+                  {step.num}
+                </div>
+                <div className="mt-4 text-[13px] tracking-[0.06em] text-foreground">{step.title}</div>
+                <p className="mt-3 text-[12px] leading-7 text-muted-foreground">{step.body}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 

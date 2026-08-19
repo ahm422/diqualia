@@ -16,9 +16,9 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
     <div
       className="flex items-center gap-3 text-[11px] tracking-[0.35em] uppercase"
-      style={{ color: "var(--gold)" }}
+      style={{ color: "var(--primary)" }}
     >
-      <span aria-hidden className="inline-block h-px w-8" style={{ background: "var(--gold)" }} />
+      <span aria-hidden className="inline-block h-px w-8" style={{ background: "var(--primary)" }} />
       {children}
     </div>
   );
@@ -121,7 +121,7 @@ export default async function BlogIndexPage() {
                       </p>
                       <span
                         className="mt-5 inline-block text-[11px] tracking-[0.22em] uppercase"
-                        style={{ color: "var(--gold)" }}
+                        style={{ color: "var(--primary)" }}
                       >
                         Read →
                       </span>

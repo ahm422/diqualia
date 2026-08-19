@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export type ServiceTab = {
   id: string; // e.g. "s01"
@@ -40,34 +40,16 @@ function Chevron({ dir }: { dir: "left" | "right" }) {
 
 export function ServicesTabs({ tabs }: { tabs: ServiceTab[] }) {
   const [active, setActive] = useState(tabs[0]?.id ?? "");
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
   const barRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
   const ids = useMemo(() => tabs.map((t) => t.id), [tabs]);
-
-  const updateOverflow = useCallback(() => {
-    const el = trackRef.current;
-    if (!el) return;
-    const max = el.scrollWidth - el.clientWidth;
-    setCanScrollLeft(el.scrollLeft > 4);
-    setCanScrollRight(max - el.scrollLeft > 4);
-  }, []);
-
-  useEffect(() => {
-    const el = trackRef.current;
-    if (!el) return;
-    updateOverflow();
-    el.addEventListener("scroll", updateOverflow, { passive: true });
-    const ro = new ResizeObserver(updateOverflow);
-    ro.observe(el);
-    return () => {
-      el.removeEventListener("scroll", updateOverflow);
-      ro.disconnect();
-    };
-  }, [ids, updateOverflow]);
+  const activeIndex = Math.max(0, ids.indexOf(active));
+  const progressPct = tabs.length > 0 ? ((activeIndex + 1) / tabs.length) * 100 : 0;
+  const prevTab = activeIndex > 0 ? tabs[activeIndex - 1] : null;
+  const nextTab = activeIndex < tabs.length - 1 ? tabs[activeIndex + 1] : null;
+  const currentTab = tabs[activeIndex] ?? tabs[0];
 
   useEffect(() => {
     const sections = ids
@@ -114,15 +96,6 @@ export function ServicesTabs({ tabs }: { tabs: ServiceTab[] }) {
     });
   }
 
-  function scrollTrack(dir: -1 | 1) {
-    const el = trackRef.current;
-    if (!el) return;
-    el.scrollBy({
-      left: dir * Math.max(180, el.clientWidth * 0.55),
-      behavior: prefersReducedMotion() ? "auto" : "smooth",
-    });
-  }
-
   function onTrackKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
     if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
     e.preventDefault();
@@ -133,10 +106,18 @@ export function ServicesTabs({ tabs }: { tabs: ServiceTab[] }) {
     if (id) onClick(id);
   }
 
+  function stepBy(delta: -1 | 1) {
+    const next = activeIndex + delta;
+    if (next < 0 || next >= ids.length) return;
+    const id = ids[next];
+    if (id) onClick(id);
+  }
+
   return (
     <div
       ref={barRef}
       className="sticky z-[120]"
+      onKeyDown={onTrackKeyDown}
       style={{
         top: "var(--diq-stickyTop)",
         background: "color-mix(in oklab, var(--card) 92%, transparent)",
@@ -144,107 +125,110 @@ export function ServicesTabs({ tabs }: { tabs: ServiceTab[] }) {
         backdropFilter: "blur(18px)",
       }}
     >
-      <div className="relative mx-auto flex w-full max-w-6xl items-center gap-1 px-3 sm:px-6">
-        <button
-          type="button"
-          className="diq-serviceTabsArrow hidden h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-opacity sm:flex"
-          style={{
-            borderColor: "color-mix(in oklab, var(--border) 80%, transparent)",
-            color: "var(--foreground)",
-            opacity: canScrollLeft ? 1 : 0.28,
-            pointerEvents: canScrollLeft ? "auto" : "none",
-          }}
-          aria-label="Show previous services"
-          tabIndex={canScrollLeft ? 0 : -1}
-          onClick={() => scrollTrack(-1)}
-        >
-          <Chevron dir="left" />
-        </button>
+      <div className="diq-serviceTabsProgressTrack" aria-hidden>
+        <div className="diq-serviceTabsProgress" style={{ width: `${progressPct}%` }} />
+      </div>
 
-        <div className="relative min-w-0 flex-1">
-          {canScrollLeft ? (
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10"
-              style={{
-                background: "linear-gradient(to right, var(--card), transparent)",
-              }}
-            />
-          ) : null}
-          {canScrollRight ? (
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10"
-              style={{
-                background: "linear-gradient(to left, var(--card), transparent)",
-              }}
-            />
-          ) : null}
-
-          <div
-            ref={trackRef}
-            role="tablist"
-            aria-label="Services"
-            className="diq-serviceTabsTrack flex gap-2 overflow-x-auto py-3"
-            onKeyDown={onTrackKeyDown}
-          >
-            {tabs.map((t, i) => {
-              const isActive = t.id === active;
-              const num = String(i + 1).padStart(2, "0");
-              return (
-                <button
-                  key={t.id}
-                  ref={(node) => {
-                    tabRefs.current[t.id] = node;
-                  }}
-                  type="button"
-                  role="tab"
-                  id={`service-tab-${t.id}`}
-                  aria-selected={isActive}
-                  aria-controls={t.id}
-                  tabIndex={isActive ? 0 : -1}
-                  onClick={() => onClick(t.id)}
-                  className="diq-serviceTab flex shrink-0 items-center gap-2.5 rounded-full border px-3.5 py-2 text-left transition-colors"
-                  style={{
-                    borderColor: isActive
-                      ? "var(--primary)"
-                      : "color-mix(in oklab, var(--foreground) 22%, transparent)",
-                    background: isActive
-                      ? "color-mix(in oklab, var(--gold) 16%, transparent)"
-                      : "color-mix(in oklab, var(--foreground) 4%, transparent)",
-                    color: isActive ? "var(--primary)" : "var(--foreground)",
-                    opacity: isActive ? 1 : 0.88,
-                  }}
-                >
-                  <span
-                    aria-hidden
-                    className="font-mono text-[10px] tracking-[0.14em]"
-                    style={{ color: "var(--primary)" }}
-                  >
-                    {num}
-                  </span>
-                  <span className="text-[11px] tracking-[0.14em] uppercase">{t.label}</span>
-                </button>
-              );
-            })}
+      {/* Mobile compact stepper */}
+      <div className="mx-auto flex w-full max-w-6xl items-center gap-2 px-3 py-2.5 md:hidden">
+        <div className="min-w-0 flex-1">
+          <div className="flex min-w-0 items-baseline gap-2">
+            <span aria-hidden className="shrink-0 font-mono text-[10px] tracking-[0.14em] text-primary">
+              {String(activeIndex + 1).padStart(2, "0")}
+            </span>
+            <span className="truncate text-[11px] tracking-[0.12em] text-foreground uppercase">
+              {currentTab?.label ?? ""}
+            </span>
           </div>
+          {prevTab ? (
+            <div className="mt-0.5 truncate text-[10px] tracking-[0.1em] text-muted-foreground uppercase">
+              {prevTab.label}
+            </div>
+          ) : null}
         </div>
 
-        <button
-          type="button"
-          className="diq-serviceTabsArrow hidden h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-opacity sm:flex"
-          style={{
-            borderColor: "color-mix(in oklab, var(--border) 80%, transparent)",
-            color: "var(--foreground)",
-            opacity: canScrollRight ? 1 : 0.28,
-            pointerEvents: canScrollRight ? "auto" : "none",
-          }}
-          aria-label="Show next services"
-          tabIndex={canScrollRight ? 0 : -1}
-          onClick={() => scrollTrack(1)}
+        <div className="flex shrink-0 items-center gap-0.5">
+          <button
+            type="button"
+            className="diq-serviceTabsArrow flex h-9 w-9 items-center justify-center rounded-full border"
+            style={{
+              borderColor: "color-mix(in oklab, var(--border) 80%, transparent)",
+              color: "var(--foreground)",
+              opacity: prevTab ? 1 : 0.28,
+              pointerEvents: prevTab ? "auto" : "none",
+            }}
+            aria-label="Previous service"
+            tabIndex={prevTab ? 0 : -1}
+            onClick={() => stepBy(-1)}
+          >
+            <Chevron dir="left" />
+          </button>
+          <span
+            className="min-w-[2.75rem] text-center font-mono text-[11px] tracking-[0.08em] text-muted-foreground"
+            aria-live="polite"
+          >
+            {activeIndex + 1}/{tabs.length}
+          </span>
+          <button
+            type="button"
+            className="diq-serviceTabsArrow flex h-9 w-9 items-center justify-center rounded-full border"
+            style={{
+              borderColor: "color-mix(in oklab, var(--border) 80%, transparent)",
+              color: "var(--foreground)",
+              opacity: nextTab ? 1 : 0.28,
+              pointerEvents: nextTab ? "auto" : "none",
+            }}
+            aria-label="Next service"
+            tabIndex={nextTab ? 0 : -1}
+            onClick={() => stepBy(1)}
+          >
+            <Chevron dir="right" />
+          </button>
+        </div>
+
+        <div className="min-w-0 flex-1 text-right">
+          {nextTab ? (
+            <span className="block truncate text-[11px] tracking-[0.12em] text-muted-foreground uppercase">
+              {nextTab.label}
+            </span>
+          ) : null}
+        </div>
+      </div>
+
+      {/* Desktop / tablet connected rail */}
+      <div className="relative mx-auto hidden w-full max-w-6xl px-3 md:block sm:px-6">
+        <div
+          ref={trackRef}
+          role="tablist"
+          aria-label="Services"
+          className="diq-serviceTabsTrack"
         >
-          <Chevron dir="right" />
-        </button>
+          {tabs.map((t, i) => {
+            const isActive = t.id === active;
+            const num = String(i + 1).padStart(2, "0");
+            return (
+              <button
+                key={t.id}
+                ref={(node) => {
+                  tabRefs.current[t.id] = node;
+                }}
+                type="button"
+                role="tab"
+                id={`service-tab-${t.id}`}
+                aria-selected={isActive}
+                aria-controls={t.id}
+                tabIndex={isActive ? 0 : -1}
+                onClick={() => onClick(t.id)}
+                className="diq-serviceTab"
+              >
+                <span aria-hidden className="diq-serviceTabNum">
+                  {num}
+                </span>
+                <span className="diq-serviceTabLabel">{t.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

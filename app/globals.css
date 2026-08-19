@@ -1,7 +1,9 @@
 @import "tailwindcss";
 
 :root {
-  /* Brand kit primitives (match provided SVG palette) */
+  /* Brand kit — exact fills from the logo SVGs
+     public/Di Qualia Black Logo-04.svg  → gold #caa84b + ink #0a0b0d
+     public/Di Qualia White Logo-03.svg  → gold #caa84b + white #ffffff */
   --ink: #0a0b0d;
   --white: #ffffff;
   --gold: #caa84b;
@@ -62,7 +64,7 @@
   --popover: var(--white);
   --popover-foreground: var(--ink);
 
-  /* Brand */
+  /* Brand — logo gold (#caa84b) */
   --primary: var(--gold);
   --primary-foreground: var(--ink);
 
@@ -364,9 +366,9 @@ body:has(a:hover) .diq-curR {
 }
 
 .diq-navMenuBtn {
-  border: 1px solid color-mix(in oklab, var(--gold) 35%, transparent);
+  border: 1px solid color-mix(in oklab, var(--primary) 35%, transparent);
   background: transparent;
-  color: var(--gold);
+  color: var(--primary);
   height: 36px;
   width: 42px;
   border-radius: 999px;
@@ -376,7 +378,7 @@ body:has(a:hover) .diq-curR {
   transition: background 0.25s ease;
 }
 .diq-navMenuBtn:hover {
-  background: color-mix(in oklab, var(--gold) 16%, transparent);
+  background: color-mix(in oklab, var(--primary) 16%, transparent);
 }
 
 .diq-hamburger {
@@ -461,11 +463,11 @@ body:has(a:hover) .diq-curR {
   text-transform: uppercase;
 }
 .diq-sheetLink:hover {
-  border-color: color-mix(in oklab, var(--gold) 55%, transparent);
+  border-color: color-mix(in oklab, var(--primary) 55%, transparent);
 }
 .diq-sheetLink.active {
-  border-color: var(--gold);
-  color: var(--gold);
+  border-color: var(--primary);
+  color: var(--primary);
 }
 
 .diq-sheetCta {
@@ -474,11 +476,11 @@ body:has(a:hover) .diq-curR {
 }
 
 .diq-themeToggle :where(button) {
-  border: 1px solid color-mix(in oklab, var(--gold) 35%, transparent);
-  color: var(--gold);
+  border: 1px solid color-mix(in oklab, var(--primary) 35%, transparent);
+  color: var(--primary);
 }
 .diq-themeToggle :where(button:hover) {
-  background: color-mix(in oklab, var(--gold) 16%, transparent);
+  background: color-mix(in oklab, var(--primary) 16%, transparent);
 }
 
 .diq-logo {
@@ -510,12 +512,12 @@ html.dark .diq-logoDark {
   border-bottom: 1px solid transparent;
 }
 .diq-navLink:hover {
-  color: var(--gold);
-  border-bottom-color: color-mix(in oklab, var(--gold) 55%, transparent);
+  color: var(--primary);
+  border-bottom-color: color-mix(in oklab, var(--primary) 55%, transparent);
 }
 .diq-navLink.active {
-  color: var(--gold);
-  border-bottom-color: color-mix(in oklab, var(--gold) 70%, transparent);
+  color: var(--primary);
+  border-bottom-color: color-mix(in oklab, var(--primary) 70%, transparent);
 }
 
 .diq-navCta {
@@ -722,29 +724,102 @@ html.dark .diq-proseMuted {
   color: color-mix(in oklab, var(--paper) 88%, var(--mist));
 }
 
+.diq-serviceTabsProgressTrack {
+  height: 2px;
+  width: 100%;
+  background: color-mix(in oklab, var(--border) 80%, transparent);
+}
+.diq-serviceTabsProgress {
+  height: 2px;
+  background: var(--primary);
+  transition: width 0.35s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .diq-serviceTabsProgress {
+    transition: none;
+  }
+}
+
 .diq-serviceTabsTrack {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  position: relative;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  scroll-snap-type: x proximity;
   -webkit-overflow-scrolling: touch;
 }
 .diq-serviceTabsTrack::-webkit-scrollbar {
   display: none;
 }
+.diq-serviceTabsTrack::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: color-mix(in oklab, var(--border) 90%, transparent);
+  pointer-events: none;
+}
 .diq-serviceTab {
-  scroll-snap-align: start;
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 14px 10px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  color: var(--muted-foreground);
+  text-align: left;
+  cursor: pointer;
+  position: relative;
+  letter-spacing: 0.1em;
+}
+.diq-serviceTabNum {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: color-mix(in oklab, var(--primary) 70%, var(--muted-foreground));
+}
+.diq-serviceTabLabel {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .diq-serviceTab:hover {
-  border-color: color-mix(in oklab, var(--gold) 55%, transparent);
+  color: var(--foreground);
   opacity: 1;
 }
-.diq-serviceTab[aria-selected="true"]:hover {
-  border-color: var(--primary);
+.diq-serviceTab:hover .diq-serviceTabNum {
   color: var(--primary);
 }
+.diq-serviceTab[aria-selected="true"] {
+  color: var(--primary);
+}
+.diq-serviceTab[aria-selected="true"] .diq-serviceTabNum {
+  color: var(--primary);
+}
+.diq-serviceTab[aria-selected="true"]::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--primary);
+  z-index: 1;
+}
 .diq-serviceTabsArrow:hover {
-  border-color: var(--gold);
-  color: var(--gold);
+  border-color: var(--primary);
+  color: var(--primary);
 }
 .diq-serviceTab:focus-visible,
 .diq-serviceTabsArrow:focus-visible {
@@ -795,8 +870,9 @@ html.dark .diq-proseMuted {
 }
 
 .diq-btnGold {
-  background: var(--gold);
+  background: color-mix(in oklab, var(--gold) 88%, var(--ink));
   color: var(--diq_ink);
+  border: 1px solid var(--ink);
   padding: 14px clamp(22px, 6vw, 44px);
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: clamp(11px, 1.1vw, 12px);
@@ -848,6 +924,24 @@ html.dark .diq-proseMuted {
 .diq-ctaEmail:focus-visible {
   outline: 2px solid color-mix(in oklab, var(--gold) 70%, #ffffff);
   outline-offset: 3px;
+}
+
+@keyframes diq-upload-indet {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(320%);
+  }
+}
+.diq-uploadIndeterminate {
+  animation: diq-upload-indet 1.2s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .diq-uploadIndeterminate {
+    animation: none;
+    width: 100%;
+  }
 }
 
 .diq-ctaEmail {

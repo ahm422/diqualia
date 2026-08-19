@@ -387,19 +387,25 @@ model CareerPage {
 }
 
 model JobOpening {
-  id           Int              @id @default(autoincrement())
-  slug         String           @unique
-  title        String
-  department   String
-  location     String
-  type         String
-  description  String
-  requirements Json
-  order        Int
-  visible      Boolean          @default(true)
-  createdAt    DateTime         @default(now()) @map("created_at")
-  updatedAt    DateTime         @updatedAt @map("updated_at")
-  applications JobApplication[]
+  id               Int              @id @default(autoincrement())
+  slug             String           @unique
+  title            String
+  department       String
+  location         String
+  type             String
+  description      String
+  responsibilities Json             @default("[]")
+  requirements     Json
+  niceToHave       Json?            @map("nice_to_have")
+  seniority        String?
+  salaryRange      String?          @map("salary_range")
+  remote           String?
+  teamNote         String?          @map("team_note")
+  order            Int
+  visible          Boolean          @default(true)
+  createdAt        DateTime         @default(now()) @map("created_at")
+  updatedAt        DateTime         @updatedAt @map("updated_at")
+  applications     JobApplication[]
 
   @@map("job_openings")
 }

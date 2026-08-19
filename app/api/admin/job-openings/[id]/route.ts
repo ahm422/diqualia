@@ -4,6 +4,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { requireAdminApi } from "@/lib/auth/require-admin-api";
 import { getDb } from "@/lib/cloudflare-env";
+import { Prisma } from "@/lib/generated/prisma/client";
 import { revalidateJobOpening, revalidatePage } from "@/lib/revalidate-site";
 import { jobOpeningPatchSchema } from "@/lib/schemas/admin/career";
 
@@ -64,9 +65,15 @@ export async function PATCH(
   }
 
   try {
+    const { niceToHave, ...rest } = parsed.data;
     const opening = await prisma.jobOpening.update({
       where: { id: numId },
-      data: parsed.data,
+      data: {
+        ...rest,
+        ...(niceToHave !== undefined
+          ? { niceToHave: niceToHave === null ? Prisma.DbNull : niceToHave }
+          : {}),
+      },
     });
 
     revalidatePage("/careers");

@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 
 import { requireAdminApi } from "@/lib/auth/require-admin-api";
 import { getDb } from "@/lib/cloudflare-env";
+import { Prisma } from "@/lib/generated/prisma/client";
 import { revalidateJobOpening, revalidatePage } from "@/lib/revalidate-site";
 import { jobOpeningCreateSchema } from "@/lib/schemas/admin/career";
 import { uniqueSlug } from "@/lib/slugify";
@@ -53,6 +54,12 @@ export async function POST(request: Request) {
       type: parsed.data.type,
       description: parsed.data.description,
       requirements: parsed.data.requirements ?? [],
+      responsibilities: parsed.data.responsibilities ?? [],
+      niceToHave: parsed.data.niceToHave ?? Prisma.DbNull,
+      seniority: parsed.data.seniority ?? null,
+      salaryRange: parsed.data.salaryRange ?? null,
+      remote: parsed.data.remote ?? null,
+      teamNote: parsed.data.teamNote ?? null,
       visible: parsed.data.visible ?? true,
       order: nextOrder,
     },

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type FormEvent } from "react";
+import { useMemo, useRef, useState, type DragEvent, type FormEvent } from "react";
 
 const MAX_BYTES = 5 * 1024 * 1024;
 const ALLOWED_EXT = new Set(["pdf", "doc", "docx"]);
@@ -10,10 +10,12 @@ const ALLOWED_MIME = new Set([
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   "application/octet-stream",
 ]);
+const ACCEPT =
+  ".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
 type SubmitState =
   | { status: "idle" }
-  | { status: "submitting" }
+  | { status: "submitting"; progress: number | null }
   | { status: "success"; id: string }
   | { status: "error"; message: string };
 
@@ -28,18 +30,67 @@ function fileError(file: File | null): string | null {
   return null;
 }
 
-export function CareerApplyForm({ jobSlug }: { jobSlug: string }) {
+function formatBytes(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function postForm(
+  form: FormData,
+  onProgress: (pct: number | null) => void,
+): Promise<{ status: number; json: unknown }> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "/api/careers/apply");
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable && event.total > 0) {
+        onProgress(Math.round((event.loaded / event.total) * 100));
+      } else {
+        onProgress(null);
+      }
+    };
+    xhr.onload = () => {
+      try {
+        resolve({ status: xhr.status, json: JSON.parse(xhr.responseText) as unknown });
+      } catch {
+        reject(new Error("Submission failed"));
+      }
+    };
+    xhr.onerror = () => reject(new Error("Submission failed"));
+    xhr.send(form);
+  });
+}
+
+export function CareerApplyForm({ jobSlug, headline }: { jobSlug: string; headline?: string | null }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [coverNote, setCoverNote] = useState("");
   const [resume, setResume] = useState<File | null>(null);
+  const [resumeError, setResumeError] = useState<string | null>(null);
+  const [dragging, setDragging] = useState(false);
   const [website, setWebsite] = useState("");
   const [state, setState] = useState<SubmitState>({ status: "idle" });
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const canSubmit = useMemo(() => {
-    return name.trim().length > 0 && email.trim().length > 0 && resume != null;
-  }, [name, email, resume]);
+    return name.trim().length > 0 && email.trim().length > 0 && resume != null && resumeError == null;
+  }, [name, email, resume, resumeError]);
+
+  function applyFile(file: File | null) {
+    const err = fileError(file);
+    setResume(file);
+    setResumeError(file ? err : null);
+    if (inputRef.current && !file) inputRef.current.value = "";
+  }
+
+  function onDrop(e: DragEvent<HTMLDivElement>) {
+    e.preventDefault();
+    setDragging(false);
+    const file = e.dataTransfer.files?.[0] ?? null;
+    applyFile(file);
+  }
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -47,11 +98,12 @@ export function CareerApplyForm({ jobSlug }: { jobSlug: string }) {
 
     const err = fileError(resume);
     if (err) {
+      setResumeError(err);
       setState({ status: "error", message: err });
       return;
     }
 
-    setState({ status: "submitting" });
+    setState({ status: "submitting", progress: 0 });
     try {
       const form = new FormData();
       form.append("name", name);
@@ -62,13 +114,12 @@ export function CareerApplyForm({ jobSlug }: { jobSlug: string }) {
       form.append("website", website);
       if (resume) form.append("resume", resume);
 
-      const res = await fetch("/api/careers/apply", {
-        method: "POST",
-        body: form,
+      const res = await postForm(form, (progress) => {
+        setState({ status: "submitting", progress });
       });
 
-      const data = (await res.json()) as unknown;
-      if (!res.ok) {
+      const data = res.json;
+      if (res.status < 200 || res.status >= 300) {
         const msg =
           typeof data === "object" && data && "error" in data && typeof (data as { error: unknown }).error === "string"
             ? (data as { error: string }).error
@@ -86,7 +137,7 @@ export function CareerApplyForm({ jobSlug }: { jobSlug: string }) {
       setEmail("");
       setPhone("");
       setCoverNote("");
-      setResume(null);
+      applyFile(null);
       setWebsite("");
     } catch (caught) {
       setState({
@@ -97,6 +148,7 @@ export function CareerApplyForm({ jobSlug }: { jobSlug: string }) {
   }
 
   const fieldBorder = { borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" };
+  const progress = state.status === "submitting" ? state.progress : null;
 
   return (
     <form
@@ -108,6 +160,20 @@ export function CareerApplyForm({ jobSlug }: { jobSlug: string }) {
       }}
     >
       <div className="text-[10px] tracking-[0.22em] uppercase text-primary">Apply</div>
+      {headline ? (
+        <div
+          className="mt-3 text-foreground"
+          style={{
+            fontFamily: "var(--font-display)",
+            fontWeight: 300,
+            fontStyle: "italic",
+            fontSize: "clamp(1.15rem, 2vw, 1.5rem)",
+            lineHeight: 1.3,
+          }}
+        >
+          {headline}
+        </div>
+      ) : null}
 
       <div className="mt-6 grid grid-cols-1 gap-4">
         <label className="block">
@@ -164,16 +230,75 @@ export function CareerApplyForm({ jobSlug }: { jobSlug: string }) {
           />
         </label>
 
-        <label className="block">
-          <div className="text-[11px] tracking-[0.18em] uppercase text-muted-foreground">Resume (PDF, DOC, DOCX · 5 MB)</div>
-          <input
-            type="file"
-            accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            onChange={(e) => setResume(e.target.files?.[0] ?? null)}
-            className="mt-2 w-full text-[13px] text-foreground file:mr-3 file:rounded file:border file:border-[var(--diq_border)] file:bg-transparent file:px-3 file:py-2 file:text-[11px] file:uppercase file:tracking-widest file:text-primary"
-            required
-          />
-        </label>
+        <div>
+          <div className="text-[11px] tracking-[0.18em] uppercase text-muted-foreground">
+            Resume (PDF, DOC, DOCX · 5 MB)
+          </div>
+          <div
+            className="mt-2 border px-4 py-6 text-center transition-colors"
+            style={{
+              ...fieldBorder,
+              background: dragging
+                ? "color-mix(in oklab, var(--gold) 10%, transparent)"
+                : "transparent",
+            }}
+            onDragEnter={(e) => {
+              e.preventDefault();
+              setDragging(true);
+            }}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setDragging(true);
+            }}
+            onDragLeave={(e) => {
+              e.preventDefault();
+              setDragging(false);
+            }}
+            onDrop={onDrop}
+          >
+            <input
+              ref={inputRef}
+              type="file"
+              accept={ACCEPT}
+              className="sr-only"
+              onChange={(e) => applyFile(e.target.files?.[0] ?? null)}
+              required={!resume}
+            />
+            {resume ? (
+              <div className="flex flex-col items-center gap-2 sm:flex-row sm:justify-between">
+                <div className="text-left">
+                  <div className="text-[13px] text-foreground">{resume.name}</div>
+                  <div className="text-[11px] text-muted-foreground">{formatBytes(resume.size)}</div>
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    className="text-[11px] tracking-[0.18em] uppercase text-primary"
+                    onClick={() => inputRef.current?.click()}
+                  >
+                    Replace
+                  </button>
+                  <button
+                    type="button"
+                    className="text-[11px] tracking-[0.18em] uppercase text-muted-foreground hover:text-foreground"
+                    onClick={() => applyFile(null)}
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                type="button"
+                className="text-[13px] text-muted-foreground"
+                onClick={() => inputRef.current?.click()}
+              >
+                Drop a file here, or <span className="text-primary">click to upload</span>
+              </button>
+            )}
+          </div>
+          {resumeError ? <div className="mt-2 text-[12px] text-red-400">{resumeError}</div> : null}
+        </div>
 
         <div className="hidden" aria-hidden>
           <label>
@@ -182,6 +307,27 @@ export function CareerApplyForm({ jobSlug }: { jobSlug: string }) {
           </label>
         </div>
       </div>
+
+      {state.status === "submitting" ? (
+        <div className="mt-6" aria-live="polite">
+          <div className="text-[11px] tracking-[0.18em] uppercase text-muted-foreground">
+            {progress == null ? "Uploading…" : `Uploading ${progress}%`}
+          </div>
+          <div
+            className="mt-2 h-0.5 w-full overflow-hidden"
+            style={{ background: "color-mix(in oklab, var(--border) 80%, transparent)" }}
+          >
+            <div
+              className={progress == null ? "diq-uploadIndeterminate h-full" : "h-full"}
+              style={{
+                width: progress == null ? "40%" : `${progress}%`,
+                background: "var(--primary)",
+                transition: progress == null ? undefined : "width 0.2s ease",
+              }}
+            />
+          </div>
+        </div>
+      ) : null}
 
       <div className="mt-8 flex flex-wrap items-center gap-4">
         <button type="submit" className="diq-btnGhost" disabled={!canSubmit || state.status === "submitting"}>

@@ -157,8 +157,9 @@ export async function POST(request: NextRequest) {
     if (!mailer) {
       console.warn("[careers/apply] EMAIL binding unavailable; skipping send");
     } else {
-      const subject = `New application: ${opening.title} — ${name}`;
-      const html = `
+      try {
+        const subject = `New application: ${opening.title} — ${name}`;
+        const html = `
         <p><b>Role:</b> ${esc(opening.title)}</p>
         <p><b>Name:</b> ${esc(name)}</p>
         <p><b>Email:</b> ${esc(email)}</p>
@@ -166,23 +167,51 @@ export async function POST(request: NextRequest) {
         <p><b>Cover note:</b></p>
         <p>${esc(coverNote?.trim() ? coverNote : "—").replace(/\n/g, "<br>")}</p>
       `;
-      const text = [
-        `Role: ${opening.title}`,
-        `Name: ${name}`,
-        `Email: ${email}`,
-        `Phone: ${phone?.trim() ? phone : "—"}`,
-        `Cover note:`,
-        coverNote?.trim() ? coverNote : "—",
-      ].join("\n");
+        const text = [
+          `Role: ${opening.title}`,
+          `Name: ${name}`,
+          `Email: ${email}`,
+          `Phone: ${phone?.trim() ? phone : "—"}`,
+          `Cover note:`,
+          coverNote?.trim() ? coverNote : "—",
+        ].join("\n");
 
-      await mailer.send({
-        to: process.env.ADMIN_EMAIL!,
-        from: { email: "noreply@diqualia.com", name: "DiQualia" },
-        replyTo: email,
-        subject,
-        html,
-        text,
-      });
+        await mailer.send({
+          to: process.env.ADMIN_EMAIL!,
+          from: { email: "noreply@diqualia.com", name: "DiQualia" },
+          replyTo: email,
+          subject,
+          html,
+          text,
+        });
+      } catch (err) {
+        console.error("[careers/apply] Email send failed:", err);
+      }
+
+      try {
+        const subject = `We received your application — ${opening.title}`;
+        const html = `
+        <p>Thank you for applying to <b>${esc(opening.title)}</b> at DiQualia.</p>
+        <p>We received your application and will reply with next steps.</p>
+        <p>Reference: <code>${esc(application.id)}</code></p>
+      `;
+        const text = [
+          `Thank you for applying to ${opening.title} at DiQualia.`,
+          `We received your application and will reply with next steps.`,
+          `Reference: ${application.id}`,
+        ].join("\n");
+
+        await mailer.send({
+          to: email,
+          from: { email: "noreply@diqualia.com", name: "DiQualia" },
+          ...(process.env.ADMIN_EMAIL ? { replyTo: process.env.ADMIN_EMAIL } : {}),
+          subject,
+          html,
+          text,
+        });
+      } catch (err) {
+        console.error("[careers/apply] Applicant email failed:", err);
+      }
     }
   } catch (err) {
     console.error("[careers/apply] Email send failed:", err);

@@ -593,8 +593,13 @@ async function testCareers() {
     }),
   });
   assert(hidden.status === 201, stepLabel(`hidden opening POST → 201 (got ${hidden.status})`));
-  const hiddenId = (hidden.json as { id?: number })?.id;
+  const hiddenBody = hidden.json as { id?: number; responsibilities?: unknown; seniority?: unknown };
+  const hiddenId = hiddenBody.id;
   assert(hiddenId != null, stepLabel("hidden opening returns id"));
+  assert(
+    Array.isArray(hiddenBody.responsibilities),
+    stepLabel("opening POST omitting new fields still 201 with responsibilities[]"),
+  );
 
   try {
     const hiddenPublic = await request(`/careers/${hiddenSlug}`);
@@ -662,6 +667,7 @@ async function testCareers() {
     stepLabel(`resume in local R2 or admin stream (local=${localResume})`),
   );
   logOk("admin resume download → 200");
+  logOk("apply 200 is independent of applicant confirmation email");
 }
 
 // ─── 7. Public routes ────────────────────────────────────────────────────────
