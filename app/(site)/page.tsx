@@ -53,7 +53,7 @@ function IntelligenceHud({ stats }: { stats: HeroStat[] }) {
             fontSize: 9,
             letterSpacing: "3.5px",
             textTransform: "uppercase",
-            color: "var(--gold)",
+            color: "var(--primary)",
           }}
         >
           Intelligence Panel
@@ -66,7 +66,7 @@ function IntelligenceHud({ stats }: { stats: HeroStat[] }) {
               fontSize: 8,
               letterSpacing: "2px",
               textTransform: "uppercase",
-              color: "var(--gold)",
+              color: "var(--primary)",
             }}
           >
             Live
@@ -100,7 +100,7 @@ function IntelligenceHud({ stats }: { stats: HeroStat[] }) {
               fontSize: 36,
               fontWeight: 700,
               lineHeight: 1,
-              color: "var(--gold)",
+              color: "var(--primary)",
               letterSpacing: "-0.5px",
             }}
           >
@@ -119,7 +119,7 @@ function highlightYou(text: string) {
   return (
     <>
       {text.slice(0, idx)}
-      <em style={{ fontStyle: "italic", color: "var(--gold)" }}>{word}</em>
+      <em style={{ fontStyle: "italic", color: "var(--primary)" }}>{word}</em>
     </>
   );
 }
@@ -131,7 +131,7 @@ function StatementHeadline({ text }: { text: string }) {
   return (
     <>
       {text.slice(0, idx)}
-      <em style={{ fontStyle: "italic", color: "var(--gold)" }}>{text.slice(idx)}</em>
+      <em style={{ fontStyle: "italic", color: "var(--primary)" }}>{text.slice(idx)}</em>
     </>
   );
 }
@@ -229,12 +229,12 @@ export default async function Home() {
                   fontSize: 10,
                   letterSpacing: "5px",
                   textTransform: "uppercase",
-                  color: "var(--gold)",
+                  color: "var(--primary)",
                   "--diq-fade-dur": "0.7s",
                   "--diq-fade-delay": "0.15s",
                 } as CSSProperties}
               >
-                <span aria-hidden className="inline-block h-px w-7" style={{ background: "var(--gold)" }} />
+                <span aria-hidden className="inline-block h-px w-7" style={{ background: "var(--primary)" }} />
                 {hero.eyebrow}
               </p>
               <h1
@@ -255,7 +255,7 @@ export default async function Home() {
                 <span className="block">{hero.headlineLine1}</span>
                 <span className="block">
                   {line2Words.join(" ")}{" "}
-                  <em style={{ fontStyle: "italic", color: "var(--gold)" }}>{line2Last}</em>
+                  <em style={{ fontStyle: "italic", color: "var(--primary)" }}>{line2Last}</em>
                 </span>
                 <span
                   aria-hidden
@@ -518,7 +518,7 @@ export default async function Home() {
                   {processPage ? (
                     <>
                       {processPage.headlineLine1}{" "}
-                      <em style={{ fontStyle: "italic", color: "var(--gold)" }}>{processPage.headlineLine2}</em>{" "}
+                      <em style={{ fontStyle: "italic", color: "var(--primary)" }}>{processPage.headlineLine2}</em>{" "}
                       {processPage.headlineLine3}
                     </>
                   ) : (
@@ -589,7 +589,7 @@ export default async function Home() {
                     <>
                       {industriesPage.headlineLine1}
                       <br />
-                      <em style={{ fontStyle: "italic", color: "var(--gold)" }}>{industriesPage.headlineLine2}</em>
+                      <em style={{ fontStyle: "italic", color: "var(--primary)" }}>{industriesPage.headlineLine2}</em>
                     </>
                   ) : (
                     "Deep expertise. Broad reach."
@@ -654,7 +654,7 @@ export default async function Home() {
                 <>
                   {headlineParts[0]}
                   <br />
-                  <em style={{ fontStyle: "italic", color: "var(--gold)" }}>Better</em>
+                  <em style={{ fontStyle: "italic", color: "var(--primary)" }}>Better</em>
                   <br />
                   {headlineParts[1]}
                 </>

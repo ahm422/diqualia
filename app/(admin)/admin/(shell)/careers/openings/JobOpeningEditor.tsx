@@ -17,6 +17,10 @@ import { slugify } from "@/lib/slugify";
 
 const JOB_TYPES = ["Full-time", "Part-time", "Contract", "Internship"] as const;
 
+function asStringList(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string" && Boolean(item)) : [];
+}
+
 export type JobOpeningData = {
   id: number;
   slug: string;
@@ -25,7 +29,13 @@ export type JobOpeningData = {
   location: string;
   type: string;
   description: string;
+  responsibilities?: unknown;
   requirements: unknown;
+  niceToHave?: unknown;
+  seniority?: string | null;
+  salaryRange?: string | null;
+  remote?: string | null;
+  teamNote?: string | null;
   order: number;
   visible: boolean;
 };
@@ -33,6 +43,46 @@ export type JobOpeningData = {
 type Props = {
   initial?: JobOpeningData | null;
 };
+
+function StringListField({
+  items,
+  onChange,
+  placeholder,
+  addLabel,
+}: {
+  items: string[];
+  onChange: (next: string[]) => void;
+  placeholder: string;
+  addLabel: string;
+}) {
+  return (
+    <div className="space-y-2">
+      {items.map((item, idx) => (
+        <div key={idx} className="flex gap-2">
+          <AdminInput
+            value={item}
+            onChange={(v) => onChange(items.map((it, i) => (i === idx ? v : it)))}
+            placeholder={placeholder}
+          />
+          <button
+            type="button"
+            onClick={() => onChange(items.filter((_, i) => i !== idx))}
+            className="shrink-0 text-xs text-red-400 hover:text-red-300"
+          >
+            Delete
+          </button>
+        </div>
+      ))}
+      <button
+        type="button"
+        onClick={() => onChange([...items, ""])}
+        className="rounded border border-[var(--diq_border)] px-3 py-1.5 text-xs uppercase tracking-widest text-[var(--diq_mid)] hover:border-[var(--gold)] hover:text-[var(--gold)]"
+      >
+        {addLabel}
+      </button>
+    </div>
+  );
+}
 
 export function JobOpeningEditor({ initial }: Props) {
   const router = useRouter();
@@ -48,11 +98,13 @@ export function JobOpeningEditor({ initial }: Props) {
       : "Full-time",
   );
   const [description, setDescription] = useState(initial?.description ?? "");
-  const [requirements, setRequirements] = useState<string[]>(
-    Array.isArray(initial?.requirements)
-      ? (initial.requirements as string[]).filter(Boolean)
-      : [],
-  );
+  const [responsibilities, setResponsibilities] = useState<string[]>(asStringList(initial?.responsibilities));
+  const [requirements, setRequirements] = useState<string[]>(asStringList(initial?.requirements));
+  const [niceToHave, setNiceToHave] = useState<string[]>(asStringList(initial?.niceToHave));
+  const [seniority, setSeniority] = useState(initial?.seniority ?? "");
+  const [salaryRange, setSalaryRange] = useState(initial?.salaryRange ?? "");
+  const [remote, setRemote] = useState(initial?.remote ?? "");
+  const [teamNote, setTeamNote] = useState(initial?.teamNote ?? "");
   const [visible, setVisible] = useState(initial?.visible ?? true);
   const [order, setOrder] = useState(String(initial?.order ?? 0));
   const [slugTouched, setSlugTouched] = useState(Boolean(initial?.slug));
@@ -76,7 +128,13 @@ export function JobOpeningEditor({ initial }: Props) {
       location,
       type,
       description,
+      responsibilities: responsibilities.filter((item) => item.trim().length > 0),
       requirements: requirements.filter((item) => item.trim().length > 0),
+      niceToHave: niceToHave.filter((item) => item.trim().length > 0),
+      seniority,
+      salaryRange,
+      remote,
+      teamNote,
       visible,
     };
     if (slug.trim()) base.slug = slug.trim();
@@ -135,10 +193,6 @@ export function JobOpeningEditor({ initial }: Props) {
     }
   }
 
-  function updateRequirement(idx: number, val: string) {
-    setRequirements((prev) => prev.map((it, i) => (i === idx ? val : it)));
-  }
-
   return (
     <div>
       <div className="mb-6">
@@ -183,35 +237,44 @@ export function JobOpeningEditor({ initial }: Props) {
             ))}
           </select>
         </AdminField>
+        <AdminField label="Seniority">
+          <AdminInput value={seniority} onChange={setSeniority} placeholder="Mid-level" />
+        </AdminField>
+        <AdminField label="Salary range">
+          <AdminInput value={salaryRange} onChange={setSalaryRange} placeholder="Optional" />
+        </AdminField>
+        <AdminField label="Remote">
+          <AdminInput value={remote} onChange={setRemote} placeholder="Remote / Hybrid / Onsite" />
+        </AdminField>
+        <AdminField label="Team note">
+          <AdminInput value={teamNote} onChange={setTeamNote} placeholder="Optional" />
+        </AdminField>
         <AdminField label="Description (Markdown)">
-          <AdminTextarea value={description} onChange={setDescription} rows={12} />
+          <AdminTextarea value={description} onChange={setDescription} rows={8} />
+        </AdminField>
+        <AdminField label="Responsibilities">
+          <StringListField
+            items={responsibilities}
+            onChange={setResponsibilities}
+            placeholder="Responsibility"
+            addLabel="+ Add responsibility"
+          />
         </AdminField>
         <AdminField label="Requirements">
-          <div className="space-y-2">
-            {requirements.map((item, idx) => (
-              <div key={idx} className="flex gap-2">
-                <AdminInput
-                  value={item}
-                  onChange={(v) => updateRequirement(idx, v)}
-                  placeholder="Requirement"
-                />
-                <button
-                  type="button"
-                  onClick={() => setRequirements((prev) => prev.filter((_, i) => i !== idx))}
-                  className="shrink-0 text-xs text-red-400 hover:text-red-300"
-                >
-                  Delete
-                </button>
-              </div>
-            ))}
-            <button
-              type="button"
-              onClick={() => setRequirements((prev) => [...prev, ""])}
-              className="rounded border border-[var(--diq_border)] px-3 py-1.5 text-xs uppercase tracking-widest text-[var(--diq_mid)] hover:border-[var(--gold)] hover:text-[var(--gold)]"
-            >
-              + Add requirement
-            </button>
-          </div>
+          <StringListField
+            items={requirements}
+            onChange={setRequirements}
+            placeholder="Requirement"
+            addLabel="+ Add requirement"
+          />
+        </AdminField>
+        <AdminField label="Nice-to-have">
+          <StringListField
+            items={niceToHave}
+            onChange={setNiceToHave}
+            placeholder="Nice-to-have"
+            addLabel="+ Add nice-to-have"
+          />
         </AdminField>
         {!isNew && (
           <AdminField label="Order">
