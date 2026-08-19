@@ -318,8 +318,13 @@ body:has(a:hover) .diq-curR {
 }
 
 .diq-fadeUp {
-  opacity: 0;
-  animation: diq_fadeUp var(--diq-fade-dur, 0.8s) ease var(--diq-fade-delay, 0s) forwards;
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .diq-fadeUp {
+    animation: diq_fadeUp var(--diq-fade-dur, 0.8s) ease var(--diq-fade-delay, 0s) both;
+  }
 }
 
 .diq-gridDrift {
@@ -634,14 +639,19 @@ html.dark .diq-logoDark {
   }
 }
 
-.diq-reveal {
-  opacity: 0;
-  transform: translateY(28px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
-}
+.diq-reveal,
 .diq-reveal.visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .diq-reveal,
+  .diq-reveal.visible {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
 }
 
 /* --breakpoint-nav: 960px — do not map to lg (1024). var() is invalid in @media. */
