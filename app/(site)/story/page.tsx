@@ -43,7 +43,7 @@ function H2({ children }: { children: React.ReactNode }) {
 
 function Prose({ children }: { children: React.ReactNode }) {
   return (
-    <div className="text-[15px] leading-8" style={{ color: "var(--text-faint)" }}>
+    <div className="max-w-[65ch] text-[15px] leading-8" style={{ color: "var(--text-faint)" }}>
       {children}
     </div>
   );
@@ -70,7 +70,7 @@ function PullQuote({ quote, cite }: { quote: React.ReactNode; cite: string }) {
       </div>
       <Container>
         <blockquote
-          className="relative z-10 mx-auto max-w-4xl pt-10"
+          className="relative z-10 pt-10"
           style={{
             fontFamily: "var(--font-display)",
             fontWeight: 300,
@@ -129,7 +129,6 @@ export default async function StoryPage() {
         />
 
         <Container className="relative">
-          <div className="relative mx-auto w-full max-w-4xl">
           <Eyebrow center>{page.eyebrow}</Eyebrow>
           <h1
             className="mt-10 text-foreground"
@@ -144,7 +143,7 @@ export default async function StoryPage() {
             <br />{page.headlineLine2}
             <br /><em style={{ fontStyle: "italic", color: "var(--gold-lt)" }}>{page.headlineLine3}</em>
           </h1>
-          <p className="mx-auto mt-10 max-w-[64ch] text-[16px] leading-9" style={{ color: "var(--text-muted)" }}>
+          <p className="mx-auto mt-10 max-w-[65ch] text-[16px] leading-9" style={{ color: "var(--text-muted)" }}>
             {page.body}
           </p>
           <div className="mt-14 flex flex-col items-center gap-4 text-[11px] tracking-[0.22em] uppercase" style={{ color: "var(--text-muted)" }}>
@@ -154,7 +153,6 @@ export default async function StoryPage() {
               style={{ background: "linear-gradient(to bottom, var(--gold), transparent)" }}
             />
             Read the story
-          </div>
           </div>
         </Container>
       </section>
@@ -285,7 +283,7 @@ export default async function StoryPage() {
           <br />
           in the age of <em style={{ fontStyle: "italic", color: "var(--gold-lt)" }}>artificial</em> everything.
         </H2>
-        <div className="mt-8 max-w-3xl">
+        <div className="mt-8">
           <Prose>
             <p>
               We are living through a paradox. Businesses have never had more data, more tools, or more automated insight
@@ -404,7 +402,7 @@ export default async function StoryPage() {
                 <br />
                 <em style={{ fontStyle: "italic", color: "var(--gold-lt)" }}>cannot afford to guess.</em>
               </H2>
-              <div className="mt-8 max-w-3xl">
+              <div className="mt-8">
                 <Prose>
                   <p>
                     DiQualia was built with a very specific client in mind: the B2B enterprise operating in a niche,
@@ -447,7 +445,6 @@ export default async function StoryPage() {
           }}
         />
         <Container className="relative">
-        <div className="relative mx-auto w-full max-w-4xl">
           {[
             ["Intelligence", false],
             ["that moves", true],
@@ -468,7 +465,6 @@ export default async function StoryPage() {
               {word}
             </div>
           ))}
-        </div>
         </Container>
       </section>
     </div>

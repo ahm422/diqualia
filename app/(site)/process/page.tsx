@@ -87,7 +87,7 @@ export default async function ProcessPage() {
       </section>
 
       <Container as="section" className="py-20">
-        <div className="grid grid-cols-1 gap-px md:grid-cols-5" style={{ background: "color-mix(in oklab, var(--border) 100%, transparent)" }}>
+        <div className="grid grid-cols-1 gap-px md:grid-cols-3 xl:grid-cols-5" style={{ background: "color-mix(in oklab, var(--border) 100%, transparent)" }}>
           {steps.map((step) => (
             <div key={step.id} className="p-8" style={{ background: "var(--bg-elev)" }}>
               <div className="text-[10px] tracking-[0.22em] uppercase text-primary">{step.stepLabel}</div>
