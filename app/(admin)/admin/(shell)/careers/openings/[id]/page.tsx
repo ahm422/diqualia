@@ -4,7 +4,6 @@ import { requireAdmin } from "@/lib/auth/require-admin";
 import { getDb } from "@/lib/cloudflare-env";
 import { AdminPageHeader } from "@/components/admin";
 
-import { CareersSubNav } from "../../CareersSubNav";
 import { JobOpeningEditor } from "../JobOpeningEditor";
 
 export default async function EditJobOpeningPage({
@@ -25,7 +24,6 @@ export default async function EditJobOpeningPage({
   return (
     <div>
       <AdminPageHeader title="Edit opening" description={opening.slug} />
-      <CareersSubNav />
       <JobOpeningEditor initial={opening} />
     </div>
   );

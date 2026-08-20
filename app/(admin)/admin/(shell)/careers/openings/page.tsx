@@ -4,7 +4,6 @@ import { requireAdmin } from "@/lib/auth/require-admin";
 import { getDb } from "@/lib/cloudflare-env";
 import { Button } from "@/components/ui/button";
 
-import { CareersSubNav } from "../CareersSubNav";
 import { JobOpeningsList } from "./JobOpeningsList";
 
 export default async function JobOpeningsAdminPage() {
@@ -26,7 +25,6 @@ export default async function JobOpeningsAdminPage() {
           <Link href="/admin/careers/openings/new">New opening</Link>
         </Button>
       </div>
-      <CareersSubNav />
       <JobOpeningsList initialOpenings={openings} />
     </div>
   );

@@ -2,7 +2,6 @@ import { requireAdmin } from "@/lib/auth/require-admin";
 import { getDb } from "@/lib/cloudflare-env";
 import { AdminPageHeader } from "@/components/admin";
 
-import { CareersSubNav } from "../CareersSubNav";
 import { ApplicationsTable } from "./ApplicationsTable";
 
 export default async function JobApplicationsAdminPage() {
@@ -19,7 +18,6 @@ export default async function JobApplicationsAdminPage() {
         title="Applications"
         description="Inbox for /careers apply submissions"
       />
-      <CareersSubNav />
       <ApplicationsTable initialApplications={applications} />
     </div>
   );

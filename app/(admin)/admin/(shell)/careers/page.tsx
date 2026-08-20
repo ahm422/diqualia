@@ -3,7 +3,6 @@ import { getDb } from "@/lib/cloudflare-env";
 import { AdminPageHeader } from "@/components/admin";
 
 import { CareerPageEditor } from "./CareerPageEditor";
-import { CareersSubNav } from "./CareersSubNav";
 
 export default async function CareersAdminPage() {
   const prisma = await getDb();
@@ -17,7 +16,6 @@ export default async function CareersAdminPage() {
         title="Careers"
         description="Hero, culture, benefits, and apply instructions"
       />
-      <CareersSubNav />
       <CareerPageEditor initialData={careerPage} />
     </div>
   );

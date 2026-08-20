@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 
 import {
   AdminSection,
@@ -9,6 +9,7 @@ import {
   AdminTextarea,
   AdminSaveButton,
   useAdminSave,
+  useScrollToSection,
 } from "@/components/admin";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -38,13 +39,25 @@ type Props = {
 
 // ─── Main editor ─────────────────────────────────────────────────────────────
 
-export function HomePageEditor({ initialHero, initialMarquee, initialExploreSection, initialExploreCards, initialWhereNext }: Props) {
+export function HomePageEditor(props: Props) {
+  return (
+    <Suspense fallback={null}>
+      <HomePageEditorInner {...props} />
+    </Suspense>
+  );
+}
+
+function HomePageEditorInner({ initialHero, initialMarquee, initialExploreSection, initialExploreCards, initialWhereNext }: Props) {
+  useScrollToSection();
+
   return (
     <div>
       <HeroSection initial={initialHero} />
       <MarqueeSection initial={initialMarquee} />
-      <ExploreSectionHeader initial={initialExploreSection} />
-      <ExploreCardsSection initial={initialExploreCards} />
+      <div id="explore" className="scroll-mt-8">
+        <ExploreSectionHeader initial={initialExploreSection} />
+        <ExploreCardsSection initial={initialExploreCards} />
+      </div>
       <WhereNextSection initial={initialWhereNext} />
     </div>
   );
@@ -74,7 +87,7 @@ function HeroSection({ initial }: { initial: HomeHero }) {
   const { save, saving } = useAdminSave("/api/admin/home-hero");
 
   return (
-    <AdminSection title="Hero">
+    <AdminSection id="hero" title="Hero">
       <AdminField label="Eyebrow"><AdminInput value={f.eyebrow} onChange={set("eyebrow")} placeholder="Marketing Intelligence & Research" /></AdminField>
       <div className="grid gap-4 sm:grid-cols-3">
         <AdminField label="Headline Line 1"><AdminInput value={f.headlineLine1} onChange={set("headlineLine1")} placeholder="Intelligence" /></AdminField>
@@ -154,7 +167,7 @@ function MarqueeSection({ initial }: { initial: MarqueeItem[] }) {
   }
 
   return (
-    <AdminSection title="Marquee Ticker">
+    <AdminSection id="marquee" title="Marquee Ticker">
       <p className="mb-4 text-xs text-[var(--diq_mid)]">Format: &quot;Label — Sublabel&quot; (bold/rest split on &quot; — &quot;)</p>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
@@ -353,7 +366,7 @@ function WhereNextSection({ initial }: { initial: WhereNext }) {
   const { save, saving } = useAdminSave("/api/admin/home-where-next");
 
   return (
-    <AdminSection title="Where Next CTA">
+    <AdminSection id="where-next" title="Where Next CTA">
       <AdminField label="Eyebrow"><AdminInput value={eyebrow} onChange={setEyebrow} placeholder="Begin With Intelligence" /></AdminField>
       <AdminField label="Headline"><AdminInput value={headline} onChange={setHeadline} placeholder="Ready to Know Your Market Better Than Anyone?" /></AdminField>
       <AdminField label="Body"><AdminTextarea value={body} onChange={setBody} rows={2} /></AdminField>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 
 import {
   AdminSection,
@@ -9,6 +9,7 @@ import {
   AdminTextarea,
   AdminSaveButton,
   useAdminSave,
+  useAdminSectionTab,
 } from "@/components/admin";
 import { slugify } from "@/lib/slugify";
 
@@ -78,15 +79,24 @@ function normalizeSector(raw: IndustrySector): IndustrySector {
 
 // ─── Main editor ─────────────────────────────────────────────────────────────
 
-type Tab = "hero" | "sectors" | "whereNext";
+const INDUSTRIES_TABS = ["hero", "sectors", "where-next"] as const;
+type Tab = (typeof INDUSTRIES_TABS)[number];
 
-export function IndustriesPageEditor({ initialPage, initialSectors }: Props) {
-  const [activeTab, setActiveTab] = useState<Tab>("hero");
+export function IndustriesPageEditor(props: Props) {
+  return (
+    <Suspense fallback={null}>
+      <IndustriesPageEditorInner {...props} />
+    </Suspense>
+  );
+}
+
+function IndustriesPageEditorInner({ initialPage, initialSectors }: Props) {
+  const { activeTab, setTab } = useAdminSectionTab(INDUSTRIES_TABS, "hero");
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "hero", label: "Hero" },
     { id: "sectors", label: "Sectors" },
-    { id: "whereNext", label: "Where Next" },
+    { id: "where-next", label: "Where Next" },
   ];
 
   return (
@@ -95,7 +105,8 @@ export function IndustriesPageEditor({ initialPage, initialSectors }: Props) {
         {tabs.map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
+            type="button"
+            onClick={() => setTab(tab.id)}
             className={`rounded px-4 py-2 text-xs uppercase tracking-widest transition-colors ${
               activeTab === tab.id
                 ? "border border-[var(--gold)] text-[var(--gold)]"
@@ -114,7 +125,7 @@ export function IndustriesPageEditor({ initialPage, initialSectors }: Props) {
           initialSectors={initialSectors.map(normalizeSector)}
         />
       )}
-      {activeTab === "whereNext" && <WhereNextTab initial={initialPage} />}
+      {activeTab === "where-next" && <WhereNextTab initial={initialPage} />}
     </div>
   );
 }
