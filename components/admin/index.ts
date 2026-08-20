@@ -7,3 +7,4 @@ export { AdminImageField } from "./AdminImageField";
 export { AdminPageHeader } from "./AdminPageHeader";
 export { AdminToaster } from "./AdminToaster";
 export { useAdminSave } from "./useAdminSave";
+export { useAdminSectionTab, useScrollToSection } from "./useAdminSection";

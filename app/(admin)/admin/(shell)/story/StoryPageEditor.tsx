@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 
 import {
   AdminSection,
@@ -9,6 +9,7 @@ import {
   AdminTextarea,
   AdminSaveButton,
   useAdminSave,
+  useAdminSectionTab,
 } from "@/components/admin";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -36,14 +37,23 @@ type Props = {
 
 // ─── Main editor ─────────────────────────────────────────────────────────────
 
-type Tab = "hero" | "doubleExperience" | "manifesto";
+const STORY_TABS = ["hero", "dx", "manifesto"] as const;
+type Tab = (typeof STORY_TABS)[number];
 
-export function StoryPageEditor({ initialData }: Props) {
-  const [activeTab, setActiveTab] = useState<Tab>("hero");
+export function StoryPageEditor(props: Props) {
+  return (
+    <Suspense fallback={null}>
+      <StoryPageEditorInner {...props} />
+    </Suspense>
+  );
+}
+
+function StoryPageEditorInner({ initialData }: Props) {
+  const { activeTab, setTab } = useAdminSectionTab(STORY_TABS, "hero");
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "hero", label: "Hero" },
-    { id: "doubleExperience", label: "Double Experience" },
+    { id: "dx", label: "Double Experience" },
     { id: "manifesto", label: "Manifesto" },
   ];
 
@@ -53,7 +63,8 @@ export function StoryPageEditor({ initialData }: Props) {
         {tabs.map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
+            type="button"
+            onClick={() => setTab(tab.id)}
             className={`rounded px-4 py-2 text-xs uppercase tracking-widest transition-colors ${
               activeTab === tab.id
                 ? "border border-[var(--gold)] text-[var(--gold)]"
@@ -66,7 +77,7 @@ export function StoryPageEditor({ initialData }: Props) {
       </div>
 
       {activeTab === "hero" && <HeroTab initial={initialData} />}
-      {activeTab === "doubleExperience" && <DoubleExperienceTab initial={initialData} />}
+      {activeTab === "dx" && <DoubleExperienceTab initial={initialData} />}
       {activeTab === "manifesto" && <ManifestoTab initial={initialData} />}
     </div>
   );

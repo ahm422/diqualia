@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 
 import {
   AdminSection,
@@ -9,6 +9,7 @@ import {
   AdminTextarea,
   AdminSaveButton,
   useAdminSave,
+  useAdminSectionTab,
 } from "@/components/admin";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -29,15 +30,24 @@ type Props = {
 
 // ─── Main editor ─────────────────────────────────────────────────────────────
 
-type Tab = "hero" | "builtFor" | "whereNext";
+const ABOUT_TABS = ["hero", "built-for", "where-next"] as const;
+type Tab = (typeof ABOUT_TABS)[number];
 
-export function AboutPageEditor({ initialHero, initialBuiltFor, initialWhereNext }: Props) {
-  const [activeTab, setActiveTab] = useState<Tab>("hero");
+export function AboutPageEditor(props: Props) {
+  return (
+    <Suspense fallback={null}>
+      <AboutPageEditorInner {...props} />
+    </Suspense>
+  );
+}
+
+function AboutPageEditorInner({ initialHero, initialBuiltFor, initialWhereNext }: Props) {
+  const { activeTab, setTab } = useAdminSectionTab(ABOUT_TABS, "hero");
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "hero", label: "Hero" },
-    { id: "builtFor", label: "Built For" },
-    { id: "whereNext", label: "Where Next" },
+    { id: "built-for", label: "Built For" },
+    { id: "where-next", label: "Where Next" },
   ];
 
   return (
@@ -46,7 +56,8 @@ export function AboutPageEditor({ initialHero, initialBuiltFor, initialWhereNext
         {tabs.map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
+            type="button"
+            onClick={() => setTab(tab.id)}
             className={`rounded px-4 py-2 text-xs uppercase tracking-widest transition-colors ${
               activeTab === tab.id
                 ? "border border-[var(--gold)] text-[var(--gold)]"
@@ -59,8 +70,8 @@ export function AboutPageEditor({ initialHero, initialBuiltFor, initialWhereNext
       </div>
 
       {activeTab === "hero" && <HeroSection initial={initialHero} />}
-      {activeTab === "builtFor" && <BuiltForSection initial={initialBuiltFor} />}
-      {activeTab === "whereNext" && <WhereNextSection initial={initialWhereNext} />}
+      {activeTab === "built-for" && <BuiltForSection initial={initialBuiltFor} />}
+      {activeTab === "where-next" && <WhereNextSection initial={initialWhereNext} />}
     </div>
   );
 }

@@ -1,13 +1,24 @@
+import { Suspense } from "react";
+
 import { requireAdmin } from "@/lib/auth/require-admin";
-import { AdminSidebar } from "../AdminSidebar";
 import { AdminToaster } from "@/components/admin";
+
+import { AdminSidebar } from "../AdminSidebar";
+
+function AdminSidebarFallback() {
+  return (
+    <aside className="h-full w-72 shrink-0 border-r border-[var(--diq_border)] bg-[var(--diq_deep)]" />
+  );
+}
 
 export default async function ShellLayout({ children }: { children: React.ReactNode }) {
   await requireAdmin();
 
   return (
-    <div className="flex min-h-screen">
-      <AdminSidebar />
+    <div className="flex h-screen overflow-hidden">
+      <Suspense fallback={<AdminSidebarFallback />}>
+        <AdminSidebar />
+      </Suspense>
       <main className="flex-1 overflow-y-auto p-8">{children}</main>
       <AdminToaster />
     </div>

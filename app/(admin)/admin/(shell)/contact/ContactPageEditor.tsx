@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 
 import {
   AdminSection,
@@ -9,6 +9,7 @@ import {
   AdminTextarea,
   AdminSaveButton,
   useAdminSave,
+  useAdminSectionTab,
 } from "@/components/admin";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -34,16 +35,25 @@ type Props = {
 
 // ─── Main editor ─────────────────────────────────────────────────────────────
 
-type Tab = "hero" | "emailCard" | "whatToInclude" | "expectation";
+const CONTACT_TABS = ["hero", "email-card", "what-to-include", "expectation"] as const;
+type Tab = (typeof CONTACT_TABS)[number];
 
-export function ContactPageEditor({ initialData }: Props) {
-  const [activeTab, setActiveTab] = useState<Tab>("hero");
+export function ContactPageEditor(props: Props) {
+  return (
+    <Suspense fallback={null}>
+      <ContactPageEditorInner {...props} />
+    </Suspense>
+  );
+}
+
+function ContactPageEditorInner({ initialData }: Props) {
+  const { activeTab, setTab } = useAdminSectionTab(CONTACT_TABS, "hero");
 
   const tabs: { id: Tab; label: string }[] = [
-    { id: "hero",          label: "Hero" },
-    { id: "emailCard",     label: "Email Card" },
-    { id: "whatToInclude", label: "What to Include" },
-    { id: "expectation",   label: "Expectation" },
+    { id: "hero", label: "Hero" },
+    { id: "email-card", label: "Email Card" },
+    { id: "what-to-include", label: "What to Include" },
+    { id: "expectation", label: "Expectation" },
   ];
 
   return (
@@ -52,7 +62,8 @@ export function ContactPageEditor({ initialData }: Props) {
         {tabs.map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
+            type="button"
+            onClick={() => setTab(tab.id)}
             className={`rounded px-4 py-2 text-xs uppercase tracking-widest transition-colors ${
               activeTab === tab.id
                 ? "border border-[var(--gold)] text-[var(--gold)]"
@@ -64,10 +75,10 @@ export function ContactPageEditor({ initialData }: Props) {
         ))}
       </div>
 
-      {activeTab === "hero"          && <HeroTab          initial={initialData} />}
-      {activeTab === "emailCard"     && <EmailCardTab     initial={initialData} />}
-      {activeTab === "whatToInclude" && <WhatToIncludeTab initial={initialData} />}
-      {activeTab === "expectation"   && <ExpectationTab   initial={initialData} />}
+      {activeTab === "hero" && <HeroTab initial={initialData} />}
+      {activeTab === "email-card" && <EmailCardTab initial={initialData} />}
+      {activeTab === "what-to-include" && <WhatToIncludeTab initial={initialData} />}
+      {activeTab === "expectation" && <ExpectationTab initial={initialData} />}
     </div>
   );
 }

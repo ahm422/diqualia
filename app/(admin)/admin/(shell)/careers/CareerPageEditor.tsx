@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 
 import {
   AdminSection,
@@ -9,6 +9,7 @@ import {
   AdminTextarea,
   AdminSaveButton,
   useAdminSave,
+  useAdminSectionTab,
 } from "@/components/admin";
 
 export type CareerPageData = {
@@ -30,10 +31,19 @@ type Props = {
   initialData: CareerPageData;
 };
 
-type Tab = "hero" | "culture" | "benefits" | "apply";
+const CAREER_TABS = ["hero", "culture", "benefits", "apply"] as const;
+type Tab = (typeof CAREER_TABS)[number];
 
-export function CareerPageEditor({ initialData }: Props) {
-  const [activeTab, setActiveTab] = useState<Tab>("hero");
+export function CareerPageEditor(props: Props) {
+  return (
+    <Suspense fallback={null}>
+      <CareerPageEditorInner {...props} />
+    </Suspense>
+  );
+}
+
+function CareerPageEditorInner({ initialData }: Props) {
+  const { activeTab, setTab } = useAdminSectionTab(CAREER_TABS, "hero");
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "hero", label: "Hero" },
@@ -48,7 +58,8 @@ export function CareerPageEditor({ initialData }: Props) {
         {tabs.map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
+            type="button"
+            onClick={() => setTab(tab.id)}
             className={`rounded px-4 py-2 text-xs uppercase tracking-widest transition-colors ${
               activeTab === tab.id
                 ? "border border-[var(--gold)] text-[var(--gold)]"

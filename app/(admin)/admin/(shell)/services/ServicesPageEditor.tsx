@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { toast } from "sonner";
 
 import {
@@ -10,6 +10,7 @@ import {
   AdminTextarea,
   AdminSaveButton,
   useAdminSave,
+  useScrollToSection,
 } from "@/components/admin";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -44,11 +45,23 @@ type Props = {
 
 // ─── Main editor ─────────────────────────────────────────────────────────────
 
-export function ServicesPageEditor({ initialPage, initialSections }: Props) {
+export function ServicesPageEditor(props: Props) {
+  return (
+    <Suspense fallback={null}>
+      <ServicesPageEditorInner {...props} />
+    </Suspense>
+  );
+}
+
+function ServicesPageEditorInner({ initialPage, initialSections }: Props) {
+  useScrollToSection();
+
   return (
     <div>
-      <HeroBlock initial={initialPage} />
-      <CtaBlock initial={initialPage} />
+      <div id="intro" className="scroll-mt-8">
+        <HeroBlock initial={initialPage} />
+        <CtaBlock initial={initialPage} />
+      </div>
       <SectionsBlock initial={initialSections} />
     </div>
   );
@@ -195,7 +208,7 @@ function SectionsBlock({ initial }: { initial: ServiceSection[] }) {
   }
 
   return (
-    <AdminSection title="Service Sections">
+    <AdminSection id="sections" title="Service Sections">
       <div className="space-y-3">
         {sections.map((section, idx) => (
           <SectionPanel

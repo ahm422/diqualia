@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 
 import {
   AdminSection,
@@ -9,6 +9,7 @@ import {
   AdminSaveButton,
   AdminImageField,
   useAdminSave,
+  useScrollToSection,
 } from "@/components/admin";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -29,14 +30,28 @@ type Props = {
 
 // ─── Main editor ─────────────────────────────────────────────────────────────
 
-export function SiteSettingsEditor({ initialSiteSettings, initialNavItems, initialCta, initialFooter, initialFooterNav }: Props) {
+export function SiteSettingsEditor(props: Props) {
+  return (
+    <Suspense fallback={null}>
+      <SiteSettingsEditorInner {...props} />
+    </Suspense>
+  );
+}
+
+function SiteSettingsEditorInner({ initialSiteSettings, initialNavItems, initialCta, initialFooter, initialFooterNav }: Props) {
+  useScrollToSection();
+
   return (
     <div>
-      <LogoSection initial={initialSiteSettings} />
+      <div id="site" className="scroll-mt-8">
+        <LogoSection initial={initialSiteSettings} />
+        <CtaSection initial={initialCta} />
+      </div>
       <NavSection initial={initialNavItems} />
-      <CtaSection initial={initialCta} />
-      <FooterCopySection initial={initialFooter} />
-      <FooterNavSection initial={initialFooterNav} />
+      <div id="footer" className="scroll-mt-8">
+        <FooterCopySection initial={initialFooter} />
+        <FooterNavSection initial={initialFooterNav} />
+      </div>
     </div>
   );
 }
@@ -132,7 +147,7 @@ function NavSection({ initial }: { initial: NavItem[] }) {
   }
 
   return (
-    <AdminSection title="Header Navigation">
+    <AdminSection id="nav" title="Header Navigation">
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
