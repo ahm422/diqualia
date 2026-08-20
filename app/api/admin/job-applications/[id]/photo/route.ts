@@ -8,7 +8,7 @@ import { getDb, getEnv } from "@/lib/cloudflare-env";
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-const RESUME_KEY_RE = /^resumes\/[a-f0-9-]+\.(pdf|doc|docx)$/i;
+const PHOTO_KEY_RE = /^photos\/[a-f0-9-]+\.(jpg|jpeg|png|webp)$/i;
 
 export async function GET(
   _request: NextRequest,
@@ -25,7 +25,7 @@ export async function GET(
 
   const application = await prisma.jobApplication.findUnique({ where: { id } });
   if (!application) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  if (!RESUME_KEY_RE.test(application.resumeKey)) {
+  if (!application.photoKey || !PHOTO_KEY_RE.test(application.photoKey)) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
@@ -34,12 +34,12 @@ export async function GET(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const object = await env.R2.get(application.resumeKey);
+  const object = await env.R2.get(application.photoKey);
   if (!object) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const bytes = await object.arrayBuffer();
-  const ext = application.resumeKey.split(".").pop() ?? "bin";
-  const filename = `resume-${application.id}.${ext}`;
+  const ext = application.photoKey.split(".").pop() ?? "bin";
+  const filename = `photo-${application.id}.${ext}`;
   const contentType = object.httpMetadata?.contentType ?? "application/octet-stream";
 
   return new NextResponse(bytes, {

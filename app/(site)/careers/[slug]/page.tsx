@@ -22,17 +22,30 @@ function asStringList(value: unknown): string[] {
 }
 
 async function loadRole(slug: string) {
-  const prisma = await getDb();
-  const [opening, careerPage, related] = await Promise.all([
-    prisma.jobOpening.findFirst({ where: { slug, visible: true } }),
-    prisma.careerPage.findUnique({ where: { id: 1 } }),
-    prisma.jobOpening.findMany({
-      where: { visible: true, slug: { not: slug } },
-      orderBy: { order: "asc" },
-      take: 3,
-    }),
-  ]);
-  return { opening, careerPage, related };
+  try {
+    const prisma = await getDb();
+    const [opening, careerPage, related] = await Promise.all([
+      prisma.jobOpening.findFirst({ where: { slug, visible: true } }),
+      prisma.careerPage.findUnique({ where: { id: 1 } }),
+      prisma.jobOpening.findMany({
+        where: { visible: true, slug: { not: slug } },
+        orderBy: { order: "asc" },
+        take: 3,
+        select: {
+          id: true,
+          slug: true,
+          title: true,
+          department: true,
+          location: true,
+          type: true,
+        },
+      }),
+    ]);
+    return { opening, careerPage, related };
+  } catch (err) {
+    console.error("[careers] loadRole failed:", err);
+    return { opening: null, careerPage: null, related: [] };
+  }
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -149,7 +162,12 @@ export default async function JobOpeningPage({ params }: PageProps) {
           ) : null}
 
           <div id="apply" className="mt-16 scroll-mt-28">
-            <CareerApplyForm jobSlug={opening.slug} jobTitle={opening.title} headline={careerPage?.applyHeadline} />
+            <CareerApplyForm
+              jobSlug={opening.slug}
+              jobTitle={opening.title}
+              department={opening.department}
+              headline={careerPage?.applyHeadline}
+            />
           </div>
         </div>
 

@@ -77,3 +77,39 @@ export const jobApplicationPatchSchema = z.object({
   status: jobApplicationStatusEnum,
 });
 export type JobApplicationPatch = z.infer<typeof jobApplicationPatchSchema>;
+
+/** Admin list/detail payload. Raw `cnic` is null unless the caller has applications.pii. */
+export type JobApplicationAdminView = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  jobOpeningId: number | null;
+  jobTitle: string;
+  coverNote: string | null;
+  resumeKey: string;
+  photoKey: string | null;
+  status: string;
+  submittedAt: Date | string;
+  fatherOrHusbandName: string | null;
+  dateOfBirth: string | null;
+  gender: string | null;
+  maritalStatus: string | null;
+  cnic: string | null;
+  cnicMasked: string;
+  nationality: string | null;
+  currentAddress: string | null;
+  city: string | null;
+  highestQualification: string | null;
+  fieldOfStudy: string | null;
+  institutionName: string | null;
+  yearOfCompletion: number | null;
+  yearsOfExperience: number | null;
+  currentEmployer: string | null;
+  currentJobTitle: string | null;
+  keySkills: string | null;
+  noticePeriodDays: number | null;
+  expectedSalary: number | null;
+  availableFrom: string | null;
+  declarationAccepted: boolean;
+};

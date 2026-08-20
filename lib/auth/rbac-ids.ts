@@ -1,4 +1,4 @@
-/** Fixed UUIDs from d1/migrations/0007_rbac.sql — keep in sync. */
+/** Fixed UUIDs from d1/migrations/0007_rbac.sql and 0008_career_application_fields.sql — keep in sync. */
 
 export const PERMISSION_IDS = {
   "content.create": "11111111-1111-4111-8111-111111111001",
@@ -8,6 +8,7 @@ export const PERMISSION_IDS = {
   "users.manage": "11111111-1111-4111-8111-111111111005",
   "users.delete": "11111111-1111-4111-8111-111111111006",
   "roles.manage": "11111111-1111-4111-8111-111111111007",
+  "applications.pii": "11111111-1111-4111-8111-111111111008",
 } as const;
 
 export const ROLE_IDS = {

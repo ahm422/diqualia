@@ -6,11 +6,9 @@
   // Confirmed (Phase 1/4 — do not change unless reprovisioning):
   //   account_id, database_name, database_id, bucket_name, R2_PUBLIC_URL
   //
-  // Swap at Phase 9.7 (DNS cutover — uncomment when zone is ready):
-  //   "routes": [
-  //     { "pattern": "diqualia.com/*", "zone_name": "diqualia.com" }
-  //   ]
-  // Alternative: bind custom domain via Cloudflare dashboard after deploy.
+  // Custom domains (apex was dashboard-bound at Phase 9.7). www must be
+  // listed too — Custom Domains are exact-host matches, so www.diqualia.com
+  // does not inherit the apex Worker. Cloudflare creates DNS + certs.
   //
   // Vars vs secrets (production):
   //   vars (wrangler.jsonc):     R2_PUBLIC_URL, NODE_ENV
@@ -27,6 +25,7 @@
   // Must match existing dashboard Worker (diqualia-web) so deploy updates in place.
   "name": "diqualia-web",
   "account_id": "YOUR_CLOUDFLARE_ACCOUNT_ID",
+  "workers_dev": true,
   "compatibility_date": "2026-07-01",
   "compatibility_flags": ["nodejs_compat"],
   "main": ".open-next/worker.js",
@@ -79,6 +78,10 @@
     "NODE_ENV": "production",
     "R2_PUBLIC_URL": "https://pub-your-r2-bucket-id.r2.dev"
   },
+  "routes": [
+    { "pattern": "diqualia.com", "custom_domain": true },
+    { "pattern": "www.diqualia.com", "custom_domain": true }
+  ],
   // This host disables IPv6 on loopback (`net.ipv6.conf.lo.disable_ipv6=1`).
   // workerd/miniflare default `localhost` tries [::1] and fails with:
   //   ::bind(...): Cannot assign requested address; toString() = [::1]:0

@@ -10,6 +10,7 @@ export const PERMISSION_KEYS = [
   "users.manage",
   "users.delete",
   "roles.manage",
+  "applications.pii",
 ] as const;
 
 export type PermissionKey = (typeof PERMISSION_KEYS)[number];
