@@ -86,6 +86,7 @@ export default async function CareersPage() {
   return (
     <div>
       <section
+        id="hero"
         className="relative overflow-hidden border-b"
         style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}
       >
@@ -144,7 +145,7 @@ export default async function CareersPage() {
         </Container>
       </section>
 
-      <section className="diq-sectionY" style={{ background: "var(--diq_ink)" }}>
+      <section id="culture" className="diq-sectionY" style={{ background: "var(--diq_ink)" }}>
         <Container>
           <Eyebrow>{page.cultureEyebrow}</Eyebrow>
           <h2
@@ -162,7 +163,7 @@ export default async function CareersPage() {
             {page.cultureBody}
           </p>
           {benefits.length > 0 ? (
-            <ul className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-2">
+            <ul id="benefits" className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-2">
               {benefits.map((item) => (
                 <li
                   key={item}
@@ -247,6 +248,7 @@ export default async function CareersPage() {
       </section>
 
       <section
+        id="apply"
         className="border-t"
         style={{
           background: "var(--bg-elev)",

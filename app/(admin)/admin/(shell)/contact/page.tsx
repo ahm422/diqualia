@@ -1,22 +1,17 @@
-import { requireAdmin } from "@/lib/auth/require-admin";
-import { getDb } from "@/lib/cloudflare-env";
-import { AdminPageHeader } from "@/components/admin";
+import { redirectAdminSection } from "@/lib/admin/section-redirect";
 
-import { ContactPageEditor } from "./ContactPageEditor";
+const CONTACT_SECTIONS = {
+  hero: "/admin/contact/hero",
+  "email-card": "/admin/contact/email-card",
+  "what-to-include": "/admin/contact/what-to-include",
+  expectation: "/admin/contact/expectation",
+} as const;
 
-export default async function ContactAdminPage() {
-  const prisma = await getDb();
-  await requireAdmin();
-
-  const contactPage = await prisma.contactPage.findUnique({ where: { id: 1 } });
-
-  return (
-    <div>
-      <AdminPageHeader
-        title="Contact Page"
-        description="Hero, email card, What to Include list, and Expectation"
-      />
-      <ContactPageEditor initialData={contactPage} />
-    </div>
-  );
+export default async function ContactAdminRedirect({
+  searchParams,
+}: {
+  searchParams: Promise<{ section?: string }>;
+}) {
+  const { section } = await searchParams;
+  redirectAdminSection(CONTACT_SECTIONS, section, "hero");
 }

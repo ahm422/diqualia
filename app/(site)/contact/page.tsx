@@ -42,7 +42,7 @@ export default async function ContactPage() {
 
   return (
     <div>
-      <section className="relative overflow-hidden border-b" style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
+      <section id="hero" className="relative overflow-hidden border-b" style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0"
@@ -80,7 +80,7 @@ export default async function ContactPage() {
       <Container as="section" className="py-20">
         <div className="grid grid-cols-1 items-start gap-14 md:grid-cols-2 md:gap-x-16 md:gap-y-14 xl:grid-cols-12 xl:gap-10">
           <div className="contents md:flex md:flex-col md:gap-10 xl:contents">
-            <div className="xl:order-1 xl:col-span-3">
+            <div id="email-card" className="xl:order-1 xl:col-span-3">
               <div className="border p-10" style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)", background: "var(--bg-elev)" }}>
                 <div className="text-[10px] tracking-[0.22em] uppercase text-primary">{page.emailLabel}</div>
                 <div className="mt-6 text-[14px] text-foreground" style={{ fontFamily: "var(--font-display)", fontWeight: 400 }}>
@@ -114,7 +114,7 @@ export default async function ContactPage() {
               </div>
             </div>
 
-            <div className="order-3 md:order-none xl:order-3 xl:col-span-4">
+            <div id="what-to-include" className="order-3 md:order-none xl:order-3 xl:col-span-4">
             <Eyebrow>What to include</Eyebrow>
             <div
               className="mt-4 text-foreground"
@@ -155,7 +155,7 @@ export default async function ContactPage() {
         </div>
       </Container>
 
-      <section className="border-t" style={{ background: "var(--bg-elev)", borderTopColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
+      <section id="expectation" className="border-t" style={{ background: "var(--bg-elev)", borderTopColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
         <Container className="py-20 text-center">
           <Eyebrow center>{page.expectationEyebrow}</Eyebrow>
           <p

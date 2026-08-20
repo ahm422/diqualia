@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import {
@@ -8,140 +8,11 @@ import {
   AdminField,
   AdminInput,
   AdminTextarea,
-  AdminSaveButton,
-  useAdminSave,
-  useScrollToSection,
 } from "@/components/admin";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+import type { ServiceItem, ServiceSection } from "../types";
 
-type ServicesPageData = {
-  id: number;
-  eyebrow: string; headline: string; body: string;
-  stat1Value: string; stat1Label: string;
-  stat2Value: string; stat2Label: string;
-  stat3Value: string; stat3Label: string;
-  stat4Value: string; stat4Label: string;
-  ctaEyebrow: string; ctaHeadline: string; ctaBody: string;
-  ctaBtn1Label: string; ctaBtn1Href: string; ctaEmailHref: string;
-} | null;
-
-type ServiceItem = {
-  id: number; sectionId: number;
-  groupLabel: string | null; title: string; body: string | null; order: number;
-};
-
-type ServiceSection = {
-  id: number; tabId: string; order: number;
-  eyebrow: string; title: string; body: string;
-  cardTitle: string | null; cardBody: string | null;
-  items: ServiceItem[];
-};
-
-type Props = {
-  initialPage: ServicesPageData;
-  initialSections: ServiceSection[];
-};
-
-// ─── Main editor ─────────────────────────────────────────────────────────────
-
-export function ServicesPageEditor(props: Props) {
-  return (
-    <Suspense fallback={null}>
-      <ServicesPageEditorInner {...props} />
-    </Suspense>
-  );
-}
-
-function ServicesPageEditorInner({ initialPage, initialSections }: Props) {
-  useScrollToSection();
-
-  return (
-    <div>
-      <div id="intro" className="scroll-mt-8">
-        <HeroBlock initial={initialPage} />
-        <CtaBlock initial={initialPage} />
-      </div>
-      <SectionsBlock initial={initialSections} />
-    </div>
-  );
-}
-
-// ─── Block A: Hero ────────────────────────────────────────────────────────────
-
-function HeroBlock({ initial }: { initial: ServicesPageData }) {
-  const [f, setF] = useState({
-    eyebrow: initial?.eyebrow ?? "",
-    headline: initial?.headline ?? "",
-    body: initial?.body ?? "",
-    stat1Value: initial?.stat1Value ?? "",
-    stat1Label: initial?.stat1Label ?? "",
-    stat2Value: initial?.stat2Value ?? "",
-    stat2Label: initial?.stat2Label ?? "",
-    stat3Value: initial?.stat3Value ?? "",
-    stat3Label: initial?.stat3Label ?? "",
-    stat4Value: initial?.stat4Value ?? "",
-    stat4Label: initial?.stat4Label ?? "",
-  });
-  const set = (key: keyof typeof f) => (v: string) => setF((p) => ({ ...p, [key]: v }));
-  const { save, saving } = useAdminSave("/api/admin/services-page");
-
-  return (
-    <AdminSection title="Hero">
-      <AdminField label="Eyebrow"><AdminInput value={f.eyebrow} onChange={set("eyebrow")} placeholder="Our Intelligence Services" /></AdminField>
-      <AdminField label="Headline"><AdminInput value={f.headline} onChange={set("headline")} placeholder="What We Do for You." /></AdminField>
-      <AdminField label="Body"><AdminTextarea value={f.body} onChange={set("body")} rows={3} /></AdminField>
-      <div className="mt-2 mb-2 text-xs uppercase tracking-widest text-[var(--diq_mid)]">Stats</div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        {([
-          ["stat1Value", "stat1Label", "6", "Core Services"],
-          ["stat2Value", "stat2Label", "94%", "Lead Quality Rate"],
-          ["stat3Value", "stat3Label", "3.8x", "Pipeline Growth"],
-          ["stat4Value", "stat4Label", "~21d", "First Qualified Lead"],
-        ] as const).map(([vk, lk, vp, lp]) => (
-          <div key={vk} className="rounded border border-[var(--diq_border2)] p-3">
-            <AdminField label="Value"><AdminInput value={f[vk]} onChange={set(vk)} placeholder={vp} /></AdminField>
-            <AdminField label="Label"><AdminInput value={f[lk]} onChange={set(lk)} placeholder={lp} /></AdminField>
-          </div>
-        ))}
-      </div>
-      <AdminSaveButton onClick={() => save(f)} saving={saving} />
-    </AdminSection>
-  );
-}
-
-// ─── Block B: CTA Strip ───────────────────────────────────────────────────────
-
-function CtaBlock({ initial }: { initial: ServicesPageData }) {
-  const [f, setF] = useState({
-    ctaEyebrow: initial?.ctaEyebrow ?? "",
-    ctaHeadline: initial?.ctaHeadline ?? "",
-    ctaBody: initial?.ctaBody ?? "",
-    ctaBtn1Label: initial?.ctaBtn1Label ?? "",
-    ctaBtn1Href: initial?.ctaBtn1Href ?? "",
-    ctaEmailHref: initial?.ctaEmailHref ?? "",
-  });
-  const set = (key: keyof typeof f) => (v: string) => setF((p) => ({ ...p, [key]: v }));
-  const { save, saving } = useAdminSave("/api/admin/services-page");
-
-  return (
-    <AdminSection title="CTA Strip">
-      <AdminField label="Eyebrow"><AdminInput value={f.ctaEyebrow} onChange={set("ctaEyebrow")} placeholder="Begin With Intelligence" /></AdminField>
-      <AdminField label="Headline"><AdminInput value={f.ctaHeadline} onChange={set("ctaHeadline")} placeholder="Ready to Start?" /></AdminField>
-      <AdminField label="Body"><AdminTextarea value={f.ctaBody} onChange={set("ctaBody")} rows={2} /></AdminField>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <AdminField label="Button Label"><AdminInput value={f.ctaBtn1Label} onChange={set("ctaBtn1Label")} placeholder="Contact" /></AdminField>
-        <AdminField label="Button Href"><AdminInput value={f.ctaBtn1Href} onChange={set("ctaBtn1Href")} placeholder="/contact" /></AdminField>
-        <AdminField label="Email (mailto)"><AdminInput value={f.ctaEmailHref} onChange={set("ctaEmailHref")} placeholder="intel@diqualia.com" /></AdminField>
-      </div>
-      <AdminSaveButton onClick={() => save(f)} saving={saving} />
-    </AdminSection>
-  );
-}
-
-// ─── Block C+D: Sections accordion ───────────────────────────────────────────
-
-function SectionsBlock({ initial }: { initial: ServiceSection[] }) {
+export function SectionsEditor({ initial }: { initial: ServiceSection[] }) {
   const [sections, setSections] = useState<ServiceSection[]>(initial);
   const [openId, setOpenId] = useState<number | null>(null);
   const [newTabId, setNewTabId] = useState("");
@@ -208,7 +79,7 @@ function SectionsBlock({ initial }: { initial: ServiceSection[] }) {
   }
 
   return (
-    <AdminSection id="sections" title="Service Sections">
+    <AdminSection title="Service Sections">
       <div className="space-y-3">
         {sections.map((section, idx) => (
           <SectionPanel
@@ -246,8 +117,6 @@ function SectionsBlock({ initial }: { initial: ServiceSection[] }) {
   );
 }
 
-// ─── Section accordion panel ──────────────────────────────────────────────────
-
 type SectionPanelProps = {
   section: ServiceSection;
   idx: number;
@@ -276,7 +145,6 @@ function SectionPanel({ section, idx, total, isOpen, onToggle, onPatch, onMove, 
 
   return (
     <div className="rounded border border-[var(--diq_border2)]">
-      {/* Accordion header */}
       <div className="flex items-center gap-2 p-4">
         <button onClick={onToggle} className="flex flex-1 items-center gap-3 text-left">
           <span className="text-sm font-medium text-foreground">{section.title}</span>
@@ -290,7 +158,6 @@ function SectionPanel({ section, idx, total, isOpen, onToggle, onPatch, onMove, 
         </div>
       </div>
 
-      {/* Accordion body */}
       {isOpen && (
         <div className="border-t border-[var(--diq_border2)] p-4">
           <div className="grid gap-3 sm:grid-cols-2 mb-3">
@@ -336,15 +203,12 @@ function SectionPanel({ section, idx, total, isOpen, onToggle, onPatch, onMove, 
             </button>
           </div>
 
-          {/* Items */}
           <ItemsEditor section={section} onItemsChange={onItemsChange} />
         </div>
       )}
     </div>
   );
 }
-
-// ─── Items editor ─────────────────────────────────────────────────────────────
 
 function ItemsEditor({ section, onItemsChange }: { section: ServiceSection; onItemsChange: (items: ServiceItem[]) => void }) {
   const [items, setItems] = useState<ServiceItem[]>(section.items);

@@ -50,7 +50,7 @@ export default async function ProcessPage() {
 
   return (
     <div>
-      <section className="relative overflow-hidden border-b" style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
+      <section id="hero" className="relative overflow-hidden border-b" style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0"
@@ -86,7 +86,7 @@ export default async function ProcessPage() {
         </Container>
       </section>
 
-      <Container as="section" className="py-20">
+      <Container as="section" id="steps" className="py-20">
         <div className="grid grid-cols-1 gap-px md:grid-cols-3 xl:grid-cols-5" style={{ background: "color-mix(in oklab, var(--border) 100%, transparent)" }}>
           {steps.map((step) => (
             <div key={step.id} className="p-8" style={{ background: "var(--bg-elev)" }}>
@@ -107,7 +107,7 @@ export default async function ProcessPage() {
         </div>
       </Container>
 
-      <section className="border-t" style={{ background: "var(--bg)", borderTopColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
+      <section id="where-next" className="border-t" style={{ background: "var(--bg)", borderTopColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
         <Container className="py-20">
           <div className="grid grid-cols-1 gap-12 md:grid-cols-2 md:items-center">
             <div>

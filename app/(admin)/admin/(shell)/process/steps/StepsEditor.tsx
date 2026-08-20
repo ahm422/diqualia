@@ -1,119 +1,12 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { useState } from "react";
 
-import {
-  AdminSection,
-  AdminField,
-  AdminInput,
-  AdminTextarea,
-  AdminSaveButton,
-  useAdminSave,
-  useAdminSectionTab,
-} from "@/components/admin";
+import { AdminSection } from "@/components/admin";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+import type { ProcessStepData } from "../types";
 
-type ProcessPageData = {
-  id: number;
-  eyebrow: string;
-  headlineLine1: string;
-  headlineLine2: string;
-  headlineLine3: string;
-  body: string;
-  whereNextEyebrow: string;
-  whereNextTitle1: string;
-  whereNextTitle2: string;
-  whereNextBody: string;
-} | null;
-
-type ProcessStepData = {
-  id: number;
-  stepLabel: string;
-  stepNumber: string;
-  title: string;
-  body: string;
-  order: number;
-};
-
-type Props = {
-  initialPage: ProcessPageData;
-  initialSteps: ProcessStepData[];
-};
-
-// ─── Main editor ─────────────────────────────────────────────────────────────
-
-const PROCESS_TABS = ["hero", "steps", "where-next"] as const;
-type Tab = (typeof PROCESS_TABS)[number];
-
-export function ProcessPageEditor(props: Props) {
-  return (
-    <Suspense fallback={null}>
-      <ProcessPageEditorInner {...props} />
-    </Suspense>
-  );
-}
-
-function ProcessPageEditorInner({ initialPage, initialSteps }: Props) {
-  const { activeTab, setTab } = useAdminSectionTab(PROCESS_TABS, "hero");
-
-  const tabs: { id: Tab; label: string }[] = [
-    { id: "hero", label: "Hero" },
-    { id: "steps", label: "Steps" },
-    { id: "where-next", label: "Where Next" },
-  ];
-
-  return (
-    <div>
-      <div className="mb-6 flex gap-2 border-b border-[var(--diq_border)] pb-4">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            onClick={() => setTab(tab.id)}
-            className={`rounded px-4 py-2 text-xs uppercase tracking-widest transition-colors ${
-              activeTab === tab.id
-                ? "border border-[var(--gold)] text-[var(--gold)]"
-                : "border border-[var(--diq_border)] text-[var(--diq_mid)] hover:text-foreground"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {activeTab === "hero" && <HeroSection initial={initialPage} />}
-      {activeTab === "steps" && <StepsSection initial={initialSteps} />}
-      {activeTab === "where-next" && <WhereNextSection initial={initialPage} />}
-    </div>
-  );
-}
-
-// ─── Hero tab ─────────────────────────────────────────────────────────────────
-
-function HeroSection({ initial }: { initial: ProcessPageData }) {
-  const [eyebrow, setEyebrow] = useState(initial?.eyebrow ?? "");
-  const [headlineLine1, setHeadlineLine1] = useState(initial?.headlineLine1 ?? "");
-  const [headlineLine2, setHeadlineLine2] = useState(initial?.headlineLine2 ?? "");
-  const [headlineLine3, setHeadlineLine3] = useState(initial?.headlineLine3 ?? "");
-  const [body, setBody] = useState(initial?.body ?? "");
-  const { save, saving } = useAdminSave("/api/admin/process-page");
-
-  return (
-    <AdminSection title="Hero">
-      <AdminField label="Eyebrow"><AdminInput value={eyebrow} onChange={setEyebrow} placeholder="How We Work" /></AdminField>
-      <AdminField label="Headline line 1"><AdminInput value={headlineLine1} onChange={setHeadlineLine1} placeholder="Research." /></AdminField>
-      <AdminField label="Headline line 2 (italic)"><AdminInput value={headlineLine2} onChange={setHeadlineLine2} placeholder="Precision." /></AdminField>
-      <AdminField label="Headline line 3"><AdminInput value={headlineLine3} onChange={setHeadlineLine3} placeholder="Results." /></AdminField>
-      <AdminField label="Body"><AdminTextarea value={body} onChange={setBody} rows={4} placeholder="We don't start with tactics…" /></AdminField>
-      <AdminSaveButton onClick={() => save({ eyebrow, headlineLine1, headlineLine2, headlineLine3, body })} saving={saving} />
-    </AdminSection>
-  );
-}
-
-// ─── Steps tab ────────────────────────────────────────────────────────────────
-
-function StepsSection({ initial }: { initial: ProcessStepData[] }) {
+export function StepsEditor({ initial }: { initial: ProcessStepData[] }) {
   const [steps, setSteps] = useState<ProcessStepData[]>(initial);
   const [newLabel, setNewLabel] = useState("");
   const [newNumber, setNewNumber] = useState("");
@@ -278,26 +171,6 @@ function StepsSection({ initial }: { initial: ProcessStepData[] }) {
           Add Step
         </button>
       </div>
-    </AdminSection>
-  );
-}
-
-// ─── Where Next tab ──────────────────────────────────────────────────────────
-
-function WhereNextSection({ initial }: { initial: ProcessPageData }) {
-  const [whereNextEyebrow, setWhereNextEyebrow] = useState(initial?.whereNextEyebrow ?? "");
-  const [whereNextTitle1, setWhereNextTitle1] = useState(initial?.whereNextTitle1 ?? "");
-  const [whereNextTitle2, setWhereNextTitle2] = useState(initial?.whereNextTitle2 ?? "");
-  const [whereNextBody, setWhereNextBody] = useState(initial?.whereNextBody ?? "");
-  const { save, saving } = useAdminSave("/api/admin/process-page");
-
-  return (
-    <AdminSection title="Where Next">
-      <AdminField label="Eyebrow"><AdminInput value={whereNextEyebrow} onChange={setWhereNextEyebrow} placeholder="Next" /></AdminField>
-      <AdminField label="Title line 1"><AdminInput value={whereNextTitle1} onChange={setWhereNextTitle1} placeholder="See what this looks like" /></AdminField>
-      <AdminField label="Title line 2"><AdminInput value={whereNextTitle2} onChange={setWhereNextTitle2} placeholder="in your market." /></AdminField>
-      <AdminField label="Body"><AdminTextarea value={whereNextBody} onChange={setWhereNextBody} rows={4} placeholder="We'll run a short discovery call…" /></AdminField>
-      <AdminSaveButton onClick={() => save({ whereNextEyebrow, whereNextTitle1, whereNextTitle2, whereNextBody })} saving={saving} />
     </AdminSection>
   );
 }

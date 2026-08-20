@@ -1,22 +1,16 @@
-import { requireAdmin } from "@/lib/auth/require-admin";
-import { getDb } from "@/lib/cloudflare-env";
-import { AdminPageHeader } from "@/components/admin";
+import { redirectAdminSection } from "@/lib/admin/section-redirect";
 
-import { ProcessPageEditor } from "./ProcessPageEditor";
+const PROCESS_SECTIONS = {
+  hero: "/admin/process/hero",
+  steps: "/admin/process/steps",
+  "where-next": "/admin/process/where-next",
+} as const;
 
-export default async function ProcessPage() {
-  const prisma = await getDb();
-  await requireAdmin();
-
-  const [initialPage, initialSteps] = await Promise.all([
-    prisma.processPage.findUnique({ where: { id: 1 } }),
-    prisma.processStep.findMany({ orderBy: { order: "asc" } }),
-  ]);
-
-  return (
-    <div>
-      <AdminPageHeader title="How We Work" description="Page hero, process steps, and Where Next section" />
-      <ProcessPageEditor initialPage={initialPage} initialSteps={initialSteps} />
-    </div>
-  );
+export default async function ProcessAdminRedirect({
+  searchParams,
+}: {
+  searchParams: Promise<{ section?: string }>;
+}) {
+  const { section } = await searchParams;
+  redirectAdminSection(PROCESS_SECTIONS, section, "hero");
 }

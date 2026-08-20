@@ -108,6 +108,7 @@ export function ServicesAccordion({ sections }: { sections: AccordionSection[] }
 
   return (
     <section
+      id="sections"
       className="border-b"
       style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}
     >
