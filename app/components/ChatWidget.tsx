@@ -1,14 +1,221 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { Eraser, Send, X } from "lucide-react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type FormEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type RefObject,
+} from "react";
 
 import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { BrandLogo } from "./BrandLogo";
 
 type ChatMessage = {
   role: "user" | "assistant";
   content: string;
 };
+
+const NAV_COLLAPSE_MQ = "(max-width: 960px)";
+
+const SUGGESTIONS = [
+  { label: "Services", text: "What services does DiQualia offer?" },
+  { label: "Industries", text: "Which industries do you work with?" },
+  { label: "How we work", text: "How does DiQualia work with clients?" },
+] as const;
+
+function subscribeNavCollapse(onStoreChange: () => void) {
+  const mq = window.matchMedia(NAV_COLLAPSE_MQ);
+  mq.addEventListener("change", onStoreChange);
+  return () => mq.removeEventListener("change", onStoreChange);
+}
+
+function getNavCollapsed() {
+  return window.matchMedia(NAV_COLLAPSE_MQ).matches;
+}
+
+function useIsNavCollapsed() {
+  return useSyncExternalStore(subscribeNavCollapse, getNavCollapsed, () => false);
+}
+
+type ChatPanelProps = {
+  listRef: RefObject<HTMLDivElement | null>;
+  inputRef: RefObject<HTMLTextAreaElement | null>;
+  messages: ChatMessage[];
+  streaming: boolean;
+  error: string | null;
+  input: string;
+  setInput: (value: string) => void;
+  onSubmit: (e: FormEvent) => void;
+  onKeyDown: (e: ReactKeyboardEvent<HTMLTextAreaElement>) => void;
+  onClear: () => void;
+  onClose: () => void;
+  onChip: (text: string) => void;
+};
+
+function ChatPanel({
+  listRef,
+  inputRef,
+  messages,
+  streaming,
+  error,
+  input,
+  setInput,
+  onSubmit,
+  onKeyDown,
+  onClear,
+  onClose,
+  onChip,
+}: ChatPanelProps) {
+  return (
+    <div className="flex h-full min-h-0 flex-col">
+      <div
+        className="flex items-center justify-between gap-3 border-b px-4 py-3"
+        style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}
+      >
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="diq-logo diq-logoLight shrink-0">
+            <BrandLogo variant="black" width={56} decorative />
+          </span>
+          <span className="diq-logo diq-logoDark shrink-0">
+            <BrandLogo variant="white" width={56} decorative />
+          </span>
+          <div className="min-w-0">
+            <div className="truncate text-[13px] font-medium tracking-[0.08em] text-foreground">
+              DiQualia
+            </div>
+            <div className="mt-0.5 truncate text-[11px] text-muted-foreground">
+              Assistant
+            </div>
+          </div>
+        </div>
+        <div className="flex shrink-0 items-center gap-1">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={onClear}
+            disabled={streaming || messages.length === 0}
+            aria-label="Clear chat"
+          >
+            <Eraser />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            aria-label="Close chat"
+          >
+            <X />
+          </Button>
+        </div>
+      </div>
+
+      <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
+        {messages.length === 0 ? (
+          <div>
+            <p className="text-[13px] leading-6 text-muted-foreground">
+              Ask about services, industries, or our process.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {SUGGESTIONS.map((chip) => (
+                <button
+                  key={chip.label}
+                  type="button"
+                  disabled={streaming}
+                  onClick={() => onChip(chip.text)}
+                  className="border px-3 py-1.5 text-[11px] uppercase tracking-[0.14em] text-foreground transition-colors hover:border-gold hover:text-gold disabled:opacity-50"
+                  style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}
+                >
+                  {chip.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          messages.map((m, i) => (
+            <div
+              key={`${m.role}-${i}`}
+              className={m.role === "user" ? "flex justify-end" : "flex justify-start"}
+            >
+              <div
+                className={`max-w-[85%] px-3 py-2 text-[13px] leading-6 ${
+                  m.role === "user" ? "bg-gold text-ink" : "text-foreground"
+                }`}
+                style={
+                  m.role === "assistant"
+                    ? {
+                        background: "var(--bg-elev)",
+                        border: "1px solid color-mix(in oklab, var(--border) 80%, transparent)",
+                      }
+                    : undefined
+                }
+              >
+                {m.content || (streaming && i === messages.length - 1 ? "…" : "")}
+              </div>
+            </div>
+          ))
+        )}
+        {error ? (
+          <p className="text-[12px] leading-6 text-muted-foreground" role="alert">
+            {error}
+          </p>
+        ) : null}
+      </div>
+
+      <form
+        onSubmit={onSubmit}
+        className="border-t px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+        style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}
+      >
+        <div className="flex items-end gap-2">
+          <label className="block min-w-0 flex-1">
+            <span className="sr-only">Message</span>
+            <textarea
+              ref={inputRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={onKeyDown}
+              rows={2}
+              maxLength={2000}
+              disabled={streaming}
+              placeholder="Ask a question…"
+              className="w-full resize-none border bg-transparent px-3 py-2 text-[13px] text-foreground outline-none"
+              style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}
+            />
+          </label>
+          <Button
+            type="submit"
+            variant="primary"
+            size="icon"
+            disabled={streaming || !input.trim()}
+            aria-label={streaming ? "Sending" : "Send message"}
+          >
+            <Send />
+          </Button>
+        </div>
+        <p className="mt-2 text-[11px] leading-5 text-muted-foreground">
+          For proposals or calls →{" "}
+          <Link href="/contact" className="text-primary underline-offset-2 hover:underline">
+            Contact
+          </Link>
+        </p>
+      </form>
+    </div>
+  );
+}
 
 export function ChatWidget() {
   const [open, setOpen] = useState(false);
@@ -18,6 +225,9 @@ export function ChatWidget() {
   const [error, setError] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const launcherRef = useRef<HTMLButtonElement>(null);
+  const wasOpen = useRef(false);
+  const isNavCollapsed = useIsNavCollapsed();
 
   useEffect(() => {
     if (!open) return;
@@ -29,6 +239,24 @@ export function ChatWidget() {
     if (open) inputRef.current?.focus();
   }, [open]);
 
+  useEffect(() => {
+    if (wasOpen.current && !open) {
+      launcherRef.current?.focus();
+    }
+    wasOpen.current = open;
+  }, [open]);
+
+  useEffect(() => {
+    if (!open || isNavCollapsed) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, isNavCollapsed]);
+
+  const close = useCallback(() => setOpen(false), []);
+
   function clearChat() {
     if (streaming) return;
     setMessages([]);
@@ -36,9 +264,8 @@ export function ChatWidget() {
     setInput("");
   }
 
-  async function sendMessage(e?: React.FormEvent) {
-    e?.preventDefault();
-    const text = input.trim();
+  async function sendUserText(raw: string) {
+    const text = raw.trim();
     if (!text || streaming) return;
 
     setError(null);
@@ -111,138 +338,82 @@ export function ChatWidget() {
     }
   }
 
-  function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+  function onSubmit(e: FormEvent) {
+    e.preventDefault();
+    void sendUserText(input);
+  }
+
+  function onKeyDown(e: ReactKeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      void sendMessage();
+      void sendUserText(input);
     }
   }
 
+  const panel = (
+    <ChatPanel
+      listRef={listRef}
+      inputRef={inputRef}
+      messages={messages}
+      streaming={streaming}
+      error={error}
+      input={input}
+      setInput={setInput}
+      onSubmit={onSubmit}
+      onKeyDown={onKeyDown}
+      onClear={clearChat}
+      onClose={close}
+      onChip={(text) => void sendUserText(text)}
+    />
+  );
+
   return (
-    <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3">
-      {open ? (
-        <div
-          className="flex w-[min(100vw-2.5rem,22rem)] flex-col overflow-hidden border shadow-sm"
-          style={{
-            borderColor: "color-mix(in oklab, var(--border) 80%, transparent)",
-            background: "var(--bg-elev)",
-            maxHeight: "min(70vh, 32rem)",
-          }}
-          role="dialog"
-          aria-label="DiQualia assistant"
-        >
-          <div
-            className="flex items-center justify-between gap-3 border-b px-4 py-3"
-            style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}
+    <>
+      {isNavCollapsed ? (
+        <Sheet open={open} onOpenChange={setOpen}>
+          <SheetContent
+            side="right"
+            hideClose
+            className="flex h-[100dvh] w-full flex-col gap-0 border-0 p-0 sm:max-w-none"
           >
-            <div>
-              <div className="text-[10px] tracking-[0.22em] uppercase text-primary">Assistant</div>
-              <div className="mt-1 text-[12px] text-muted-foreground">Ask about DiQualia</div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={clearChat}
-                disabled={streaming || messages.length === 0}
-              >
-                Clear
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={() => setOpen(false)}
-                aria-label="Close chat"
-              >
-                Close
-              </Button>
-            </div>
-          </div>
-
-          <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-4">
-            {messages.length === 0 ? (
-              <p className="text-[13px] leading-6 text-muted-foreground">
-                Ask about services, industries, or our process.
-              </p>
-            ) : (
-              messages.map((m, i) => (
-                <div
-                  key={`${m.role}-${i}`}
-                  className={m.role === "user" ? "text-right" : "text-left"}
-                >
-                  <div
-                    className={`inline-block max-w-[95%] px-3 py-2 text-[13px] leading-6 ${
-                      m.role === "user" ? "text-foreground" : "text-foreground"
-                    }`}
-                    style={
-                      m.role === "user"
-                        ? {
-                            border: "1px solid color-mix(in oklab, var(--gold) 45%, transparent)",
-                            background: "color-mix(in oklab, var(--gold) 8%, transparent)",
-                          }
-                        : {
-                            border: "1px solid color-mix(in oklab, var(--border) 80%, transparent)",
-                          }
-                    }
-                  >
-                    {m.content || (streaming && i === messages.length - 1 ? "…" : "")}
-                  </div>
-                </div>
-              ))
-            )}
-            {error ? (
-              <p className="text-[12px] leading-6 text-muted-foreground" role="alert">
-                {error}
-              </p>
-            ) : null}
-          </div>
-
-          <form
-            onSubmit={sendMessage}
-            className="border-t px-4 py-3"
-            style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}
-          >
-            <label className="block">
-              <span className="sr-only">Message</span>
-              <textarea
-                ref={inputRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={onKeyDown}
-                rows={2}
-                maxLength={2000}
-                disabled={streaming}
-                placeholder="Ask a question…"
-                className="w-full resize-none border bg-transparent px-3 py-2 text-[13px] text-foreground outline-none"
-                style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}
-              />
-            </label>
-            <div className="mt-2 flex items-center justify-between gap-3">
-              <p className="text-[11px] leading-5 text-muted-foreground">
-                For proposals or calls →{" "}
-                <Link href="/contact" className="text-primary underline-offset-2 hover:underline">
-                  Contact
-                </Link>
-              </p>
-              <Button type="submit" variant="secondary" size="sm" disabled={streaming || !input.trim()}>
-                {streaming ? "…" : "Send"}
-              </Button>
-            </div>
-          </form>
-        </div>
+            <SheetTitle className="sr-only">DiQualia assistant</SheetTitle>
+            <SheetDescription className="sr-only">Ask about DiQualia</SheetDescription>
+            {panel}
+          </SheetContent>
+        </Sheet>
       ) : null}
 
-      <Button
-        type="button"
-        variant="secondary"
-        onClick={() => setOpen((v) => !v)}
-        aria-label={open ? "Close chat assistant" : "Open chat assistant"}
-        aria-expanded={open}
-      >
-        {open ? "Chat" : "Ask DiQualia"}
-      </Button>
-    </div>
+      <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3">
+        {!isNavCollapsed && open ? (
+          <div
+            className="diq-fadeUp flex w-[min(100vw-2.5rem,22rem)] flex-col overflow-hidden border shadow-sm"
+            style={{
+              borderColor: "color-mix(in oklab, var(--border) 80%, transparent)",
+              background: "var(--bg-elev)",
+              maxHeight: "min(70vh, 32rem)",
+              height: "min(70vh, 32rem)",
+            }}
+            role="dialog"
+            aria-label="DiQualia assistant"
+          >
+            {panel}
+          </div>
+        ) : null}
+
+        {!(open && isNavCollapsed) ? (
+          <Button
+            ref={launcherRef}
+            type="button"
+            variant={open ? "ghost" : "secondary"}
+            size={open ? "icon" : "default"}
+            onClick={() => setOpen((v) => !v)}
+            aria-label={open ? "Close chat assistant" : "Open chat assistant"}
+            aria-expanded={open}
+          >
+            {open ? <X /> : "Ask DiQualia"}
+          </Button>
+        ) : null}
+      </div>
+    </>
   );
 }

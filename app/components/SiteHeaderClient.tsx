@@ -101,7 +101,7 @@ export function SiteHeaderClient({ navItems, mobileNavItems, cta, logoUrl, siteN
                   </Link>
                 ))}
                 {cta && (
-                  <Button asChild variant="secondary" size="sm">
+                  <Button asChild variant="primary" size="sm">
                     <Link href={cta.href}>{cta.label}</Link>
                   </Button>
                 )}
@@ -175,7 +175,7 @@ export function SiteHeaderClient({ navItems, mobileNavItems, cta, logoUrl, siteN
 
             {cta && (
               <div className="diq-sheetCta">
-                <Button asChild variant="secondary" className="w-full">
+                <Button asChild variant="primary" className="w-full">
                   <Link href={cta.href} onClick={() => setMenuOpen(false)}>
                     {cta.label}
                   </Link>

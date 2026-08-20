@@ -123,7 +123,7 @@ export function ContactLeadForm() {
       </div>
 
       <div className="mt-8 flex flex-wrap items-center gap-4">
-        <Button type="submit" variant="secondary" disabled={!canSubmit || state.status === "submitting"}>
+        <Button type="submit" variant="primary" disabled={!canSubmit || state.status === "submitting"}>
           {state.status === "submitting" ? "Sending…" : "Send"}
         </Button>
         <div className="text-[12px] leading-7 text-muted-foreground">

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
 import { Container } from "@/app/components/Container";
 import { getDb } from "@/lib/cloudflare-env";
@@ -107,19 +106,8 @@ export default async function StoryPage() {
 
   return (
     <div>
-      {/* Top back link */}
-      <Container className="diq-pageTop">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-[11px] tracking-[0.22em] uppercase no-underline"
-          style={{ color: "var(--text-faint)" }}
-        >
-          <span aria-hidden>←</span> Back to Home
-        </Link>
-      </Container>
-
       {/* HERO */}
-      <section className="relative flex min-h-[calc(100vh-var(--diq-heroTop))] flex-col items-center justify-center overflow-hidden pb-20 pt-6 text-center">
+      <section className="diq-pageTop relative flex min-h-[calc(100vh-var(--diq-heroTop))] flex-col items-center justify-center overflow-hidden pb-20 text-center">
         <div
           className="pointer-events-none absolute left-1/2 top-1/2 h-[520px] w-[720px] -translate-x-1/2 -translate-y-1/2"
           style={{
