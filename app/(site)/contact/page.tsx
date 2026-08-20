@@ -78,61 +78,79 @@ export default async function ContactPage() {
       </section>
 
       <Container as="section" className="py-20">
-        <div className="grid grid-cols-1 gap-14 md:grid-cols-2 md:gap-20">
-          <div className="border p-10" style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)", background: "var(--bg-elev)" }}>
-            <div className="text-[10px] tracking-[0.22em] uppercase text-primary">{page.emailLabel}</div>
-            <div className="mt-6 text-[14px] text-foreground" style={{ fontFamily: "var(--font-display)", fontWeight: 400 }}>
-              {page.emailType}
+        <div className="grid grid-cols-1 items-start gap-14 md:grid-cols-2 md:gap-x-16 md:gap-y-14 xl:grid-cols-12 xl:gap-10">
+          <div className="contents md:flex md:flex-col md:gap-10 xl:contents">
+            <div className="xl:order-1 xl:col-span-3">
+              <div className="border p-10" style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)", background: "var(--bg-elev)" }}>
+                <div className="text-[10px] tracking-[0.22em] uppercase text-primary">{page.emailLabel}</div>
+                <div className="mt-6 text-[14px] text-foreground" style={{ fontFamily: "var(--font-display)", fontWeight: 400 }}>
+                  {page.emailType}
+                </div>
+                <a href={`mailto:${page.email}`} className="mt-4 block no-underline">
+                  <span
+                    className="diq-ctaEmail"
+                    style={{ fontSize: "clamp(1.25rem, 3vw, 1.75rem)" }}
+                  >
+                    {page.email}
+                  </span>
+                </a>
+                <p className="mt-5 text-[12px] leading-7 text-muted-foreground">
+                  {page.emailCopy}
+                </p>
+              </div>
+
+              <div className="mt-10">
+                <div className="text-[10px] tracking-[0.22em] uppercase text-primary">After you submit</div>
+                <ol className="mt-4 space-y-3 text-[13px] leading-7 text-muted-foreground">
+                  {["You send context", "30-min discovery", "We reply with next steps"].map((step, idx) => (
+                    <li key={step} className="flex items-start gap-3">
+                      <span aria-hidden className="text-[11px] tracking-[0.18em] text-primary">
+                        {String(idx + 1).padStart(2, "0")}
+                      </span>
+                      <span>{step}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
             </div>
-            <a href={`mailto:${page.email}`} className="mt-4 block no-underline">
-              <span
-                className="diq-ctaEmail"
-                style={{ fontSize: "clamp(1.25rem, 3vw, 1.75rem)" }}
-              >
-                {page.email}
-              </span>
-            </a>
-            <p className="mt-5 text-[12px] leading-7 text-muted-foreground">
-              {page.emailCopy}
-            </p>
+
+            <div className="order-3 md:order-none xl:order-3 xl:col-span-4">
+            <Eyebrow>What to include</Eyebrow>
+            <div
+              className="mt-4 text-foreground"
+              style={{
+                fontFamily: "var(--font-display)",
+                fontWeight: 300,
+                fontSize: "clamp(2rem, 3.6vw, 3.1rem)",
+                lineHeight: 1.1,
+              }}
+            >
+              Make the first call
+              <br />
+              count.
+            </div>
+            <ul className="mt-8 space-y-3 text-[13px] leading-7 text-muted-foreground">
+              {whatToIncludeItems.map((item, idx) => (
+                <li key={idx} className="flex items-start gap-3">
+                  <span aria-hidden className="text-primary">→</span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-10 flex flex-wrap gap-4">
+              <Button asChild variant="secondary">
+                <Link href="/services">Services</Link>
+              </Button>
+              <Button asChild variant="secondary">
+                <Link href="/process">How We Work</Link>
+              </Button>
+            </div>
+            </div>
           </div>
 
-          <div>
+          <div className="order-2 md:order-none xl:order-2 xl:col-span-5">
             <ContactLeadForm />
-
-            <div className="mt-14">
-              <Eyebrow>What to include</Eyebrow>
-              <div
-                className="mt-4 text-foreground"
-                style={{
-                  fontFamily: "var(--font-display)",
-                  fontWeight: 300,
-                  fontSize: "clamp(2rem, 3.6vw, 3.1rem)",
-                  lineHeight: 1.1,
-                }}
-              >
-                Make the first call
-                <br />
-                count.
-              </div>
-              <ul className="mt-8 space-y-3 text-[13px] leading-7 text-muted-foreground">
-                {whatToIncludeItems.map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-3">
-                    <span aria-hidden className="text-primary">→</span>
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <div className="mt-10 flex flex-wrap gap-4">
-                <Button asChild variant="secondary">
-                  <Link href="/services">Services</Link>
-                </Button>
-                <Button asChild variant="secondary">
-                  <Link href="/process">How We Work</Link>
-                </Button>
-              </div>
-            </div>
           </div>
         </div>
       </Container>

@@ -325,6 +325,38 @@ body:has(a:hover) .diq-curR {
   .diq-fadeUp {
     animation: diq_fadeUp var(--diq-fade-dur, 0.8s) ease var(--diq-fade-delay, 0s) both;
   }
+
+  .diq-radixSheetOverlay[data-state="open"] {
+    animation: diq_sheetOverlayIn 200ms ease both;
+  }
+  .diq-radixSheetOverlay[data-state="closed"] {
+    animation: diq_sheetOverlayOut 180ms ease both;
+  }
+
+  .diq-radixSheetPanel[data-side="right"][data-state="open"] {
+    animation: diq_sheetInFromRight 320ms ease both;
+  }
+  .diq-radixSheetPanel[data-side="right"][data-state="closed"] {
+    animation: diq_sheetOutToRight 240ms ease both;
+  }
+  .diq-radixSheetPanel[data-side="left"][data-state="open"] {
+    animation: diq_sheetInFromLeft 320ms ease both;
+  }
+  .diq-radixSheetPanel[data-side="left"][data-state="closed"] {
+    animation: diq_sheetOutToLeft 240ms ease both;
+  }
+  .diq-radixSheetPanel[data-side="top"][data-state="open"] {
+    animation: diq_sheetInFromTop 320ms ease both;
+  }
+  .diq-radixSheetPanel[data-side="top"][data-state="closed"] {
+    animation: diq_sheetOutToTop 240ms ease both;
+  }
+  .diq-radixSheetPanel[data-side="bottom"][data-state="open"] {
+    animation: diq_sheetInFromBottom 320ms ease both;
+  }
+  .diq-radixSheetPanel[data-side="bottom"][data-state="closed"] {
+    animation: diq_sheetOutToBottom 240ms ease both;
+  }
 }
 
 .diq-gridDrift {
@@ -337,7 +369,9 @@ body:has(a:hover) .diq-curR {
   }
 
   .diq-fadeUp,
-  .diq-gridDrift {
+  .diq-gridDrift,
+  .diq-radixSheetOverlay,
+  .diq-radixSheetPanel {
     animation: none !important;
     opacity: 1;
     transform: none;
@@ -612,6 +646,46 @@ html.dark .diq-logoDark {
     opacity: 1;
     transform: translateY(0);
   }
+}
+@keyframes diq_sheetOverlayIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes diq_sheetOverlayOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+@keyframes diq_sheetInFromRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+@keyframes diq_sheetOutToRight {
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
+}
+@keyframes diq_sheetInFromLeft {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+@keyframes diq_sheetOutToLeft {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+@keyframes diq_sheetInFromTop {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
+}
+@keyframes diq_sheetOutToTop {
+  from { transform: translateY(0); }
+  to { transform: translateY(-100%); }
+}
+@keyframes diq_sheetInFromBottom {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+@keyframes diq_sheetOutToBottom {
+  from { transform: translateY(0); }
+  to { transform: translateY(100%); }
 }
 @keyframes diq_gridDrift {
   from {
@@ -1048,12 +1122,10 @@ html.dark .diq-proseMuted {
 
 .diq-homeHud {
   border: 1px solid var(--diq_border);
-  border-top: 2px solid var(--gold);
-  background: color-mix(in oklab, var(--diq_surface) 88%, transparent);
+  background: color-mix(in oklab, var(--diq_surface) 92%, transparent);
   box-shadow:
-    0 24px 64px color-mix(in oklab, var(--ink) 18%, transparent),
-    inset 0 1px 0 color-mix(in oklab, var(--gold) 12%, transparent);
-  animation: diq_homeFloat 7s ease-in-out infinite;
+    0 18px 48px color-mix(in oklab, var(--ink) 14%, transparent),
+    inset 0 1px 0 color-mix(in oklab, var(--gold) 10%, transparent);
 }
 
 @media (prefers-reduced-transparency: no-preference) {
