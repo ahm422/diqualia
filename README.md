@@ -41,7 +41,7 @@ For fast UI iteration you can also use `npm run dev` (Next only; no Worker bindi
 | Database | Cloudflare D1 + Prisma D1 adapter |
 | Storage | Cloudflare R2 |
 | Email | Cloudflare Email Service (`send_email` → `EMAIL`) |
-| Auth | Custom JWT (`jose`) + `bcryptjs` + `ADMIN_EMAIL` |
+| Auth | Custom JWT (`jose`) + `bcryptjs` + RBAC (seeded `super_admin` / `admin` / `editor`; `ADMIN_EMAIL` is bootstrap seed + notification recipient, not a login allowlist) |
 
 ## Deploy
 

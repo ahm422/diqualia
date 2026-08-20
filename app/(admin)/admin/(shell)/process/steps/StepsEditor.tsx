@@ -3,10 +3,13 @@
 import { useState } from "react";
 
 import { AdminSection } from "@/components/admin";
+import { useCan } from "@/app/(admin)/admin/AdminSessionProvider";
 
 import type { ProcessStepData } from "../types";
 
 export function StepsEditor({ initial }: { initial: ProcessStepData[] }) {
+  const canCreate = useCan("content.create");
+  const canDelete = useCan("content.delete");
   const [steps, setSteps] = useState<ProcessStepData[]>(initial);
   const [newLabel, setNewLabel] = useState("");
   const [newNumber, setNewNumber] = useState("");
@@ -116,12 +119,15 @@ export function StepsEditor({ initial }: { initial: ProcessStepData[] }) {
                 <button onClick={() => move(step.id, -1)} disabled={idx === 0} className="rounded px-1 text-[var(--diq_mid)] hover:text-foreground disabled:opacity-30 text-xs">↑</button>
                 <button onClick={() => move(step.id, 1)} disabled={idx === steps.length - 1} className="rounded px-1 text-[var(--diq_mid)] hover:text-foreground disabled:opacity-30 text-xs">↓</button>
               </div>
-              <button onClick={() => del(step.id)} className="ml-auto text-xs text-red-400 hover:text-red-300">Delete</button>
+              {canDelete && (
+                <button onClick={() => del(step.id)} className="ml-auto text-xs text-red-400 hover:text-red-300">Delete</button>
+              )}
             </div>
           </div>
         ))}
       </div>
 
+      {canCreate && (
       <div className="mt-4 border-t border-[var(--diq_border2)] pt-4">
         <div className="mb-3 text-xs uppercase tracking-widest text-[var(--diq_mid)]">Add step</div>
         <div className="mb-2 grid gap-2 sm:grid-cols-2">
@@ -171,6 +177,7 @@ export function StepsEditor({ initial }: { initial: ProcessStepData[] }) {
           Add Step
         </button>
       </div>
+      )}
     </AdminSection>
   );
 }

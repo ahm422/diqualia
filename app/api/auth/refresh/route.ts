@@ -21,10 +21,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!process.env.ADMIN_EMAIL || rotated.adminUser.email !== process.env.ADMIN_EMAIL) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   const accessToken = await signAdminToken({
     id: rotated.adminUser.id,
     email: rotated.adminUser.email,

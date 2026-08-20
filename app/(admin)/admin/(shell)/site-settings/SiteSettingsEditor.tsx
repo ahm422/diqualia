@@ -11,6 +11,7 @@ import {
   useAdminSave,
   useScrollToSection,
 } from "@/components/admin";
+import { useCan } from "@/app/(admin)/admin/AdminSessionProvider";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -84,6 +85,8 @@ function LogoSection({ initial }: { initial: SiteSettings }) {
 // ─── 2. Header Navigation ─────────────────────────────────────────────────────
 
 function NavSection({ initial }: { initial: NavItem[] }) {
+  const canCreate = useCan("content.create");
+  const canDelete = useCan("content.delete");
   const [items, setItems] = useState<NavItem[]>(initial);
   const [newHref, setNewHref] = useState("");
   const [newLabel, setNewLabel] = useState("");
@@ -186,7 +189,9 @@ function NavSection({ initial }: { initial: NavItem[] }) {
                   </div>
                 </td>
                 <td className="py-2">
-                  <button onClick={() => del(item.id)} className="text-xs text-red-400 hover:text-red-300">Delete</button>
+                  {canDelete && (
+                    <button onClick={() => del(item.id)} className="text-xs text-red-400 hover:text-red-300">Delete</button>
+                  )}
                 </td>
               </tr>
             ))}
@@ -194,6 +199,7 @@ function NavSection({ initial }: { initial: NavItem[] }) {
         </table>
       </div>
 
+      {canCreate && (
       <div className="mt-4 flex flex-wrap items-end gap-2 border-t border-[var(--diq_border2)] pt-4">
         <div>
           <label className="mb-1 block text-[11px] uppercase tracking-widest text-[var(--diq_mid)]">Label</label>
@@ -207,6 +213,7 @@ function NavSection({ initial }: { initial: NavItem[] }) {
           Add
         </button>
       </div>
+      )}
     </AdminSection>
   );
 }
@@ -261,6 +268,8 @@ function FooterCopySection({ initial }: { initial: FooterSettings }) {
 // ─── 5. Footer Navigation ─────────────────────────────────────────────────────
 
 function FooterNavSection({ initial }: { initial: FooterNavItem[] }) {
+  const canCreate = useCan("content.create");
+  const canDelete = useCan("content.delete");
   const [items, setItems] = useState<FooterNavItem[]>(initial);
   const [newHref, setNewHref] = useState("");
   const [newLabel, setNewLabel] = useState("");
@@ -371,7 +380,9 @@ function FooterNavSection({ initial }: { initial: FooterNavItem[] }) {
                     </div>
                   </td>
                   <td className="py-2">
-                    <button onClick={() => del(item.id)} className="text-xs text-red-400 hover:text-red-300">Delete</button>
+                    {canDelete && (
+                      <button onClick={() => del(item.id)} className="text-xs text-red-400 hover:text-red-300">Delete</button>
+                    )}
                   </td>
                 </tr>
               );
@@ -380,6 +391,7 @@ function FooterNavSection({ initial }: { initial: FooterNavItem[] }) {
         </table>
       </div>
 
+      {canCreate && (
       <div className="mt-4 flex flex-wrap items-end gap-2 border-t border-[var(--diq_border2)] pt-4">
         <div>
           <label className="mb-1 block text-[11px] uppercase tracking-widest text-[var(--diq_mid)]">Group</label>
@@ -400,6 +412,7 @@ function FooterNavSection({ initial }: { initial: FooterNavItem[] }) {
           Add
         </button>
       </div>
+      )}
     </AdminSection>
   );
 }

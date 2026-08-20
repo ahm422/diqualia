@@ -2,7 +2,7 @@ import "server-only";
 
 import { NextResponse } from "next/server";
 
-import { requireAdminApi } from "@/lib/auth/require-admin-api";
+import { requireAdminApi, requirePermissionApi } from "@/lib/auth/require-admin-api";
 import { getDb } from "@/lib/cloudflare-env";
 import { revalidatePage } from "@/lib/revalidate-site";
 import { storyPagePatchSchema } from "@/lib/schemas/admin/story";
@@ -18,7 +18,7 @@ export async function GET() {
 
 export async function PATCH(request: Request) {
   const prisma = await getDb();
-  const session = await requireAdminApi();
+  const session = await requirePermissionApi("content.edit");
   if (session instanceof NextResponse) return session;
 
   let body: unknown;

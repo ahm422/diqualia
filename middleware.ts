@@ -12,15 +12,15 @@ export async function middleware(request: NextRequest) {
   const token = getTokenFromRequest(request);
 
   // Next.js edge middleware inlines `process.env.*` at build time. Wrangler
-  // secrets (JWT_SECRET, ADMIN_EMAIL) exist only at Worker runtime, so JWT
-  // verify here often no-ops in production. Never treat a missing env var as
-  // a valid session (`undefined === undefined` caused /admin ↔ /admin/login).
+  // secrets (JWT_SECRET) exist only at Worker runtime, so JWT verify here often
+  // no-ops in production. Never treat a missing env var as a valid session
+  // (`undefined === undefined` caused /admin ↔ /admin/login). Do not query D1
+  // from middleware — requireAdmin loads the user + role on the server.
   let isValidAdmin = false;
-  const expectedEmail = process.env.ADMIN_EMAIL;
-  if (token && expectedEmail && process.env.JWT_SECRET) {
+  if (token && process.env.JWT_SECRET) {
     try {
-      const user = await verifyAdminToken(token);
-      isValidAdmin = user.email === expectedEmail;
+      await verifyAdminToken(token);
+      isValidAdmin = true;
     } catch {
       /* invalid or expired */
     }

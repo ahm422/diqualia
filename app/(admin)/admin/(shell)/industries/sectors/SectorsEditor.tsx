@@ -11,6 +11,7 @@ import {
   useAdminSave,
 } from "@/components/admin";
 import { slugify } from "@/lib/slugify";
+import { useCan } from "@/app/(admin)/admin/AdminSessionProvider";
 
 import {
   normalizeSector,
@@ -37,6 +38,8 @@ export function SectorsEditor({
   const [newName, setNewName] = useState("");
   const [adding, setAdding] = useState(false);
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  const canCreate = useCan("content.create");
+  const canDelete = useCan("content.delete");
 
   async function patchSector(id: number, data: Record<string, unknown>) {
     const res = await fetch(`/api/admin/industry-sectors/${id}`, {
@@ -133,7 +136,9 @@ export function SectorsEditor({
                 >
                   {expandedId === sector.id ? "Close" : "Edit page"}
                 </button>
-                <button type="button" onClick={() => del(sector.id)} className="text-xs text-red-400 hover:text-red-300 shrink-0">Delete</button>
+                {canDelete && (
+                  <button type="button" onClick={() => del(sector.id)} className="text-xs text-red-400 hover:text-red-300 shrink-0">Delete</button>
+                )}
               </div>
               {expandedId === sector.id && (
                 <SectorPagePanel
@@ -147,6 +152,7 @@ export function SectorsEditor({
           ))}
         </div>
 
+        {canCreate && (
         <div className="mt-4 border-t border-[var(--diq_border2)] pt-4 flex items-end gap-2">
           <div className="flex-1">
             <label className="mb-1 block text-[11px] uppercase tracking-widest text-[var(--diq_mid)]">New sector name</label>
@@ -166,6 +172,7 @@ export function SectorsEditor({
             Add
           </button>
         </div>
+        )}
       </AdminSection>
     </div>
   );

@@ -12,12 +12,15 @@ import {
   Settings,
 } from "lucide-react";
 
+import type { PermissionKey } from "@/lib/auth/session";
+
 export type NavLeafMatch = "exact" | "prefix" | "section";
 
 export type NavLeaf = {
   href: string;
   label: string;
   match?: NavLeafMatch;
+  permission?: PermissionKey;
 };
 
 export type NavGroup = {
@@ -127,6 +130,8 @@ export const ADMIN_NAV: NavGroup[] = [
       { href: "/admin/site-settings?section=site", label: "Site Settings" },
       { href: "/admin/site-settings?section=nav", label: "Nav Items" },
       { href: "/admin/site-settings?section=footer", label: "Footer" },
+      { href: "/admin/settings/users", label: "Users", permission: "users.manage" },
+      { href: "/admin/settings/roles", label: "Roles", permission: "roles.manage" },
     ],
   },
 ];
@@ -168,11 +173,23 @@ export function isLeafActive(
   return (matched ?? sectionLeaves[0]) === leaf;
 }
 
+export function filterAdminNav(groups: NavGroup[], permissions: PermissionKey[]): NavGroup[] {
+  return groups
+    .map((group) => ({
+      ...group,
+      children: group.children.filter(
+        (leaf) => !leaf.permission || permissions.includes(leaf.permission),
+      ),
+    }))
+    .filter((group) => group.children.length > 0);
+}
+
 export function findActiveGroupId(
   pathname: string,
   searchParams: Pick<URLSearchParams, "get">,
+  groups: NavGroup[] = ADMIN_NAV,
 ): string | null {
-  for (const group of ADMIN_NAV) {
+  for (const group of groups) {
     if (group.children.some((leaf) => isLeafActive(leaf, group, pathname, searchParams))) {
       return group.id;
     }

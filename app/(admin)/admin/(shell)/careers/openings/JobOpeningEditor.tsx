@@ -15,6 +15,7 @@ import {
 } from "@/components/admin";
 import { Button } from "@/components/ui/button";
 import { slugify } from "@/lib/slugify";
+import { useCan } from "@/app/(admin)/admin/AdminSessionProvider";
 
 const JOB_TYPES = ["Full-time", "Part-time", "Contract", "Internship"] as const;
 
@@ -88,6 +89,7 @@ function StringListField({
 export function JobOpeningEditor({ initial }: Props) {
   const router = useRouter();
   const isNew = !initial;
+  const canDelete = useCan("content.delete");
 
   const [title, setTitle] = useState(initial?.title ?? "");
   const [slug, setSlug] = useState(initial?.slug ?? "");
@@ -297,7 +299,7 @@ export function JobOpeningEditor({ initial }: Props) {
           ) : (
             <AdminSaveButton onClick={handleSave} saving={saving} />
           )}
-          {!isNew && (
+          {!isNew && canDelete && (
             <Button
               type="button"
               variant="destructive"

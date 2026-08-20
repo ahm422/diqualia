@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { useCan } from "@/app/(admin)/admin/AdminSessionProvider";
 import type { BlogPostData } from "./BlogPostEditor";
 
 function formatDate(value: string | Date | null | undefined): string {
@@ -20,6 +21,8 @@ function formatDate(value: string | Date | null | undefined): string {
 
 export function BlogPostsList({ initialPosts }: { initialPosts: BlogPostData[] }) {
   const router = useRouter();
+  const canCreate = useCan("content.create");
+  const canDelete = useCan("content.delete");
   const [posts, setPosts] = useState(initialPosts);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -49,12 +52,14 @@ export function BlogPostsList({ initialPosts }: { initialPosts: BlogPostData[] }
     return (
       <div className="rounded border border-[var(--diq_border)] px-6 py-12 text-center">
         <p className="text-sm text-[var(--diq_mid)]">No posts yet.</p>
-        <Link
-          href="/admin/blog/new"
-          className="mt-4 inline-block text-xs uppercase tracking-widest text-[var(--gold)] hover:underline"
-        >
-          Create the first post
-        </Link>
+        {canCreate && (
+          <Link
+            href="/admin/blog/new"
+            className="mt-4 inline-block text-xs uppercase tracking-widest text-[var(--gold)] hover:underline"
+          >
+            Create the first post
+          </Link>
+        )}
       </div>
     );
   }
@@ -112,14 +117,16 @@ export function BlogPostsList({ initialPosts }: { initialPosts: BlogPostData[] }
                   >
                     Edit
                   </Link>
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(post)}
-                    disabled={deletingId === post.id}
-                    className="text-xs text-red-400 hover:text-red-300 disabled:opacity-50"
-                  >
-                    {deletingId === post.id ? "…" : "Delete"}
-                  </button>
+                  {canDelete && (
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(post)}
+                      disabled={deletingId === post.id}
+                      className="text-xs text-red-400 hover:text-red-300 disabled:opacity-50"
+                    >
+                      {deletingId === post.id ? "…" : "Delete"}
+                    </button>
+                  )}
                 </div>
               </td>
             </tr>

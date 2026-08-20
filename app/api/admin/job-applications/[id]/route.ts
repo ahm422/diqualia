@@ -2,7 +2,7 @@ import "server-only";
 
 import { NextResponse, type NextRequest } from "next/server";
 
-import { requireAdminApi } from "@/lib/auth/require-admin-api";
+import { requireAdminApi, requirePermissionApi } from "@/lib/auth/require-admin-api";
 import { getDb } from "@/lib/cloudflare-env";
 import { jobApplicationPatchSchema } from "@/lib/schemas/admin/career";
 
@@ -32,7 +32,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const prisma = await getDb();
-  const session = await requireAdminApi();
+  const session = await requirePermissionApi("content.edit");
   if (session instanceof NextResponse) return session;
 
   const { id } = await params;

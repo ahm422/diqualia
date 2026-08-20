@@ -1,5 +1,5 @@
 import type { ExportPayload, ExportTableKey } from "./migration-types";
-import { SQL_TABLE_NAMES, rowToInsert } from "./sql-table-meta";
+import { SQL_TABLE_NAMES, rowToInsert, withAdminUserRole } from "./sql-table-meta";
 import { INSERT_ORDER, WIPE_ORDER } from "./table-order";
 import { assertRemoteSchema, countAllRemoteTables, execRemoteD1Sql, queryRemoteScalar } from "./d1-wrangler-remote";
 
@@ -20,7 +20,8 @@ export async function importRemoteTables(payload: ExportPayload) {
     const table = SQL_TABLE_NAMES[key];
     const rows = payload[key] as Record<string, unknown>[];
     for (const row of rows) {
-      statements.push(rowToInsert(table, row));
+      const prepared = key === "adminUsers" ? withAdminUserRole(row) : row;
+      statements.push(rowToInsert(table, prepared));
     }
     console.error(`queued ${key}: ${rows.length}`);
   }

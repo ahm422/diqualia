@@ -3,23 +3,23 @@ import "server-only";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { verifyAdminToken } from "./jwt";
-import { COOKIE_NAME } from "./session";
+import { loadAdminSessionFromToken } from "./load-admin-session";
+import { COOKIE_NAME, hasPermission, type AdminSession, type PermissionKey } from "./session";
 
-export async function requireAdmin() {
+export async function requireAdmin(): Promise<AdminSession> {
   const cookieStore = await cookies();
   const token = cookieStore.get(COOKIE_NAME)?.value;
 
   if (!token) redirect("/admin/login");
 
-  let payload: { sub: string; email: string };
-  try {
-    payload = await verifyAdminToken(token);
-  } catch {
-    redirect("/admin/login");
-  }
+  const session = await loadAdminSessionFromToken(token);
+  if (!session) redirect("/admin/login");
 
-  if (!process.env.ADMIN_EMAIL || payload.email !== process.env.ADMIN_EMAIL) redirect("/admin/login");
+  return session;
+}
 
-  return { id: payload.sub, email: payload.email };
+export async function requirePermission(key: PermissionKey): Promise<AdminSession> {
+  const session = await requireAdmin();
+  if (!hasPermission(session, key)) redirect("/admin/forbidden");
+  return session;
 }
