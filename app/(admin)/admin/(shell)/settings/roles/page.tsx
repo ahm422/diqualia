@@ -32,7 +32,7 @@ export default async function AdminRolesPage() {
             System roles are read-only. Custom roles change the permission matrix.
           </p>
         </div>
-        <Button asChild variant="secondary" className="shrink-0">
+        <Button asChild variant="secondary" size="admin" className="shrink-0">
           <Link href="/admin/settings/roles/new">New role</Link>
         </Button>
       </div>

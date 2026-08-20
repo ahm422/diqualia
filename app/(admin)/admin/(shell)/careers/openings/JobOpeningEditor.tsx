@@ -303,6 +303,7 @@ export function JobOpeningEditor({ initial }: Props) {
             <Button
               type="button"
               variant="destructive"
+              size="admin"
               className="mt-4"
               onClick={handleDelete}
               disabled={deleting}

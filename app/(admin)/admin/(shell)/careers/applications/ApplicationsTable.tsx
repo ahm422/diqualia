@@ -1,6 +1,10 @@
 "use client";
 
 import { Fragment, useState } from "react";
+import { useSearchParams } from "next/navigation";
+
+import { Badge } from "@/components/ui/badge";
+import { highlightRowRef } from "@/lib/highlight-row";
 
 const STATUSES = ["new", "reviewing", "rejected", "hired"] as const;
 
@@ -17,12 +21,22 @@ type Application = {
 
 type Props = {
   initialApplications: Application[];
+  initialStatus?: string;
 };
 
-export function ApplicationsTable({ initialApplications }: Props) {
+function statusVariant(status: string): "new" | "gold" | "default" | "read" {
+  if (status === "new") return "new";
+  if (status === "hired") return "gold";
+  if (status === "rejected") return "read";
+  return "default";
+}
+
+export function ApplicationsTable({ initialApplications, initialStatus = "" }: Props) {
+  const searchParams = useSearchParams();
+  const highlight = searchParams.get("highlight");
   const [rows, setRows] = useState(initialApplications);
   const [sort, setSort] = useState<"asc" | "desc">("desc");
-  const [status, setStatus] = useState<string>("");
+  const [status, setStatus] = useState(initialStatus);
   const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [downloading, setDownloading] = useState<string | null>(null);
@@ -66,7 +80,8 @@ export function ApplicationsTable({ initialApplications }: Props) {
   function toggleExpand(id: string) {
     setExpanded((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
   }
@@ -109,14 +124,14 @@ export function ApplicationsTable({ initialApplications }: Props) {
         <button
           onClick={toggleSort}
           disabled={loading}
-          className="rounded border border-[var(--diq_border)] px-3 py-1.5 text-xs uppercase tracking-widest text-[var(--diq_mid)] hover:border-[var(--gold)] hover:text-[var(--gold)] disabled:opacity-50"
+          className="min-h-11 rounded border border-[var(--diq_border)] px-3 py-1.5 text-xs uppercase tracking-widest text-[var(--diq_mid)] hover:border-[var(--gold)] hover:text-[var(--gold)] disabled:opacity-50"
         >
           Date {sort === "desc" ? "↓ newest" : "↑ oldest"}
         </button>
         <select
           value={status}
           onChange={(e) => changeStatusFilter(e.target.value)}
-          className="rounded border border-[var(--diq_border)] bg-[var(--diq_deep)] px-3 py-1.5 text-xs uppercase tracking-widest text-[var(--diq_mid)] focus:outline-none focus:ring-1 focus:ring-[var(--gold)]"
+          className="min-h-11 rounded border border-[var(--diq_border)] bg-[var(--diq_deep)] px-3 py-1.5 text-xs uppercase tracking-widest text-[var(--diq_mid)] focus:outline-none focus:ring-1 focus:ring-[var(--gold)]"
         >
           <option value="">All statuses</option>
           {STATUSES.map((s) => (
@@ -145,14 +160,25 @@ export function ApplicationsTable({ initialApplications }: Props) {
               </tr>
             </thead>
             <tbody>
-              {rows.map((row) => (
-              <Fragment key={row.id}>
-                  <tr key={row.id} className="border-b border-[var(--diq_border)] hover:bg-[var(--diq_panel)]">
+              {rows.map((row) => {
+                const isHighlighted = highlight === row.id;
+                const isExpanded = expanded.has(row.id) || isHighlighted;
+                return (
+                <Fragment key={row.id}>
+                  <tr
+                    id={`application-${row.id}`}
+                    ref={isHighlighted ? highlightRowRef : undefined}
+                    tabIndex={-1}
+                    className="border-b border-[var(--diq_border)] outline-none hover:bg-[var(--diq_panel)]"
+                    style={{
+                      boxShadow: isHighlighted ? "inset 3px 0 0 var(--gold)" : undefined,
+                    }}
+                  >
                     <td className="px-4 py-3">
                       <button
                         type="button"
                         onClick={() => toggleExpand(row.id)}
-                        className="text-left text-foreground hover:text-[var(--gold)]"
+                        className="min-h-11 text-left text-foreground hover:text-[var(--gold)]"
                       >
                         {row.name}
                       </button>
@@ -161,41 +187,43 @@ export function ApplicationsTable({ initialApplications }: Props) {
                     <td className="px-4 py-3 text-[var(--diq_mid)]">{row.jobTitle}</td>
                     <td className="px-4 py-3 text-[var(--diq_mid)]">{formatDate(row.submittedAt)}</td>
                     <td className="px-4 py-3">
-                      <select
-                        value={row.status}
-                        onChange={(e) => updateStatus(row, e.target.value)}
-                        className="rounded border border-[var(--diq_border)] bg-[var(--diq_deep)] px-2 py-1 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-[var(--gold)]"
-                      >
-                        {STATUSES.map((s) => (
-                          <option key={s} value={s}>
-                            {s}
-                          </option>
-                        ))}
-                      </select>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Badge variant={statusVariant(row.status)}>{row.status}</Badge>
+                        <select
+                          value={row.status}
+                          onChange={(e) => updateStatus(row, e.target.value)}
+                          className="min-h-11 rounded border border-[var(--diq_border)] bg-[var(--diq_deep)] px-2 py-1 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-[var(--gold)]"
+                        >
+                          {STATUSES.map((s) => (
+                            <option key={s} value={s}>
+                              {s}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                     </td>
                     <td className="px-4 py-3 text-right">
                       <button
                         type="button"
                         onClick={() => downloadResume(row.id)}
                         disabled={downloading === row.id}
-                        className="text-xs uppercase tracking-widest text-[var(--gold)] hover:underline disabled:opacity-50"
+                        className="min-h-11 text-xs uppercase tracking-widest text-[var(--gold)] hover:underline disabled:opacity-50"
                       >
                         {downloading === row.id ? "…" : "Download resume"}
                       </button>
                     </td>
                   </tr>
-                  {expanded.has(row.id) ? (
+                  {isExpanded ? (
                     <tr className="border-b border-[var(--diq_border)] bg-[var(--diq_panel)]">
                       <td colSpan={6} className="px-4 py-4 text-sm text-[var(--diq_mid)]">
                         <div>Phone: {row.phone || "—"}</div>
-                        <div className="mt-2 whitespace-pre-wrap">
-                          Cover note: {row.coverNote || "—"}
-                        </div>
+                        <div className="mt-2 whitespace-pre-wrap">Cover note: {row.coverNote || "—"}</div>
                       </td>
                     </tr>
                   ) : null}
-              </Fragment>
-            ))}
+                </Fragment>
+                );
+              })}
             </tbody>
           </table>
         </div>

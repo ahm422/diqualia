@@ -82,6 +82,8 @@ export function ServicesAccordion({ sections }: { sections: AccordionSection[] }
   }, [ids]);
 
   useLayoutEffect(() => {
+    // Hash may only be read after mount; this is an external URL sync, not derived React state.
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- open section from location.hash
     openFromHash();
   }, [openFromHash]);
 

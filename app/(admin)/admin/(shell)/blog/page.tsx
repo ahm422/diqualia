@@ -26,7 +26,7 @@ export default async function BlogAdminPage() {
           </p>
         </div>
         {canCreate && (
-          <Button asChild variant="secondary" className="shrink-0">
+          <Button asChild variant="secondary" size="admin" className="shrink-0">
             <Link href="/admin/blog/new">New post</Link>
           </Button>
         )}

@@ -5,7 +5,7 @@ import { z } from "zod";
 
 import { requirePermissionApi } from "@/lib/auth/require-admin-api";
 import { getEnv } from "@/lib/cloudflare-env";
-import { checkRateLimit } from "@/lib/rateLimit";
+import { checkRateLimit, rateLimitResponse } from "@/lib/rateLimit";
 import { getStorage, publicUrl } from "@/lib/storage";
 
 // Allowed MIME types → file extension
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
 
   // 2. Rate limit — 20 uploads per minute per admin
   const rl = checkRateLimit({ key: `upload:${session.id}`, limit: 20, windowMs: 60_000 });
-  if (!rl.ok) return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  if (!rl.ok) return rateLimitResponse(rl.resetAtMs);
 
   // 3. Parse multipart body
   let formData: FormData;

@@ -1,27 +1,13 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { z } from "zod";
 
 import { getDb, getEmail, getEnv } from "@/lib/cloudflare-env";
-import { checkRateLimit } from "@/lib/rateLimit";
+import { checkRateLimit, rateLimitResponse } from "@/lib/rateLimit";
+import {
+  CareerApplyFieldsSchema,
+  classifyResume,
+  MIME_BY_EXT,
+} from "@/lib/schemas/public/career-apply";
 import { getStorage } from "@/lib/storage";
-
-const MAX_BYTES = 5 * 1024 * 1024;
-
-const MIME_BY_EXT: Record<string, string[]> = {
-  pdf: ["application/pdf"],
-  doc: ["application/msword"],
-  docx: ["application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
-};
-
-const FieldsSchema = z.object({
-  name: z.string().trim().min(1).max(200),
-  email: z.string().trim().email().max(254),
-  phone: z.string().trim().max(50).optional().or(z.literal("")),
-  jobSlug: z.string().trim().max(200).optional().or(z.literal("")),
-  jobOpeningId: z.string().trim().max(20).optional().or(z.literal("")),
-  coverNote: z.string().trim().max(10000).optional().or(z.literal("")),
-  website: z.string().trim().max(200).optional().or(z.literal("")),
-});
 
 function getClientIp(request: NextRequest) {
   const xff = request.headers.get("x-forwarded-for");
@@ -33,27 +19,11 @@ function esc(s: string) {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-function resumeExtension(file: File): string | null {
-  const name = file.name.toLowerCase();
-  const match = name.match(/\.([a-z0-9]+)$/);
-  const ext = match?.[1] ?? "";
-  if (!(ext in MIME_BY_EXT)) return null;
-
-  const mime = (file.type || "").toLowerCase();
-  if (!mime || mime === "application/octet-stream") return ext;
-  const known = Object.values(MIME_BY_EXT).flat();
-  if (!known.includes(mime)) return null;
-  if (!MIME_BY_EXT[ext].includes(mime)) return null;
-  return ext;
-}
-
 export async function POST(request: NextRequest) {
   const prisma = await getDb();
   const ip = getClientIp(request);
   const rl = checkRateLimit({ key: `careers:${ip}`, limit: 5, windowMs: 60_000 });
-  if (!rl.ok) {
-    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
-  }
+  if (!rl.ok) return rateLimitResponse(rl.resetAtMs);
 
   let formData: FormData;
   try {
@@ -62,7 +32,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid form data" }, { status: 400 });
   }
 
-  const parsed = FieldsSchema.safeParse({
+  const parsed = CareerApplyFieldsSchema.safeParse({
     name: String(formData.get("name") ?? ""),
     email: String(formData.get("email") ?? ""),
     phone: String(formData.get("phone") ?? ""),
@@ -84,20 +54,23 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid submission" }, { status: 400 });
   }
 
-  const resume = formData.get("resume");
-  if (!(resume instanceof File) || resume.size === 0) {
-    return NextResponse.json({ error: "Resume is required" }, { status: 400 });
-  }
-  if (resume.size > MAX_BYTES) {
-    return NextResponse.json({ error: "File exceeds 5 MB limit" }, { status: 413 });
-  }
-  const ext = resumeExtension(resume);
-  if (!ext) {
+  const resumeRaw = formData.get("resume");
+  const resume = resumeRaw instanceof File ? resumeRaw : null;
+  const resumeCheck = classifyResume(resume);
+  if (!resume || !resumeCheck.ok) {
+    const reason = resumeCheck.ok ? "required" : resumeCheck.reason;
+    if (reason === "required") {
+      return NextResponse.json({ error: "Resume is required" }, { status: 400 });
+    }
+    if (reason === "too_large") {
+      return NextResponse.json({ error: "File exceeds 5 MB limit" }, { status: 413 });
+    }
     return NextResponse.json(
       { error: "File type not allowed. Accepted: PDF, DOC, DOCX." },
       { status: 400 },
     );
   }
+  const ext = resumeCheck.ext;
 
   let opening = null;
   const numId = jobOpeningId ? parseInt(jobOpeningId, 10) : NaN;

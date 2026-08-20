@@ -1,28 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { z } from "zod";
 
-import { checkRateLimit } from "@/lib/rateLimit";
+import { checkRateLimit, rateLimitResponse } from "@/lib/rateLimit";
 import { getDb, getEmail } from "@/lib/cloudflare-env";
-
-const ContactBodySchema = z
-  .object({
-    email:   z.string().trim().email().max(254).optional().or(z.literal("")),
-    name:    z.string().trim().min(1).max(200).optional().or(z.literal("")),
-    message: z.string().trim().min(1).max(5000).optional().or(z.literal("")),
-    source:  z.string().trim().min(1).max(100).optional().or(z.literal("")),
-    website: z.string().trim().max(200).optional().or(z.literal("")),
-  })
-  .superRefine((val, ctx) => {
-    const hasEmail   = typeof val.email   === "string" && val.email.trim().length   > 0;
-    const hasMessage = typeof val.message === "string" && val.message.trim().length > 0;
-    if (!hasEmail && !hasMessage) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Provide at least one of email or message.",
-        path: ["email"],
-      });
-    }
-  });
+import { ContactBodySchema } from "@/lib/schemas/public/contact";
 
 function getClientIp(request: NextRequest) {
   const xff = request.headers.get("x-forwarded-for");
@@ -38,9 +18,7 @@ export async function POST(request: NextRequest) {
   const prisma = await getDb();
   const ip = getClientIp(request);
   const rl = checkRateLimit({ key: `contact:${ip}`, limit: 10, windowMs: 60_000 });
-  if (!rl.ok) {
-    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
-  }
+  if (!rl.ok) return rateLimitResponse(rl.resetAtMs);
 
   let json: unknown;
   try {

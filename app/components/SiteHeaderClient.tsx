@@ -21,13 +21,14 @@ type Props = {
 export function SiteHeaderClient({ navItems, mobileNavItems, cta, logoUrl, siteName }: Props) {
   const pathname = usePathname() ?? "/";
   const [menuOpen, setMenuOpen] = useState(false);
+  const [menuForPath, setMenuForPath] = useState(pathname);
+  if (menuForPath !== pathname) {
+    setMenuForPath(pathname);
+    if (menuOpen) setMenuOpen(false);
+  }
   const dialogId = useId();
   const closeBtnRef = useRef<HTMLButtonElement | null>(null);
   const lastActiveRef = useRef<HTMLElement | null>(null);
-
-  useEffect(() => {
-    setMenuOpen(false);
-  }, [pathname]);
 
   useEffect(() => {
     if (!menuOpen) return;

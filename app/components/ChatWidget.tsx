@@ -20,14 +20,13 @@ import {
   SheetDescription,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { NAV_COLLAPSE_MQ } from "@/lib/breakpoints";
 import { BrandLogo } from "./BrandLogo";
 
 type ChatMessage = {
   role: "user" | "assistant";
   content: string;
 };
-
-const NAV_COLLAPSE_MQ = "(max-width: 960px)";
 
 const SUGGESTIONS = [
   { label: "Services", text: "What services does DiQualia offer?" },
@@ -283,16 +282,20 @@ export function ChatWidget() {
 
       if (!res.ok) {
         let message = "Something went wrong. Please try again.";
-        if (res.status === 429) {
-          message = "Too many requests — wait a moment and try again.";
-        } else if (res.status === 503) {
-          message = "Assistant is temporarily unavailable.";
-        } else {
-          try {
-            const data = (await res.json()) as { error?: string };
-            if (data?.error) message = data.error;
-          } catch {
-            // keep default
+        try {
+          const data = (await res.json()) as { error?: string };
+          if (typeof data?.error === "string" && data.error.length > 0) {
+            message = data.error;
+          } else if (res.status === 429) {
+            message = "Too many requests — wait a moment and try again.";
+          } else if (res.status === 503) {
+            message = "Assistant is temporarily unavailable.";
+          }
+        } catch {
+          if (res.status === 429) {
+            message = "Too many requests — wait a moment and try again.";
+          } else if (res.status === 503) {
+            message = "Assistant is temporarily unavailable.";
           }
         }
         setMessages(nextMessages);

@@ -6,7 +6,7 @@ import { signAdminToken } from "@/lib/auth/jwt";
 import { issueRefreshToken, setRefreshCookie } from "@/lib/auth/refresh-tokens";
 import { setSessionCookie } from "@/lib/auth/session";
 import { getDb } from "@/lib/cloudflare-env";
-import { checkRateLimit } from "@/lib/rateLimit";
+import { checkRateLimit, rateLimitResponse } from "@/lib/rateLimit";
 
 const BodySchema = z.object({
   email: z.string().trim().email().max(254),
@@ -23,9 +23,7 @@ export async function POST(request: NextRequest) {
   const prisma = await getDb();
   const ip = getClientIp(request);
   const rl = checkRateLimit({ key: `login:${ip}`, limit: 10, windowMs: 60_000 });
-  if (!rl.ok) {
-    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
-  }
+  if (!rl.ok) return rateLimitResponse(rl.resetAtMs);
 
   let json: unknown;
   try {

@@ -149,7 +149,7 @@ export default async function JobOpeningPage({ params }: PageProps) {
           ) : null}
 
           <div id="apply" className="mt-16 scroll-mt-28">
-            <CareerApplyForm jobSlug={opening.slug} headline={careerPage?.applyHeadline} />
+            <CareerApplyForm jobSlug={opening.slug} jobTitle={opening.title} headline={careerPage?.applyHeadline} />
           </div>
         </div>
 

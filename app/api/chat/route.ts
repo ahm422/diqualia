@@ -9,7 +9,7 @@ import {
   CHAT_RATE_LIMIT,
 } from "@/lib/chat/config";
 import { getAI } from "@/lib/cloudflare-env";
-import { checkRateLimit } from "@/lib/rateLimit";
+import { checkRateLimit, rateLimitResponse } from "@/lib/rateLimit";
 
 const MessageSchema = z.object({
   role: z.enum(["user", "assistant"]),
@@ -93,9 +93,7 @@ export async function POST(request: NextRequest) {
     limit: CHAT_RATE_LIMIT.limit,
     windowMs: CHAT_RATE_LIMIT.windowMs,
   });
-  if (!rl.ok) {
-    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
-  }
+  if (!rl.ok) return rateLimitResponse(rl.resetAtMs);
 
   let json: unknown;
   try {
