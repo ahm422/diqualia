@@ -2,7 +2,7 @@ import "server-only";
 
 import { NextResponse, type NextRequest } from "next/server";
 
-import { requireAdminApi, requirePermissionApi } from "@/lib/auth/require-admin-api";
+import { requirePermissionApi } from "@/lib/auth/require-admin-api";
 import { getDb } from "@/lib/cloudflare-env";
 import { Prisma } from "@/lib/generated/prisma/client";
 import { industrySectorPatchSchema } from "@/lib/schemas/admin/industries";

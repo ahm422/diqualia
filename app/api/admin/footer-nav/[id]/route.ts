@@ -3,7 +3,7 @@ import "server-only";
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 
-import { requireAdminApi, requirePermissionApi } from "@/lib/auth/require-admin-api";
+import { requirePermissionApi } from "@/lib/auth/require-admin-api";
 import { getDb } from "@/lib/cloudflare-env";
 import { revalidateSiteLayout } from "@/lib/revalidate-site";
 
