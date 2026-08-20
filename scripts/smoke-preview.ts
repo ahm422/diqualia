@@ -43,6 +43,9 @@ async function main() {
     redirect: "manual",
   });
   console.log(`/admin authed -> ${adminAuthed.status}`);
+  console.log(
+    `/admin overview -> ${adminAuthed.text.includes("data-admin-overview") && adminAuthed.text.includes("Recent activity") && !adminAuthed.text.includes(">Sections<")}`,
+  );
 
   console.log("\n=== CRUD site-settings PATCH ===");
   const patch = await request("/api/admin/site-settings", {

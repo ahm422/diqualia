@@ -1,3 +1,5 @@
+import { NextResponse } from "next/server";
+
 type RateLimitState = {
   count: number;
   resetAtMs: number;
@@ -30,3 +32,31 @@ export function checkRateLimit({
   return { ok: true as const, remaining: Math.max(0, limit - existing.count), resetAtMs: existing.resetAtMs };
 }
 
+export function retryAfterSec(resetAtMs: number, nowMs = Date.now()) {
+  return Math.max(1, Math.ceil((resetAtMs - nowMs) / 1000));
+}
+
+export function rateLimitMessage(retryAfterSeconds: number) {
+  if (retryAfterSeconds < 60) {
+    return `Too many requests. Try again in ${retryAfterSeconds} second${retryAfterSeconds === 1 ? "" : "s"}.`;
+  }
+  const minutes = Math.ceil(retryAfterSeconds / 60);
+  return `Too many requests. Try again in ${minutes} minute${minutes === 1 ? "" : "s"}.`;
+}
+
+export function rateLimitDenied(resetAtMs: number, nowMs = Date.now()) {
+  const retryAfterSeconds = retryAfterSec(resetAtMs, nowMs);
+  return {
+    status: 429 as const,
+    headers: { "Retry-After": String(retryAfterSeconds) },
+    body: {
+      error: rateLimitMessage(retryAfterSeconds),
+      retryAfterSec: retryAfterSeconds,
+    },
+  };
+}
+
+export function rateLimitResponse(resetAtMs: number) {
+  const denied = rateLimitDenied(resetAtMs);
+  return NextResponse.json(denied.body, { status: denied.status, headers: denied.headers });
+}

@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { getDb } from "@/lib/cloudflare-env";
 import { AdminPageHeader } from "@/components/admin";
@@ -18,7 +20,9 @@ export default async function SubmissionsPage() {
         title="Submissions"
         description="Form submissions from the contact page"
       />
-      <SubmissionsTable initialLeads={leads} />
+      <Suspense fallback={<p className="text-sm text-[var(--diq_mid)]">Loading…</p>}>
+        <SubmissionsTable initialLeads={leads} />
+      </Suspense>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useSyncExternalStore } from "react";
 import { Moon, Sun } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -13,8 +13,6 @@ const THEME_EVENT = "diqualia-theme-change";
 const DARK_CLASS = "dark";
 
 function getSystemTheme(): Theme {
-  // On the server we can't know the user's OS theme; return a deterministic value
-  // so SSR markup matches the initial client render.
   if (typeof window === "undefined") return "light";
   return window.matchMedia?.("(prefers-color-scheme: dark)")?.matches ? "dark" : "light";
 }
@@ -23,42 +21,34 @@ function applyThemeToHtml(theme: Theme) {
   document.documentElement.classList.toggle(DARK_CLASS, theme === "dark");
 }
 
+function subscribeTheme(onStoreChange: () => void) {
+  window.addEventListener("storage", onStoreChange);
+  window.addEventListener(THEME_EVENT, onStoreChange);
+  return () => {
+    window.removeEventListener("storage", onStoreChange);
+    window.removeEventListener(THEME_EVENT, onStoreChange);
+  };
+}
+
+function getStoredMode(): ThemeMode {
+  try {
+    const stored = window.localStorage.getItem(STORAGE_KEY);
+    if (stored === "light" || stored === "dark") return stored;
+  } catch {
+    // ignore
+  }
+  return "system";
+}
+
 export function ThemeToggle() {
-  // SSR/initial client render must be deterministic to avoid hydration mismatches.
-  // We start at "system" and then sync from storage after mount.
-  const [mode, setMode] = useState<ThemeMode>("system");
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-
-    function syncFromStorage() {
-      try {
-        const stored = window.localStorage.getItem(STORAGE_KEY);
-        if (stored === "light" || stored === "dark") {
-          setMode(stored);
-          return;
-        }
-      } catch {
-        // ignore
-      }
-      setMode("system");
-    }
-
-    const handler = () => syncFromStorage();
-    window.addEventListener("storage", handler);
-    window.addEventListener(THEME_EVENT, handler as EventListener);
-    syncFromStorage();
-
-    return () => {
-      window.removeEventListener("storage", handler);
-      window.removeEventListener(THEME_EVENT, handler as EventListener);
-    };
-  }, []);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+  const mode = useSyncExternalStore<ThemeMode>(subscribeTheme, getStoredMode, () => "system");
 
   const effectiveTheme = useMemo<Theme>(() => {
-    // Keep SSR and the *first* client render identical.
-    // After mount, we can safely read OS theme.
     if (mode === "system") return mounted ? getSystemTheme() : "light";
     return mode;
   }, [mode, mounted]);
@@ -105,4 +95,3 @@ export function ThemeToggle() {
     </Button>
   );
 }
-

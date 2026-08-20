@@ -75,7 +75,14 @@ async function testAuth() {
 
   const admin = await request("/admin");
   assert(admin.status === 200, stepLabel(`GET /admin authed → 200 (got ${admin.status})`));
-  logOk("GET /admin authed → 200");
+  assert(
+    admin.text.includes("data-admin-overview") &&
+      admin.text.includes("Recent activity") &&
+      admin.text.includes("Quick actions"),
+    stepLabel("GET /admin HTML is overview (metrics/activity/actions)"),
+  );
+  assert(!admin.text.includes(">Sections<"), stepLabel("GET /admin HTML has no Sections directory grid"));
+  logOk("GET /admin authed → 200 overview");
 
   const oldRefresh = jar.get("dq_admin_refresh")!;
   const refresh = await request("/api/auth/refresh", { method: "POST" });

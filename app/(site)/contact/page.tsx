@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Container } from "@/app/components/Container";
 import { ContactLeadForm } from "@/app/components/ContactLeadForm";
 import { Button } from "@/components/ui/button";
+import { CONTACT_AFTER_SUBMIT_STEPS } from "@/lib/contact-copy";
 import { getDb } from "@/lib/cloudflare-env";
 
 export const revalidate = 60;
@@ -102,7 +103,7 @@ export default async function ContactPage() {
               <div className="mt-10">
                 <div className="text-[10px] tracking-[0.22em] uppercase text-primary">After you submit</div>
                 <ol className="mt-4 space-y-3 text-[13px] leading-7 text-muted-foreground">
-                  {["You send context", "30-min discovery", "We reply with next steps"].map((step, idx) => (
+                  {CONTACT_AFTER_SUBMIT_STEPS.map((step, idx) => (
                     <li key={step} className="flex items-start gap-3">
                       <span aria-hidden className="text-[11px] tracking-[0.18em] text-primary">
                         {String(idx + 1).padStart(2, "0")}
@@ -150,7 +151,7 @@ export default async function ContactPage() {
           </div>
 
           <div className="order-2 md:order-none xl:order-2 xl:col-span-5">
-            <ContactLeadForm />
+            <ContactLeadForm expectationText={page.expectationText} />
           </div>
         </div>
       </Container>

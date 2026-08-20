@@ -18,7 +18,7 @@ export function AdminSaveButton({
 
   return (
     <div className="mt-4">
-      <Button type="button" variant="secondary" onClick={onClick} disabled={saving}>
+      <Button type="button" variant="secondary" size="admin" onClick={onClick} disabled={saving}>
         {saving ? "Saving…" : "Save Changes"}
       </Button>
     </div>

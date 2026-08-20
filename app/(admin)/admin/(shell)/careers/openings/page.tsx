@@ -24,7 +24,7 @@ export default async function JobOpeningsAdminPage() {
           <p className="mt-1 text-sm text-[var(--diq_mid)]">Public roles listed on /careers</p>
         </div>
         {canCreate && (
-          <Button asChild variant="secondary" className="shrink-0">
+          <Button asChild variant="secondary" size="admin" className="shrink-0">
             <Link href="/admin/careers/openings/new">New opening</Link>
           </Button>
         )}

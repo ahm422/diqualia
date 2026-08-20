@@ -30,6 +30,7 @@ const buttonVariants = cva(
         default: "min-h-11 px-[clamp(1.375rem,6vw,2.75rem)] py-3.5 leading-none",
         sm: "min-h-9 px-5 py-2.5 leading-none",
         lg: "min-h-12 px-10 py-4 leading-none",
+        admin: "h-8 min-h-8 px-3.5 py-1.5 text-[11px] leading-none tracking-[0.12em]",
         icon: "size-9 shrink-0 rounded-full p-0",
       },
     },

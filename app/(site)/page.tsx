@@ -215,7 +215,7 @@ export default async function Home() {
           style={{ background: "linear-gradient(90deg, transparent, var(--diq_border), transparent)" }}
         />
 
-        <Container className="relative z-[1] flex flex-1 flex-col justify-center gap-10 lg:flex-row lg:items-center lg:justify-between lg:gap-16">
+        <Container className="relative z-[1] flex max-w-[1680px] flex-1 flex-col justify-center gap-10 lg:flex-row lg:items-center lg:justify-between lg:gap-16">
           <div className="min-w-0 max-w-[820px] flex-1">
               <p
                 className="diq-fadeUp mb-[clamp(16px,3vw,28px)] flex flex-wrap items-center gap-3"

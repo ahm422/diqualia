@@ -7,13 +7,21 @@ const eslintConfig = defineConfig([
   ...nextTs,
   // Override default ignores of eslint-config-next.
   globalIgnores([
+    "**/node_modules/**",
+    ".git/**",
     // Default ignores of eslint-config-next:
     ".next/**",
     "out/**",
     "build/**",
+    "env.d.ts",
     "next-env.d.ts",
+    "types/**",
     // Local extracted design reference
     "reference/**",
+    // Preview/build artifacts (OpenNext + Vercel adapter dumps)
+    ".vercel/**",
+    ".open-next/**",
+    ".wrangler/**",
   ]),
 ]);
 

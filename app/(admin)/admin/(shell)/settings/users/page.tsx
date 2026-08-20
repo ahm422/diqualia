@@ -32,7 +32,7 @@ export default async function AdminUsersPage() {
             CMS operators and the roles they are assigned.
           </p>
         </div>
-        <Button asChild variant="secondary" className="shrink-0">
+        <Button asChild variant="secondary" size="admin" className="shrink-0">
           <Link href="/admin/settings/users/new">New user</Link>
         </Button>
       </div>
