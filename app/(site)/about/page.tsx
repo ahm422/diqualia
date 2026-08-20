@@ -106,7 +106,7 @@ export default async function AboutPage() {
 
   return (
     <div>
-      <section className="relative overflow-hidden border-b" style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
+      <section id="hero" className="relative overflow-hidden border-b" style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0"
@@ -135,7 +135,7 @@ export default async function AboutPage() {
         </Container>
       </section>
 
-      <Container as="section" className="py-20">
+      <Container as="section" id="built-for" className="py-20">
         <Eyebrow>What we&apos;re built for</Eyebrow>
         <H2>
           Intelligence that compounds —
@@ -156,7 +156,7 @@ export default async function AboutPage() {
       </Container>
 
       {whereNext && (
-        <section className="border-t" style={{ background: "var(--bg-elev)", borderTopColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
+        <section id="where-next" className="border-t" style={{ background: "var(--bg-elev)", borderTopColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
           <Container className="py-20">
             <Eyebrow>{whereNext.eyebrow}</Eyebrow>
             <H2>{renderWhereNextHeadline(whereNext.headline)}</H2>

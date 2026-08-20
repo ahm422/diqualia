@@ -107,7 +107,7 @@ export default async function StoryPage() {
   return (
     <div>
       {/* HERO */}
-      <section className="diq-pageTop relative flex min-h-[calc(100vh-var(--diq-heroTop))] flex-col items-center justify-center overflow-hidden pb-20 text-center">
+      <section id="hero" className="diq-pageTop relative flex min-h-[calc(100vh-var(--diq-heroTop))] flex-col items-center justify-center overflow-hidden pb-20 text-center">
         <div
           className="pointer-events-none absolute left-1/2 top-1/2 h-[520px] w-[720px] -translate-x-1/2 -translate-y-1/2"
           style={{
@@ -187,7 +187,7 @@ export default async function StoryPage() {
       />
 
       {/* CHAPTER 3 — Double Experience */}
-      <section style={{ background: "var(--bg-elev)" }}>
+      <section id="dx" style={{ background: "var(--bg-elev)" }}>
         <Container className="py-20">
           <div className="grid grid-cols-1 gap-12 md:grid-cols-2 md:gap-24">
             <div className="order-2 md:order-1">
@@ -319,7 +319,7 @@ export default async function StoryPage() {
       </Container>
 
       {/* MANIFESTO */}
-      <section style={{ background: "var(--bg-elev)" }}>
+      <section id="manifesto" style={{ background: "var(--bg-elev)" }}>
         <Container className="py-24 text-center">
           <Eyebrow center>What We Believe</Eyebrow>
           <h2

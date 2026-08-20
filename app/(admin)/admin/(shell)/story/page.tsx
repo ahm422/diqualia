@@ -1,22 +1,16 @@
-import { requireAdmin } from "@/lib/auth/require-admin";
-import { getDb } from "@/lib/cloudflare-env";
-import { AdminPageHeader } from "@/components/admin";
+import { redirectAdminSection } from "@/lib/admin/section-redirect";
 
-import { StoryPageEditor } from "./StoryPageEditor";
+const STORY_SECTIONS = {
+  hero: "/admin/story/hero",
+  dx: "/admin/story/dx",
+  manifesto: "/admin/story/manifesto",
+} as const;
 
-export default async function StoryAdminPage() {
-  const prisma = await getDb();
-  await requireAdmin();
-
-  const storyPage = await prisma.storyPage.findUnique({ where: { id: 1 } });
-
-  return (
-    <div>
-      <AdminPageHeader
-        title="Story Page"
-        description="Hero, Double Experience cards, and manifesto"
-      />
-      <StoryPageEditor initialData={storyPage} />
-    </div>
-  );
+export default async function StoryAdminRedirect({
+  searchParams,
+}: {
+  searchParams: Promise<{ section?: string }>;
+}) {
+  const { section } = await searchParams;
+  redirectAdminSection(STORY_SECTIONS, section, "hero");
 }

@@ -92,7 +92,7 @@ export default async function ServicesPage() {
   return (
     <div>
       {/* PAGE HERO */}
-      <section className="relative overflow-hidden border-b" style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
+      <section id="hero" className="relative overflow-hidden border-b" style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
         <div
           className="pointer-events-none absolute inset-0"
           style={{

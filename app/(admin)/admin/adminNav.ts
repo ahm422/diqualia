@@ -33,10 +33,10 @@ export const ADMIN_NAV: NavGroup[] = [
     label: "Home",
     icon: House,
     children: [
-      { href: "/admin/home?section=hero", label: "Hero" },
-      { href: "/admin/home?section=marquee", label: "Marquee" },
-      { href: "/admin/home?section=explore", label: "Explore Cards" },
-      { href: "/admin/home?section=where-next", label: "Where Next" },
+      { href: "/admin/home/hero", label: "Hero" },
+      { href: "/admin/home/marquee", label: "Marquee" },
+      { href: "/admin/home/explore", label: "Explore Cards" },
+      { href: "/admin/home/where-next", label: "Where Next" },
     ],
   },
   {
@@ -44,9 +44,9 @@ export const ADMIN_NAV: NavGroup[] = [
     label: "About",
     icon: Info,
     children: [
-      { href: "/admin/about?section=hero", label: "Hero" },
-      { href: "/admin/about?section=built-for", label: "Built-For Items" },
-      { href: "/admin/about?section=where-next", label: "Where Next" },
+      { href: "/admin/about/hero", label: "Hero" },
+      { href: "/admin/about/built-for", label: "Built-For Items" },
+      { href: "/admin/about/where-next", label: "Where Next" },
     ],
   },
   {
@@ -54,8 +54,8 @@ export const ADMIN_NAV: NavGroup[] = [
     label: "Services",
     icon: Layers,
     children: [
-      { href: "/admin/services?section=intro", label: "Page Intro" },
-      { href: "/admin/services?section=sections", label: "Sections & Items" },
+      { href: "/admin/services/intro", label: "Page Intro" },
+      { href: "/admin/services/sections", label: "Sections & Items" },
     ],
   },
   {
@@ -63,9 +63,9 @@ export const ADMIN_NAV: NavGroup[] = [
     label: "How We Work",
     icon: ListOrdered,
     children: [
-      { href: "/admin/process?section=hero", label: "Hero" },
-      { href: "/admin/process?section=steps", label: "Steps" },
-      { href: "/admin/process?section=where-next", label: "Where Next" },
+      { href: "/admin/process/hero", label: "Hero" },
+      { href: "/admin/process/steps", label: "Steps" },
+      { href: "/admin/process/where-next", label: "Where Next" },
     ],
   },
   {
@@ -73,9 +73,9 @@ export const ADMIN_NAV: NavGroup[] = [
     label: "Industries",
     icon: Building2,
     children: [
-      { href: "/admin/industries?section=hero", label: "Hero" },
-      { href: "/admin/industries?section=sectors", label: "Sectors" },
-      { href: "/admin/industries?section=where-next", label: "Where Next" },
+      { href: "/admin/industries/hero", label: "Hero" },
+      { href: "/admin/industries/sectors", label: "Sectors" },
+      { href: "/admin/industries/where-next", label: "Where Next" },
     ],
   },
   {
@@ -83,9 +83,9 @@ export const ADMIN_NAV: NavGroup[] = [
     label: "Story",
     icon: BookOpen,
     children: [
-      { href: "/admin/story?section=hero", label: "Hero" },
-      { href: "/admin/story?section=dx", label: "Double Experience" },
-      { href: "/admin/story?section=manifesto", label: "Manifesto" },
+      { href: "/admin/story/hero", label: "Hero" },
+      { href: "/admin/story/dx", label: "Double Experience" },
+      { href: "/admin/story/manifesto", label: "Manifesto" },
     ],
   },
   {
@@ -99,7 +99,10 @@ export const ADMIN_NAV: NavGroup[] = [
     label: "Careers",
     icon: Briefcase,
     children: [
-      { href: "/admin/careers", label: "Page Copy", match: "exact" },
+      { href: "/admin/careers/hero", label: "Hero" },
+      { href: "/admin/careers/culture", label: "Culture" },
+      { href: "/admin/careers/benefits", label: "Benefits" },
+      { href: "/admin/careers/apply", label: "Apply instructions" },
       { href: "/admin/careers/openings", label: "Job Openings", match: "prefix" },
       { href: "/admin/careers/applications", label: "Applications", match: "prefix" },
     ],
@@ -109,7 +112,10 @@ export const ADMIN_NAV: NavGroup[] = [
     label: "Contact",
     icon: Mail,
     children: [
-      { href: "/admin/contact?section=hero", label: "Page Copy", match: "exact" },
+      { href: "/admin/contact/hero", label: "Hero" },
+      { href: "/admin/contact/email-card", label: "Email Card" },
+      { href: "/admin/contact/what-to-include", label: "What to Include" },
+      { href: "/admin/contact/expectation", label: "Expectation" },
       { href: "/admin/submissions", label: "Submissions" },
     ],
   },

@@ -1,31 +1,17 @@
-import { requireAdmin } from "@/lib/auth/require-admin";
-import { getDb } from "@/lib/cloudflare-env";
-import { AdminPageHeader } from "@/components/admin";
+import { redirectAdminSection } from "@/lib/admin/section-redirect";
 
-import { HomePageEditor } from "./HomePageEditor";
+const HOME_SECTIONS = {
+  hero: "/admin/home/hero",
+  marquee: "/admin/home/marquee",
+  explore: "/admin/home/explore",
+  "where-next": "/admin/home/where-next",
+} as const;
 
-export default async function HomePage() {
-  const prisma = await getDb();
-  await requireAdmin();
-
-  const [hero, marqueeItems, exploreSection, exploreCards, whereNext] = await Promise.all([
-    prisma.homeHero.findUnique({ where: { id: 1 } }),
-    prisma.homeMarqueeItem.findMany({ orderBy: { order: "asc" } }),
-    prisma.homeExploreSection.findUnique({ where: { id: 1 } }),
-    prisma.homeExploreCard.findMany({ orderBy: { order: "asc" } }),
-    prisma.homeWhereNext.findUnique({ where: { id: 1 } }),
-  ]);
-
-  return (
-    <div>
-      <AdminPageHeader title="Home Page" description="Hero, marquee, explore cards, and Where Next section" />
-      <HomePageEditor
-        initialHero={hero}
-        initialMarquee={marqueeItems}
-        initialExploreSection={exploreSection}
-        initialExploreCards={exploreCards}
-        initialWhereNext={whereNext}
-      />
-    </div>
-  );
+export default async function HomeAdminRedirect({
+  searchParams,
+}: {
+  searchParams: Promise<{ section?: string }>;
+}) {
+  const { section } = await searchParams;
+  redirectAdminSection(HOME_SECTIONS, section, "hero");
 }

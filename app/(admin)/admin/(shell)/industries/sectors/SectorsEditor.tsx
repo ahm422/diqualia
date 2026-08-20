@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { useState } from "react";
 
 import {
   AdminSection,
@@ -9,152 +9,24 @@ import {
   AdminTextarea,
   AdminSaveButton,
   useAdminSave,
-  useAdminSectionTab,
 } from "@/components/admin";
 import { slugify } from "@/lib/slugify";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+import {
+  normalizeSector,
+  type CaseStudyRef,
+  type IndustriesPageData,
+  type IndustrySector,
+  type WhyPoint,
+} from "../types";
 
-type IndustriesPageData = {
-  id: number;
-  eyebrow: string; headlineLine1: string; headlineLine2: string; body: string;
-  sectorsLabel: string; sectorsDescription: string;
-  sidebarLabel: string; sidebarCopy: string;
-  whereNextEyebrow: string; whereNextTitle1: string; whereNextTitle2: string; whereNextBody: string;
-} | null;
-
-type WhyPoint = { title: string; body: string };
-type CaseStudyRef = { label: string; href: string };
-
-type IndustrySector = {
-  id: number;
-  slug: string;
-  name: string;
-  visible: boolean;
-  order: number;
-  eyebrow: string | null;
-  headline: string | null;
-  body: string | null;
-  heroImageUrl: string | null;
-  whyPoints: WhyPoint[] | null;
-  caseStudyRefs: CaseStudyRef[] | null;
-};
-
-type Props = {
+export function SectorsEditor({
+  initialPage,
+  initialSectors,
+}: {
   initialPage: IndustriesPageData;
   initialSectors: IndustrySector[];
-};
-
-function parseWhyPoints(value: unknown): WhyPoint[] {
-  if (!Array.isArray(value)) return [];
-  return value
-    .filter((item): item is WhyPoint =>
-      item != null &&
-      typeof item === "object" &&
-      typeof (item as WhyPoint).title === "string" &&
-      typeof (item as WhyPoint).body === "string",
-    )
-    .map((item) => ({ title: item.title, body: item.body }));
-}
-
-function parseCaseStudyRefs(value: unknown): CaseStudyRef[] {
-  if (!Array.isArray(value)) return [];
-  return value
-    .filter((item): item is CaseStudyRef =>
-      item != null &&
-      typeof item === "object" &&
-      typeof (item as CaseStudyRef).label === "string" &&
-      typeof (item as CaseStudyRef).href === "string",
-    )
-    .map((item) => ({ label: item.label, href: item.href }));
-}
-
-function normalizeSector(raw: IndustrySector): IndustrySector {
-  return {
-    ...raw,
-    whyPoints: parseWhyPoints(raw.whyPoints),
-    caseStudyRefs: parseCaseStudyRefs(raw.caseStudyRefs),
-  };
-}
-
-// ─── Main editor ─────────────────────────────────────────────────────────────
-
-const INDUSTRIES_TABS = ["hero", "sectors", "where-next"] as const;
-type Tab = (typeof INDUSTRIES_TABS)[number];
-
-export function IndustriesPageEditor(props: Props) {
-  return (
-    <Suspense fallback={null}>
-      <IndustriesPageEditorInner {...props} />
-    </Suspense>
-  );
-}
-
-function IndustriesPageEditorInner({ initialPage, initialSectors }: Props) {
-  const { activeTab, setTab } = useAdminSectionTab(INDUSTRIES_TABS, "hero");
-
-  const tabs: { id: Tab; label: string }[] = [
-    { id: "hero", label: "Hero" },
-    { id: "sectors", label: "Sectors" },
-    { id: "where-next", label: "Where Next" },
-  ];
-
-  return (
-    <div>
-      <div className="mb-6 flex gap-2 border-b border-[var(--diq_border)] pb-4">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            onClick={() => setTab(tab.id)}
-            className={`rounded px-4 py-2 text-xs uppercase tracking-widest transition-colors ${
-              activeTab === tab.id
-                ? "border border-[var(--gold)] text-[var(--gold)]"
-                : "border border-[var(--diq_border)] text-[var(--diq_mid)] hover:text-foreground"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {activeTab === "hero" && <HeroTab initial={initialPage} />}
-      {activeTab === "sectors" && (
-        <SectorsTab
-          initialPage={initialPage}
-          initialSectors={initialSectors.map(normalizeSector)}
-        />
-      )}
-      {activeTab === "where-next" && <WhereNextTab initial={initialPage} />}
-    </div>
-  );
-}
-
-// ─── Hero tab ─────────────────────────────────────────────────────────────────
-
-function HeroTab({ initial }: { initial: IndustriesPageData }) {
-  const [eyebrow, setEyebrow] = useState(initial?.eyebrow ?? "");
-  const [line1, setLine1] = useState(initial?.headlineLine1 ?? "");
-  const [line2, setLine2] = useState(initial?.headlineLine2 ?? "");
-  const [body, setBody] = useState(initial?.body ?? "");
-  const { save, saving } = useAdminSave("/api/admin/industries-page");
-
-  return (
-    <AdminSection title="Hero">
-      <AdminField label="Eyebrow"><AdminInput value={eyebrow} onChange={setEyebrow} placeholder="Industries" /></AdminField>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <AdminField label="Headline Line 1"><AdminInput value={line1} onChange={setLine1} placeholder="Deep expertise." /></AdminField>
-        <AdminField label="Headline Line 2 (italic)"><AdminInput value={line2} onChange={setLine2} placeholder="Broad reach." /></AdminField>
-      </div>
-      <AdminField label="Body"><AdminTextarea value={body} onChange={setBody} rows={3} placeholder="We operate across…" /></AdminField>
-      <AdminSaveButton onClick={() => save({ eyebrow, headlineLine1: line1, headlineLine2: line2, body })} saving={saving} />
-    </AdminSection>
-  );
-}
-
-// ─── Sectors tab ──────────────────────────────────────────────────────────────
-
-function SectorsTab({ initialPage, initialSectors }: { initialPage: IndustriesPageData; initialSectors: IndustrySector[] }) {
+}) {
   const [sectorsLabel, setSectorsLabel] = useState(initialPage?.sectorsLabel ?? "");
   const [sectorsDescription, setSectorsDescription] = useState(initialPage?.sectorsDescription ?? "");
   const [sidebarLabel, setSidebarLabel] = useState(initialPage?.sidebarLabel ?? "");
@@ -481,27 +353,5 @@ function SectorPagePanel({
 
       <AdminSaveButton onClick={savePage} saving={saving} />
     </div>
-  );
-}
-
-// ─── Where Next tab ──────────────────────────────────────────────────────────
-
-function WhereNextTab({ initial }: { initial: IndustriesPageData }) {
-  const [eyebrow, setEyebrow] = useState(initial?.whereNextEyebrow ?? "");
-  const [title1, setTitle1] = useState(initial?.whereNextTitle1 ?? "");
-  const [title2, setTitle2] = useState(initial?.whereNextTitle2 ?? "");
-  const [body, setBody] = useState(initial?.whereNextBody ?? "");
-  const { save, saving } = useAdminSave("/api/admin/industries-page");
-
-  return (
-    <AdminSection title="Where Next CTA">
-      <AdminField label="Eyebrow"><AdminInput value={eyebrow} onChange={setEyebrow} placeholder="Start here" /></AdminField>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <AdminField label="Title Line 1"><AdminInput value={title1} onChange={setTitle1} placeholder="Tell us your niche —" /></AdminField>
-        <AdminField label="Title Line 2"><AdminInput value={title2} onChange={setTitle2} placeholder="we'll map your buyers." /></AdminField>
-      </div>
-      <AdminField label="Body"><AdminTextarea value={body} onChange={setBody} rows={3} /></AdminField>
-      <AdminSaveButton onClick={() => save({ whereNextEyebrow: eyebrow, whereNextTitle1: title1, whereNextTitle2: title2, whereNextBody: body })} saving={saving} />
-    </AdminSection>
   );
 }

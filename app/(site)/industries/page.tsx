@@ -50,7 +50,7 @@ export default async function IndustriesPage() {
 
   return (
     <div>
-      <section className="relative overflow-hidden border-b" style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
+      <section id="hero" className="relative overflow-hidden border-b" style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0"
@@ -84,7 +84,7 @@ export default async function IndustriesPage() {
         </Container>
       </section>
 
-      <Container as="section" className="py-20">
+      <Container as="section" id="sectors" className="py-20">
         <div className="grid grid-cols-1 gap-12 md:grid-cols-[1fr_320px] md:items-start">
           <div>
             <div className="text-[13px] tracking-[0.06em] text-foreground" style={{ fontFamily: "var(--font-display)", fontWeight: 400 }}>
@@ -143,7 +143,7 @@ export default async function IndustriesPage() {
         </div>
       </Container>
 
-      <section className="border-t" style={{ background: "var(--bg)", borderTopColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
+      <section id="where-next" className="border-t" style={{ background: "var(--bg)", borderTopColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
         <Container className="py-20">
           <div className="grid grid-cols-1 gap-12 md:grid-cols-2 md:items-center">
             <div>

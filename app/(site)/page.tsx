@@ -182,7 +182,7 @@ export default async function Home() {
   return (
     <div style={{ background: "var(--diq_ink)" }}>
       {/* HERO */}
-      <section className="diq-hero diq-homeHero relative flex min-h-[100svh] flex-col overflow-hidden">
+      <section id="hero" className="diq-hero diq-homeHero relative flex min-h-[100svh] flex-col overflow-hidden">
         <div
           aria-hidden
           className="diq-gridDrift pointer-events-none absolute inset-0"
@@ -315,7 +315,7 @@ export default async function Home() {
 
       {/* TICKER */}
       {marqueeItems.length > 0 && (
-        <div className="diq-homeMarquee overflow-hidden border-y" style={{ borderColor: "var(--diq_border)" }}>
+        <div id="marquee" className="diq-homeMarquee overflow-hidden border-y" style={{ borderColor: "var(--diq_border)" }}>
           <div className="diq-homeMarqueeTrack" style={{ animationDuration: `${Math.max(28, marqueeItems.length * 6)}s` }}>
             {ticker.map((item, idx) => {
               const dashIdx = item.text.indexOf(" — ");
@@ -607,7 +607,7 @@ export default async function Home() {
 
       {/* CTA */}
       {whereNext && (
-        <section className="diq-cta diq-homeCta relative overflow-hidden text-center" style={{ background: "var(--diq_ink)" }}>
+        <section id="where-next" className="diq-cta diq-homeCta relative overflow-hidden text-center" style={{ background: "var(--diq_ink)" }}>
           <div
             aria-hidden
             className="absolute inset-0"
