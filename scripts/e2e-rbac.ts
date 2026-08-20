@@ -22,6 +22,7 @@ import {
   logOk,
   parseArgs,
   pngBlob,
+  jpegBlob,
   section,
   stepLabel,
 } from "./lib/e2e-client";
@@ -78,6 +79,7 @@ async function main() {
   const perms = meBody.permissions as string[];
   assert(perms.includes("users.delete"), stepLabel("super_admin has users.delete"));
   assert(perms.includes("roles.manage"), stepLabel("super_admin has roles.manage"));
+  assert(perms.includes("applications.pii"), stepLabel("super_admin has applications.pii"));
   logOk("bootstrap session is super_admin");
 
   const createdUserIds: string[] = [];
@@ -290,6 +292,52 @@ async function main() {
     form.set("file", pngBlob(), "rbac.png");
     const upload = await editorSession.request("/api/admin/upload", { method: "POST", body: form });
     assert(upload.status === 200, stepLabel(`editor upload POST → 200 (got ${upload.status})`));
+
+    const apply = new FormData();
+    apply.append("name", `RBAC Applicant ${TS}`);
+    apply.append("email", `rbac-apply-${TS}@example.com`);
+    apply.append("phone", "+923001111111");
+    apply.append("jobSlug", "research-analyst");
+    apply.append("dateOfBirth", "1994-04-04");
+    apply.append("gender", "male");
+    apply.append("nationality", "Pakistan");
+    apply.append("cnic", "3520112345678");
+    apply.append("currentAddress", "Street 1");
+    apply.append("city", "Lahore");
+    apply.append("highestQualification", "bachelor");
+    apply.append("yearsOfExperience", "2");
+    apply.append("keySkills", "research");
+    apply.append("noticePeriodDays", "15");
+    apply.append("expectedSalary", "120000");
+    apply.append("availableFrom", new Date().toISOString().slice(0, 10));
+    apply.append("declarationAccepted", "true");
+    apply.append("resume", new Blob(["%PDF-1.4\n"], { type: "application/pdf" }), "resume.pdf");
+    apply.append("photo", jpegBlob(), "photo.jpg");
+    const applyRes = await fetch(`${base}/api/careers/apply`, { method: "POST", body: apply, redirect: "manual" });
+    assert(applyRes.status === 200, stepLabel(`public apply for rbac → 200 (got ${applyRes.status})`));
+    const applyJson = (await applyRes.json()) as { id?: string };
+    assert(typeof applyJson.id === "string", stepLabel("rbac apply returns id"));
+
+    const editorList = await editorSession.request("/api/admin/job-applications");
+    assert(editorList.status === 200, stepLabel(`editor GET job-applications → 200 (got ${editorList.status})`));
+    const editorApps = editorList.json as { id: string; cnic?: string | null; cnicMasked?: string }[];
+    const editorRow = editorApps.find((row) => row.id === applyJson.id);
+    assert(editorRow != null, stepLabel("editor list includes new application"));
+    assert(editorRow.cnic == null, stepLabel("editor list CNIC is masked/absent"));
+    assert(typeof editorRow.cnicMasked === "string", stepLabel("editor list has cnicMasked"));
+
+    const editorResume = await editorSession.request(`/api/admin/job-applications/${applyJson.id}/resume`);
+    assert(editorResume.status === 403, stepLabel(`editor GET resume → 403 (got ${editorResume.status})`));
+    const editorPhoto = await editorSession.request(`/api/admin/job-applications/${applyJson.id}/photo`);
+    assert(editorPhoto.status === 403, stepLabel(`editor GET photo → 403 (got ${editorPhoto.status})`));
+
+    const adminResume = await adminSession.request(`/api/admin/job-applications/${applyJson.id}/resume`);
+    assert(adminResume.status === 200, stepLabel(`admin GET resume → 200 (got ${adminResume.status})`));
+    const superPhoto = await superSession.request(`/api/admin/job-applications/${applyJson.id}/photo`);
+    assert(superPhoto.status === 200, stepLabel(`super_admin GET photo → 200 (got ${superPhoto.status})`));
+    const superDetail = await superSession.request(`/api/admin/job-applications/${applyJson.id}`);
+    const superRow = superDetail.json as { cnic?: string | null };
+    assert(superRow.cnic === "3520112345678", stepLabel("super_admin detail has raw CNIC"));
     logOk("editor matrix");
 
     section("Negative auth");

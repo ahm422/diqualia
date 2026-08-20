@@ -2,7 +2,9 @@ import "server-only";
 
 import { NextResponse, type NextRequest } from "next/server";
 
+import { JOB_APPLICATION_ADMIN_SELECT, toJobApplicationAdminView } from "@/lib/admin/job-application-view";
 import { requireAdminApi, requirePermissionApi } from "@/lib/auth/require-admin-api";
+import { hasPermission } from "@/lib/auth/session";
 import { getDb } from "@/lib/cloudflare-env";
 import { jobApplicationPatchSchema } from "@/lib/schemas/admin/career";
 
@@ -22,9 +24,14 @@ export async function GET(
     return NextResponse.json({ error: "Invalid id" }, { status: 400 });
   }
 
-  const application = await prisma.jobApplication.findUnique({ where: { id } });
+  const application = await prisma.jobApplication.findUnique({
+    where: { id },
+    select: JOB_APPLICATION_ADMIN_SELECT,
+  });
   if (!application) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  return NextResponse.json(application);
+  return NextResponse.json(
+    toJobApplicationAdminView(application, hasPermission(session, "applications.pii")),
+  );
 }
 
 export async function PATCH(
@@ -56,8 +63,11 @@ export async function PATCH(
     const application = await prisma.jobApplication.update({
       where: { id },
       data: { status: parsed.data.status },
+      select: JOB_APPLICATION_ADMIN_SELECT,
     });
-    return NextResponse.json(application);
+    return NextResponse.json(
+      toJobApplicationAdminView(application, hasPermission(session, "applications.pii")),
+    );
   } catch {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }

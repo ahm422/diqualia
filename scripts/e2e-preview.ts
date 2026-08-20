@@ -32,6 +32,7 @@ import {
   logOk,
   parseArgs,
   pngBlob,
+  jpegBlob,
   r2ObjectExists,
   section,
   stepLabel,
@@ -582,6 +583,38 @@ function pdfBlob(): Blob {
   return new Blob(["%PDF-1.4\n1 0 obj\n<<>>\nendobj\ntrailer\n%%EOF\n"], { type: "application/pdf" });
 }
 
+function todayIso() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function validApplyForm(email: string, extras?: { cnic?: string; dob?: string; photo?: Blob | null; photoName?: string; photoType?: string; declaration?: string | null }) {
+  const apply = new FormData();
+  apply.append("name", `Applicant ${TS}`);
+  apply.append("email", email);
+  apply.append("phone", "+923001111111");
+  apply.append("jobSlug", "research-analyst");
+  apply.append("coverNote", `Cover ${TS}`);
+  apply.append("dateOfBirth", extras?.dob ?? "1995-06-15");
+  apply.append("gender", "female");
+  apply.append("nationality", "Pakistan");
+  if (extras?.cnic !== "") apply.append("cnic", extras?.cnic ?? "35201-1234567-1");
+  apply.append("currentAddress", "Street 1, Gulberg");
+  apply.append("city", "Lahore");
+  apply.append("highestQualification", "bachelor");
+  apply.append("yearsOfExperience", "3");
+  apply.append("keySkills", "research, writing");
+  apply.append("noticePeriodDays", "30");
+  apply.append("expectedSalary", "150000");
+  apply.append("availableFrom", todayIso());
+  if (extras?.declaration !== null) apply.append("declarationAccepted", extras?.declaration ?? "true");
+  apply.append("resume", pdfBlob(), "resume.pdf");
+  if (extras?.photo !== null) {
+    const photo = extras?.photo ?? jpegBlob();
+    apply.append("photo", photo, extras?.photoName ?? "photo.jpg");
+  }
+  return apply;
+}
+
 async function testCareers() {
   section("Careers apply + hidden opening");
 
@@ -638,13 +671,40 @@ async function testCareers() {
   );
   logOk("honeypot apply → 400, no row");
 
+  const missingCnic = validApplyForm(`cnic-${TS}@example.com`, { cnic: "" });
+  const missingCnicRes = await fetch(`${base}/api/careers/apply`, { method: "POST", body: missingCnic, redirect: "manual" });
+  assert(missingCnicRes.status === 400, stepLabel(`apply missing PK CNIC → 400 (got ${missingCnicRes.status})`));
+
+  const missingPhoto = validApplyForm(`photo-${TS}@example.com`, { photo: null });
+  const missingPhotoRes = await fetch(`${base}/api/careers/apply`, { method: "POST", body: missingPhoto, redirect: "manual" });
+  assert(missingPhotoRes.status === 400, stepLabel(`apply missing photo → 400 (got ${missingPhotoRes.status})`));
+
+  const missingDecl = validApplyForm(`decl-${TS}@example.com`, { declaration: null });
+  const missingDeclRes = await fetch(`${base}/api/careers/apply`, { method: "POST", body: missingDecl, redirect: "manual" });
+  assert(missingDeclRes.status === 400, stepLabel(`apply missing declaration → 400 (got ${missingDeclRes.status})`));
+
+  // Rate limit is careers:${ip} 5/min — wait a window before more POSTs.
+  await new Promise((resolve) => setTimeout(resolve, 61_000));
+
+  const bigPhoto = new Blob([new Uint8Array(2 * 1024 * 1024 + 1)], { type: "image/jpeg" });
+  const oversize = validApplyForm(`oversize-${TS}@example.com`, { photo: bigPhoto, photoName: "photo.jpg" });
+  const oversizeRes = await fetch(`${base}/api/careers/apply`, { method: "POST", body: oversize, redirect: "manual" });
+  assert(oversizeRes.status === 413, stepLabel(`apply oversized photo → 413 (got ${oversizeRes.status})`));
+
+  const badMime = validApplyForm(`mime-${TS}@example.com`, {
+    photo: new Blob(["gif"], { type: "image/gif" }),
+    photoName: "photo.gif",
+  });
+  const badMimeRes = await fetch(`${base}/api/careers/apply`, { method: "POST", body: badMime, redirect: "manual" });
+  assert(badMimeRes.status === 400, stepLabel(`apply bad photo MIME → 400 (got ${badMimeRes.status})`));
+
+  const futureDob = validApplyForm(`dob-${TS}@example.com`, { dob: "2099-01-01" });
+  const futureDobRes = await fetch(`${base}/api/careers/apply`, { method: "POST", body: futureDob, redirect: "manual" });
+  assert(futureDobRes.status === 400, stepLabel(`apply future DOB → 400 (got ${futureDobRes.status})`));
+  logOk("apply validation: CNIC / photo / declaration / size / MIME / DOB");
+
   const applyEmail = `${TS}@example.com`;
-  const apply = new FormData();
-  apply.append("name", `Applicant ${TS}`);
-  apply.append("email", applyEmail);
-  apply.append("jobSlug", "research-analyst");
-  apply.append("coverNote", `Cover ${TS}`);
-  apply.append("resume", pdfBlob(), "resume.pdf");
+  const apply = validApplyForm(applyEmail);
   const applyRes = await fetch(`${base}/api/careers/apply`, { method: "POST", body: apply, redirect: "manual" });
   const applyJson = (await applyRes.json()) as Record<string, unknown>;
   assert(applyRes.status === 200, stepLabel(`apply happy path → 200 (got ${applyRes.status})`));
@@ -652,28 +712,33 @@ async function testCareers() {
   assert(typeof applyJson.id === "string", stepLabel("apply returns id"));
   assert(!("url" in applyJson), stepLabel("apply JSON has no url"));
   assert(!("resumeKey" in applyJson), stepLabel("apply JSON has no resumeKey"));
+  assert(!("photoKey" in applyJson), stepLabel("apply JSON has no photoKey"));
   logOk(`apply created id=${applyJson.id}`);
 
   const detail = await request(`/api/admin/job-applications/${applyJson.id}`);
   assert(detail.status === 200, stepLabel(`GET job-application detail → 200 (got ${detail.status})`));
-  const row = detail.json as { jobTitle?: string; resumeKey?: string };
+  const row = detail.json as { jobTitle?: string; resumeKey?: string; photoKey?: string; cnic?: string | null };
   assert(row.jobTitle === "Research Analyst", stepLabel("denormalized job_title persisted"));
   assert(typeof row.resumeKey === "string" && row.resumeKey.startsWith("resumes/"), stepLabel("resume_key under resumes/"));
+  assert(typeof row.photoKey === "string" && row.photoKey.startsWith("photos/"), stepLabel("photo_key under photos/"));
+  assert(row.cnic === "3520112345671", stepLabel("CNIC stored as 13 digits"));
   const resumeKey = row.resumeKey;
 
   const inbox = await request("/api/admin/job-applications");
   assert(inbox.status === 200, stepLabel(`GET job-applications → 200 (got ${inbox.status})`));
   const apps = inbox.json as { id: string }[];
-  assert(Array.isArray(apps) && apps.some((row) => row.id === applyJson.id), stepLabel("inbox includes new application"));
+  assert(Array.isArray(apps) && apps.some((item) => item.id === applyJson.id), stepLabel("inbox includes new application"));
 
   const resumeGet = await request(`/api/admin/job-applications/${applyJson.id}/resume`);
   assert(resumeGet.status === 200, stepLabel(`admin resume GET → 200 (got ${resumeGet.status})`));
+  const photoGet = await request(`/api/admin/job-applications/${applyJson.id}/photo`);
+  assert(photoGet.status === 200, stepLabel(`admin photo GET → 200 (got ${photoGet.status})`));
   const localResume = r2ObjectExists(resumeKey!);
   assert(
     localResume || resumeGet.status === 200,
     stepLabel(`resume in local R2 or admin stream (local=${localResume})`),
   );
-  logOk("admin resume download → 200");
+  logOk("admin resume + photo download → 200");
   logOk("apply 200 is independent of applicant confirmation email");
 }
 

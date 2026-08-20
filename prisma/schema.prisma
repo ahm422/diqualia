@@ -444,17 +444,38 @@ model JobOpening {
 }
 
 model JobApplication {
-  id           String      @id @default(uuid())
-  name         String
-  email        String
-  phone        String?
-  jobOpeningId Int?        @map("job_opening_id")
-  jobTitle     String      @map("job_title")
-  coverNote    String?     @map("cover_note")
-  resumeKey    String      @map("resume_key")
-  status       String      @default("new")
-  submittedAt  DateTime    @default(now()) @map("submitted_at")
-  jobOpening   JobOpening? @relation(fields: [jobOpeningId], references: [id], onDelete: SetNull)
+  id                  String      @id @default(uuid())
+  name                String
+  email               String
+  phone               String?
+  jobOpeningId        Int?        @map("job_opening_id")
+  jobTitle            String      @map("job_title")
+  coverNote           String?     @map("cover_note")
+  resumeKey           String      @map("resume_key")
+  status              String      @default("new")
+  submittedAt         DateTime    @default(now()) @map("submitted_at")
+  fatherOrHusbandName String?     @map("father_or_husband_name")
+  dateOfBirth         String?     @map("date_of_birth")
+  gender              String?
+  maritalStatus       String?     @map("marital_status")
+  cnic                String?
+  nationality         String?
+  currentAddress      String?     @map("current_address")
+  city                String?
+  highestQualification String?    @map("highest_qualification")
+  fieldOfStudy        String?     @map("field_of_study")
+  institutionName     String?     @map("institution_name")
+  yearOfCompletion    Int?        @map("year_of_completion")
+  yearsOfExperience   Int?        @map("years_of_experience")
+  currentEmployer     String?     @map("current_employer")
+  currentJobTitle     String?     @map("current_job_title")
+  keySkills           String?     @map("key_skills")
+  noticePeriodDays    Int?        @map("notice_period_days")
+  expectedSalary      Int?        @map("expected_salary")
+  availableFrom       String?     @map("available_from")
+  photoKey            String?     @map("photo_key")
+  declarationAccepted Boolean     @default(false) @map("declaration_accepted")
+  jobOpening          JobOpening? @relation(fields: [jobOpeningId], references: [id], onDelete: SetNull)
 
   @@index([jobOpeningId])
   @@index([status])

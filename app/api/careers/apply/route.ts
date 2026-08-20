@@ -1,11 +1,14 @@
 import { NextResponse, type NextRequest } from "next/server";
 
+import { cnicLast4 } from "@/lib/cnic";
 import { getDb, getEmail, getEnv } from "@/lib/cloudflare-env";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rateLimit";
 import {
   CareerApplyFieldsSchema,
+  classifyPhoto,
   classifyResume,
   MIME_BY_EXT,
+  PHOTO_MIME_BY_EXT,
 } from "@/lib/schemas/public/career-apply";
 import { getStorage } from "@/lib/storage";
 
@@ -17,6 +20,10 @@ function getClientIp(request: NextRequest) {
 
 function esc(s: string) {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function formText(formData: FormData, key: string) {
+  return String(formData.get(key) ?? "");
 }
 
 export async function POST(request: NextRequest) {
@@ -32,14 +39,39 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid form data" }, { status: 400 });
   }
 
+  const websiteRaw = formText(formData, "website");
+  if (websiteRaw.trim().length > 0) {
+    return NextResponse.json({ error: "Invalid submission" }, { status: 400 });
+  }
+
   const parsed = CareerApplyFieldsSchema.safeParse({
-    name: String(formData.get("name") ?? ""),
-    email: String(formData.get("email") ?? ""),
-    phone: String(formData.get("phone") ?? ""),
-    jobSlug: String(formData.get("jobSlug") ?? ""),
-    jobOpeningId: String(formData.get("jobOpeningId") ?? ""),
-    coverNote: String(formData.get("coverNote") ?? ""),
-    website: String(formData.get("website") ?? ""),
+    name: formText(formData, "name"),
+    email: formText(formData, "email"),
+    phone: formText(formData, "phone"),
+    jobSlug: formText(formData, "jobSlug"),
+    jobOpeningId: formText(formData, "jobOpeningId"),
+    coverNote: formText(formData, "coverNote"),
+    website: formText(formData, "website"),
+    fatherOrHusbandName: formText(formData, "fatherOrHusbandName"),
+    dateOfBirth: formText(formData, "dateOfBirth"),
+    gender: formText(formData, "gender"),
+    maritalStatus: formText(formData, "maritalStatus"),
+    cnic: formText(formData, "cnic"),
+    nationality: formText(formData, "nationality") || "Pakistan",
+    currentAddress: formText(formData, "currentAddress"),
+    city: formText(formData, "city"),
+    highestQualification: formText(formData, "highestQualification"),
+    fieldOfStudy: formText(formData, "fieldOfStudy"),
+    institutionName: formText(formData, "institutionName"),
+    yearOfCompletion: formText(formData, "yearOfCompletion"),
+    yearsOfExperience: formText(formData, "yearsOfExperience"),
+    currentEmployer: formText(formData, "currentEmployer"),
+    currentJobTitle: formText(formData, "currentJobTitle"),
+    keySkills: formText(formData, "keySkills"),
+    noticePeriodDays: formText(formData, "noticePeriodDays"),
+    expectedSalary: formText(formData, "expectedSalary"),
+    availableFrom: formText(formData, "availableFrom"),
+    declarationAccepted: formData.get("declarationAccepted"),
   });
   if (!parsed.success) {
     return NextResponse.json(
@@ -48,11 +80,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { website, name, email, phone, jobSlug, jobOpeningId, coverNote } = parsed.data;
-
-  if (website && website.trim().length > 0) {
-    return NextResponse.json({ error: "Invalid submission" }, { status: 400 });
-  }
+  const fields = parsed.data;
 
   const resumeRaw = formData.get("resume");
   const resume = resumeRaw instanceof File ? resumeRaw : null;
@@ -70,14 +98,30 @@ export async function POST(request: NextRequest) {
       { status: 400 },
     );
   }
-  const ext = resumeCheck.ext;
+
+  const photoRaw = formData.get("photo");
+  const photo = photoRaw instanceof File ? photoRaw : null;
+  const photoCheck = classifyPhoto(photo);
+  if (!photo || !photoCheck.ok) {
+    const reason = photoCheck.ok ? "required" : photoCheck.reason;
+    if (reason === "required") {
+      return NextResponse.json({ error: "Photograph is required" }, { status: 400 });
+    }
+    if (reason === "too_large") {
+      return NextResponse.json({ error: "Photograph exceeds 2 MB limit" }, { status: 413 });
+    }
+    return NextResponse.json(
+      { error: "Photograph type not allowed. Accepted: JPG, PNG, WebP." },
+      { status: 400 },
+    );
+  }
 
   let opening = null;
-  const numId = jobOpeningId ? parseInt(jobOpeningId, 10) : NaN;
+  const numId = fields.jobOpeningId ? parseInt(fields.jobOpeningId, 10) : NaN;
   if (Number.isInteger(numId)) {
     opening = await prisma.jobOpening.findUnique({ where: { id: numId } });
-  } else if (jobSlug) {
-    opening = await prisma.jobOpening.findUnique({ where: { slug: jobSlug } });
+  } else if (fields.jobSlug) {
+    opening = await prisma.jobOpening.findUnique({ where: { slug: fields.jobSlug } });
   }
   if (!opening || !opening.visible) {
     return NextResponse.json({ error: "This opening is not available" }, { status: 400 });
@@ -89,15 +133,36 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Upload failed" }, { status: 500 });
   }
 
-  const key = `resumes/${crypto.randomUUID()}.${ext}`;
-  const body = Buffer.from(await resume.arrayBuffer());
   const storage = getStorage(env.R2);
-  const contentType = MIME_BY_EXT[ext][0];
+  const resumeKey = `resumes/${crypto.randomUUID()}.${resumeCheck.ext}`;
+  const photoKey = `photos/${crypto.randomUUID()}.${photoCheck.ext}`;
+  const resumeType = MIME_BY_EXT[resumeCheck.ext][0];
+  const photoType = PHOTO_MIME_BY_EXT[photoCheck.ext][0];
 
   try {
-    await storage.uploadObject({ key, body, contentType });
+    await storage.uploadObject({
+      key: resumeKey,
+      body: Buffer.from(await resume.arrayBuffer()),
+      contentType: resumeType,
+    });
   } catch (err) {
-    console.error("[careers/apply] R2 error:", err);
+    console.error("[careers/apply] R2 resume error:", err);
+    return NextResponse.json({ error: "Upload failed" }, { status: 500 });
+  }
+
+  try {
+    await storage.uploadObject({
+      key: photoKey,
+      body: Buffer.from(await photo.arrayBuffer()),
+      contentType: photoType,
+    });
+  } catch (err) {
+    console.error("[careers/apply] R2 photo error:", err);
+    try {
+      await storage.deleteObject({ key: resumeKey });
+    } catch {
+      // ignore cleanup failure
+    }
     return NextResponse.json({ error: "Upload failed" }, { status: 500 });
   }
 
@@ -105,20 +170,46 @@ export async function POST(request: NextRequest) {
   try {
     application = await prisma.jobApplication.create({
       data: {
-        name: name.trim(),
-        email: email.trim(),
-        phone: phone?.trim() ? phone.trim() : null,
+        name: fields.name.trim(),
+        email: fields.email.trim(),
+        phone: fields.phone.trim(),
         jobOpeningId: opening.id,
         jobTitle: opening.title,
-        coverNote: coverNote?.trim() ? coverNote.trim() : null,
-        resumeKey: key,
+        coverNote: fields.coverNote,
+        resumeKey,
+        photoKey,
         status: "new",
+        fatherOrHusbandName: fields.fatherOrHusbandName,
+        dateOfBirth: fields.dateOfBirth,
+        gender: fields.gender,
+        maritalStatus: fields.maritalStatus,
+        cnic: fields.cnic,
+        nationality: fields.nationality.trim(),
+        currentAddress: fields.currentAddress.trim(),
+        city: fields.city.trim(),
+        highestQualification: fields.highestQualification,
+        fieldOfStudy: fields.fieldOfStudy,
+        institutionName: fields.institutionName,
+        yearOfCompletion: fields.yearOfCompletion,
+        yearsOfExperience: fields.yearsOfExperience,
+        currentEmployer: fields.currentEmployer,
+        currentJobTitle: fields.currentJobTitle,
+        keySkills: fields.keySkills.trim(),
+        noticePeriodDays: fields.noticePeriodDays,
+        expectedSalary: fields.expectedSalary,
+        availableFrom: fields.availableFrom,
+        declarationAccepted: true,
       },
     });
   } catch (err) {
     console.error("[careers/apply] persist failed:", err);
     try {
-      await storage.deleteObject({ key });
+      await storage.deleteObject({ key: resumeKey });
+    } catch {
+      // ignore cleanup failure
+    }
+    try {
+      await storage.deleteObject({ key: photoKey });
     } catch {
       // ignore cleanup failure
     }
@@ -131,28 +222,38 @@ export async function POST(request: NextRequest) {
       console.warn("[careers/apply] EMAIL binding unavailable; skipping send");
     } else {
       try {
-        const subject = `New application: ${opening.title} — ${name}`;
+        const last4 = cnicLast4(fields.cnic);
+        const inboxUrl = `https://diqualia.com/admin/careers/applications?highlight=${application.id}`;
+        const subject = `New application: ${opening.title} — ${fields.name}`;
         const html = `
         <p><b>Role:</b> ${esc(opening.title)}</p>
-        <p><b>Name:</b> ${esc(name)}</p>
-        <p><b>Email:</b> ${esc(email)}</p>
-        <p><b>Phone:</b> ${esc(phone?.trim() ? phone : "—")}</p>
-        <p><b>Cover note:</b></p>
-        <p>${esc(coverNote?.trim() ? coverNote : "—").replace(/\n/g, "<br>")}</p>
+        <p><b>Name:</b> ${esc(fields.name)}</p>
+        <p><b>Email:</b> ${esc(fields.email)}</p>
+        <p><b>Phone:</b> ${esc(fields.phone)}</p>
+        <p><b>CNIC (last 4):</b> ${esc(last4)}</p>
+        <p><b>City:</b> ${esc(fields.city)}</p>
+        <p><b>Years of experience:</b> ${esc(String(fields.yearsOfExperience))}</p>
+        <p><b>Notice period (days):</b> ${esc(String(fields.noticePeriodDays))}</p>
+        <p><b>Expected salary (PKR):</b> ${esc(String(fields.expectedSalary))}</p>
+        <p><a href="${esc(inboxUrl)}">Review in admin</a></p>
       `;
         const text = [
           `Role: ${opening.title}`,
-          `Name: ${name}`,
-          `Email: ${email}`,
-          `Phone: ${phone?.trim() ? phone : "—"}`,
-          `Cover note:`,
-          coverNote?.trim() ? coverNote : "—",
+          `Name: ${fields.name}`,
+          `Email: ${fields.email}`,
+          `Phone: ${fields.phone}`,
+          `CNIC (last 4): ${last4}`,
+          `City: ${fields.city}`,
+          `Years of experience: ${fields.yearsOfExperience}`,
+          `Notice period (days): ${fields.noticePeriodDays}`,
+          `Expected salary (PKR): ${fields.expectedSalary}`,
+          `Review: ${inboxUrl}`,
         ].join("\n");
 
         await mailer.send({
           to: process.env.ADMIN_EMAIL!,
           from: { email: "noreply@diqualia.com", name: "DiQualia" },
-          replyTo: email,
+          replyTo: fields.email,
           subject,
           html,
           text,
@@ -175,7 +276,7 @@ export async function POST(request: NextRequest) {
         ].join("\n");
 
         await mailer.send({
-          to: email,
+          to: fields.email,
           from: { email: "noreply@diqualia.com", name: "DiQualia" },
           ...(process.env.ADMIN_EMAIL ? { replyTo: process.env.ADMIN_EMAIL } : {}),
           subject,

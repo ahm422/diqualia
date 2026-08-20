@@ -823,6 +823,59 @@ export async function seedCms(prisma: PrismaClient): Promise<void> {
   }
   console.log("JobOpening ready (2)");
 
+  const analyst = await prisma.jobOpening.findUnique({ where: { slug: "research-analyst" } });
+  if (analyst) {
+    await prisma.jobApplication.deleteMany({
+      where: { email: { in: ["qa-full-applicant@example.com", "qa-legacy-applicant@example.com"] } },
+    });
+    await prisma.jobApplication.create({
+      data: {
+        name: "QA Full Applicant",
+        email: "qa-full-applicant@example.com",
+        phone: "+923001234567",
+        jobOpeningId: analyst.id,
+        jobTitle: analyst.title,
+        coverNote: "Seeded full packet for admin QA.",
+        resumeKey: "resumes/11111111-1111-4111-8111-aaaaaaaaaaa1.pdf",
+        photoKey: "photos/11111111-1111-4111-8111-aaaaaaaaaaa2.jpg",
+        status: "new",
+        fatherOrHusbandName: "Ahmed Khan",
+        dateOfBirth: "1994-03-12",
+        gender: "female",
+        maritalStatus: "single",
+        cnic: "3520212345671",
+        nationality: "Pakistan",
+        currentAddress: "House 12, Street 4, Gulberg",
+        city: "Lahore",
+        highestQualification: "master",
+        fieldOfStudy: "Economics",
+        institutionName: "LUMS",
+        yearOfCompletion: 2018,
+        yearsOfExperience: 6,
+        currentEmployer: "Example Research",
+        currentJobTitle: "Analyst",
+        keySkills: "Desk research, interviews, briefing",
+        noticePeriodDays: 30,
+        expectedSalary: 250000,
+        availableFrom: "2026-09-01",
+        declarationAccepted: true,
+      },
+    });
+    await prisma.jobApplication.create({
+      data: {
+        name: "QA Legacy Applicant",
+        email: "qa-legacy-applicant@example.com",
+        phone: null,
+        jobOpeningId: analyst.id,
+        jobTitle: analyst.title,
+        coverNote: "Legacy-shaped row with null PII columns.",
+        resumeKey: "resumes/11111111-1111-4111-8111-aaaaaaaaaaa3.pdf",
+        status: "reviewing",
+      },
+    });
+    console.log("JobApplication ready (2 QA fixtures)");
+  }
+
   // ─── FooterSettings ───────────────────────────────────────────────────────
   await prisma.footerSettings.upsert({
     where: { id: 1 },

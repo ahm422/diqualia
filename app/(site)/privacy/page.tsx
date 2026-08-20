@@ -13,7 +13,7 @@ export default function PrivacyPage() {
         Privacy
       </h1>
       <p className="mt-6 text-sm leading-8" style={{ color: "var(--text-muted)" }}>
-        This is a placeholder privacy page for the DiQualia marketing site. For privacy enquiries, email{" "}
+        This is a placeholder privacy page for the DiQualia marketing site. Job applications may include a CNIC and photograph; rejected applications are retained for 12 months, then deleted. For privacy enquiries, email{" "}
         <a href="mailto:intel@diqualia.com" style={{ color: "var(--gold)" }}>
           intel@diqualia.com
         </a>

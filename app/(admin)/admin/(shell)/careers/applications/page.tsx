@@ -1,7 +1,9 @@
 import { Suspense } from "react";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
+import { hasPermission } from "@/lib/auth/session";
 import { getDb } from "@/lib/cloudflare-env";
+import { JOB_APPLICATION_ADMIN_SELECT, toJobApplicationAdminView } from "@/lib/admin/job-application-view";
 import { AdminPageHeader } from "@/components/admin";
 import { jobApplicationStatusEnum } from "@/lib/schemas/admin/career";
 
@@ -13,14 +15,16 @@ export default async function JobApplicationsAdminPage({
   searchParams: Promise<{ highlight?: string; status?: string }>;
 }) {
   const prisma = await getDb();
-  await requireAdmin();
+  const session = await requireAdmin();
   const sp = await searchParams;
   const statusParsed = sp.status ? jobApplicationStatusEnum.safeParse(sp.status) : null;
   const status = statusParsed?.success ? statusParsed.data : undefined;
+  const canRevealPii = hasPermission(session, "applications.pii");
 
   const applications = await prisma.jobApplication.findMany({
     orderBy: { submittedAt: "desc" },
     where: status ? { status } : undefined,
+    select: JOB_APPLICATION_ADMIN_SELECT,
   });
 
   return (
@@ -30,7 +34,11 @@ export default async function JobApplicationsAdminPage({
         description="Inbox for /careers apply submissions"
       />
       <Suspense fallback={<p className="text-sm text-[var(--diq_mid)]">Loading…</p>}>
-        <ApplicationsTable initialApplications={applications} initialStatus={status ?? ""} />
+        <ApplicationsTable
+          initialApplications={applications.map((row) => toJobApplicationAdminView(row, canRevealPii))}
+          initialStatus={status ?? ""}
+          canRevealPii={canRevealPii}
+        />
       </Suspense>
     </div>
   );

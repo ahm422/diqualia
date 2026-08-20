@@ -104,6 +104,11 @@ export function pngBlob(): Blob {
   return new Blob([buf], { type: "image/png" });
 }
 
+export function jpegBlob(): Blob {
+  const buf = Buffer.from(PNG_1X1_BASE64, "base64");
+  return new Blob([buf], { type: "image/jpeg" });
+}
+
 export function d1Query(sql: string): unknown[] {
   try {
     const out = execSync(

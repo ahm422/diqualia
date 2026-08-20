@@ -22,6 +22,7 @@ const PERMISSION_LABELS: Record<PermissionKey, string> = {
   "users.manage": "List / create / edit users",
   "users.delete": "Delete users",
   "roles.manage": "Manage roles",
+  "applications.pii": "Reveal applicant CNIC; download resume/photo; export CSV",
 };
 
 export type RoleEditorInitial = {

@@ -17,15 +17,28 @@ function Eyebrow({ children, center }: { children: React.ReactNode; center?: boo
 }
 
 async function loadCareers() {
-  const prisma = await getDb();
-  const [page, openings] = await Promise.all([
-    prisma.careerPage.findUnique({ where: { id: 1 } }),
-    prisma.jobOpening.findMany({
-      where: { visible: true },
-      orderBy: { order: "asc" },
-    }),
-  ]);
-  return { page, openings };
+  try {
+    const prisma = await getDb();
+    const [page, openings] = await Promise.all([
+      prisma.careerPage.findUnique({ where: { id: 1 } }),
+      prisma.jobOpening.findMany({
+        where: { visible: true },
+        orderBy: { order: "asc" },
+        select: {
+          id: true,
+          slug: true,
+          title: true,
+          department: true,
+          location: true,
+          type: true,
+        },
+      }),
+    ]);
+    return { page, openings };
+  } catch (err) {
+    console.error("[careers] loadCareers failed:", err);
+    return { page: null, openings: [] as { id: number; slug: string; title: string; department: string; location: string; type: string }[] };
+  }
 }
 
 export async function generateMetadata(): Promise<Metadata> {

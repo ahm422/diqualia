@@ -6,7 +6,8 @@
  *   npm run db:migrate:validate -- --remote   # Phase 9 cutover
  *   tsx scripts/validate-migration.ts --local --file scratch/export.json
  *
- * Exits 1 if any table count mismatch or JSON spot-check fails.
+ * Exits 1 if any CMS table count mismatch or JSON spot-check fails.
+ * `leads` and `adminUsers` are operational (seed/e2e) and are not compared.
  */
 import {
   parseMigrationCliArgs,
@@ -21,7 +22,10 @@ import {
   countRemoteTables,
   queryRemoteJsonColumn,
 } from "./lib/migration-ops-remote";
-import { TABLE_MANIFEST } from "./lib/migration-types";
+import { TABLE_MANIFEST, type ExportTableKey } from "./lib/migration-types";
+
+/** Seed/e2e mutate these; they are not part of the CMS snapshot contract. */
+const OPERATIONAL_KEYS = new Set<ExportTableKey>(["leads", "adminUsers"]);
 
 function isNonEmptyStringArray(value: unknown): value is string[] {
   return (
@@ -45,6 +49,11 @@ async function main() {
     for (const { key } of TABLE_MANIFEST) {
       const expected = payload.counts[key];
       const actual = d1Counts[key];
+      if (OPERATIONAL_KEYS.has(key)) {
+        const label = key.padEnd(20);
+        console.error(`⏭️  ${label} ${actual} (operational, not compared)`);
+        continue;
+      }
       const ok = expected === actual;
       if (!ok) failed = true;
       const mark = ok ? "✅" : "❌";
@@ -89,6 +98,11 @@ async function main() {
     for (const { key } of TABLE_MANIFEST) {
       const expected = payload.counts[key];
       const actual = d1Counts[key];
+      if (OPERATIONAL_KEYS.has(key)) {
+        const label = key.padEnd(20);
+        console.error(`⏭️  ${label} ${actual} (operational, not compared)`);
+        continue;
+      }
       const ok = expected === actual;
       if (!ok) failed = true;
       const mark = ok ? "✅" : "❌";
