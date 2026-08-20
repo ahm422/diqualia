@@ -2,7 +2,8 @@ import "server-only";
 
 import { NextResponse, type NextRequest } from "next/server";
 
-import { requireAdminApi } from "@/lib/auth/require-admin-api";
+import { requirePermissionApi } from "@/lib/auth/require-admin-api";
+import { hasPermission } from "@/lib/auth/session";
 import { getDb } from "@/lib/cloudflare-env";
 import { blogPostPatchSchema } from "@/lib/schemas/admin/blog";
 import { revalidateBlogPost, revalidatePage } from "@/lib/revalidate-site";
@@ -15,7 +16,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const prisma = await getDb();
-  const session = await requireAdminApi();
+  const session = await requirePermissionApi("content.edit");
   if (session instanceof NextResponse) return session;
 
   const { id } = await params;
@@ -38,6 +39,14 @@ export async function PATCH(
   const existing = await prisma.blogPost.findUnique({ where: { id } });
   if (!existing) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  if (
+    parsed.data.status === "published" &&
+    existing.status !== "published" &&
+    !hasPermission(session, "content.publish")
+  ) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   if (parsed.data.slug && parsed.data.slug !== existing.slug) {
@@ -85,7 +94,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const prisma = await getDb();
-  const session = await requireAdminApi();
+  const session = await requirePermissionApi("content.delete");
   if (session instanceof NextResponse) return session;
 
   const { id } = await params;

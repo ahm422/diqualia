@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { AdminToaster } from "@/components/admin";
 
+import { AdminSessionProvider } from "../AdminSessionProvider";
 import { AdminSidebar } from "../AdminSidebar";
 
 function AdminSidebarFallback() {
@@ -12,15 +13,17 @@ function AdminSidebarFallback() {
 }
 
 export default async function ShellLayout({ children }: { children: React.ReactNode }) {
-  await requireAdmin();
+  const session = await requireAdmin();
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      <Suspense fallback={<AdminSidebarFallback />}>
-        <AdminSidebar />
-      </Suspense>
-      <main className="flex-1 overflow-y-auto p-8">{children}</main>
-      <AdminToaster />
-    </div>
+    <AdminSessionProvider session={session}>
+      <div className="flex h-screen overflow-hidden">
+        <Suspense fallback={<AdminSidebarFallback />}>
+          <AdminSidebar />
+        </Suspense>
+        <main className="flex-1 overflow-y-auto p-8">{children}</main>
+        <AdminToaster />
+      </div>
+    </AdminSessionProvider>
   );
 }

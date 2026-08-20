@@ -3,23 +3,26 @@ import "server-only";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
-import { verifyAdminToken } from "./jwt";
-import { COOKIE_NAME } from "./session";
-
-export type AdminSession = { id: string; email: string };
+import { loadAdminSessionFromToken } from "./load-admin-session";
+import { COOKIE_NAME, hasPermission, type AdminSession, type PermissionKey } from "./session";
 
 export async function requireAdminApi(): Promise<AdminSession | NextResponse> {
   const cookieStore = await cookies();
   const token = cookieStore.get(COOKIE_NAME)?.value;
   if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  try {
-    const { sub: id, email } = await verifyAdminToken(token);
-    if (!process.env.ADMIN_EMAIL || email !== process.env.ADMIN_EMAIL) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-    return { id, email };
-  } catch {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const session = await loadAdminSessionFromToken(token);
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  return session;
+}
+
+export async function requirePermissionApi(
+  key: PermissionKey,
+): Promise<AdminSession | NextResponse> {
+  const session = await requireAdminApi();
+  if (session instanceof NextResponse) return session;
+  if (!hasPermission(session, key)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
+  return session;
 }

@@ -3,10 +3,13 @@
 import { useState } from "react";
 
 import { AdminSection } from "@/components/admin";
+import { useCan } from "@/app/(admin)/admin/AdminSessionProvider";
 
 import type { MarqueeItem } from "../types";
 
 export function MarqueeEditor({ initial }: { initial: MarqueeItem[] }) {
+  const canCreate = useCan("content.create");
+  const canDelete = useCan("content.delete");
   const [items, setItems] = useState<MarqueeItem[]>(initial);
   const [newText, setNewText] = useState("");
   const [adding, setAdding] = useState(false);
@@ -82,13 +85,16 @@ export function MarqueeEditor({ initial }: { initial: MarqueeItem[] }) {
                   </div>
                 </td>
                 <td className="py-2">
-                  <button onClick={() => del(item.id)} className="text-xs text-red-400 hover:text-red-300">Delete</button>
+                  {canDelete && (
+                    <button onClick={() => del(item.id)} className="text-xs text-red-400 hover:text-red-300">Delete</button>
+                  )}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+      {canCreate && (
       <div className="mt-4 flex flex-wrap items-end gap-2 border-t border-[var(--diq_border2)] pt-4">
         <div className="flex-1">
           <label className="mb-1 block text-[11px] uppercase tracking-widest text-[var(--diq_mid)]">New item</label>
@@ -100,6 +106,7 @@ export function MarqueeEditor({ initial }: { initial: MarqueeItem[] }) {
           Add
         </button>
       </div>
+      )}
     </AdminSection>
   );
 }

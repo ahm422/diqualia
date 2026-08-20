@@ -2,7 +2,7 @@ import "server-only";
 
 import { NextResponse } from "next/server";
 
-import { requireAdminApi } from "@/lib/auth/require-admin-api";
+import { requireAdminApi, requirePermissionApi } from "@/lib/auth/require-admin-api";
 import { getDb } from "@/lib/cloudflare-env";
 import { industrySectorPostSchema } from "@/lib/schemas/admin/industries";
 import { revalidateIndustrySector, revalidatePage } from "@/lib/revalidate-site";
@@ -19,7 +19,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   const prisma = await getDb();
-  const session = await requireAdminApi();
+  const session = await requirePermissionApi("content.create");
   if (session instanceof NextResponse) return session;
 
   let body: unknown;

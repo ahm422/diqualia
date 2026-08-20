@@ -2,6 +2,34 @@ import type { NextRequest, NextResponse } from "next/server";
 
 export const COOKIE_NAME = "dq_admin_token";
 
+export const PERMISSION_KEYS = [
+  "content.create",
+  "content.edit",
+  "content.delete",
+  "content.publish",
+  "users.manage",
+  "users.delete",
+  "roles.manage",
+] as const;
+
+export type PermissionKey = (typeof PERMISSION_KEYS)[number];
+
+export type AdminSession = {
+  id: string;
+  email: string;
+  name: string | null;
+  role: { id: string; name: string; isSystem: boolean };
+  permissions: PermissionKey[];
+};
+
+export function isPermissionKey(value: string): value is PermissionKey {
+  return (PERMISSION_KEYS as readonly string[]).includes(value);
+}
+
+export function hasPermission(session: AdminSession, key: PermissionKey): boolean {
+  return session.permissions.includes(key);
+}
+
 const BASE_OPTS = {
   httpOnly: true,
   sameSite: "lax" as const,

@@ -11,6 +11,8 @@ import {
   useAdminSave,
 } from "@/components/admin";
 
+import { useCan } from "@/app/(admin)/admin/AdminSessionProvider";
+
 import type { ExploreCard, ExploreSection } from "../types";
 
 export function ExploreEditor({
@@ -49,6 +51,8 @@ function ExploreSectionHeader({ initial }: { initial: ExploreSection }) {
 }
 
 function ExploreCardsSection({ initial }: { initial: ExploreCard[] }) {
+  const canCreate = useCan("content.create");
+  const canDelete = useCan("content.delete");
   const [cards, setCards] = useState<ExploreCard[]>(initial);
   const [newHref, setNewHref] = useState("");
   const [newTitle, setNewTitle] = useState("");
@@ -128,12 +132,15 @@ function ExploreCardsSection({ initial }: { initial: ExploreCard[] }) {
                 <button onClick={() => move(card.id, -1)} disabled={idx === 0} className="rounded px-1 text-[var(--diq_mid)] hover:text-foreground disabled:opacity-30 text-xs">↑</button>
                 <button onClick={() => move(card.id, 1)} disabled={idx === cards.length - 1} className="rounded px-1 text-[var(--diq_mid)] hover:text-foreground disabled:opacity-30 text-xs">↓</button>
               </div>
-              <button onClick={() => del(card.id)} className="text-xs text-red-400 hover:text-red-300 ml-auto">Delete</button>
+              {canDelete && (
+                <button onClick={() => del(card.id)} className="text-xs text-red-400 hover:text-red-300 ml-auto">Delete</button>
+              )}
             </div>
           </div>
         ))}
       </div>
 
+      {canCreate && (
       <div className="mt-4 border-t border-[var(--diq_border2)] pt-4">
         <div className="text-xs uppercase tracking-widest text-[var(--diq_mid)] mb-3">Add card</div>
         <div className="grid gap-3 sm:grid-cols-2">
@@ -158,6 +165,7 @@ function ExploreCardsSection({ initial }: { initial: ExploreCard[] }) {
           Add Card
         </button>
       </div>
+      )}
     </AdminSection>
   );
 }

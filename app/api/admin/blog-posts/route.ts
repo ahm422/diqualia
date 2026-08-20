@@ -2,7 +2,8 @@ import "server-only";
 
 import { NextResponse } from "next/server";
 
-import { requireAdminApi } from "@/lib/auth/require-admin-api";
+import { requireAdminApi, requirePermissionApi } from "@/lib/auth/require-admin-api";
+import { hasPermission } from "@/lib/auth/session";
 import { getDb } from "@/lib/cloudflare-env";
 import { blogPostCreateSchema } from "@/lib/schemas/admin/blog";
 import { revalidateBlogPost, revalidatePage } from "@/lib/revalidate-site";
@@ -20,7 +21,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   const prisma = await getDb();
-  const session = await requireAdminApi();
+  const session = await requirePermissionApi("content.create");
   if (session instanceof NextResponse) return session;
 
   let body: unknown;
@@ -36,6 +37,9 @@ export async function POST(request: Request) {
   }
 
   const status = parsed.data.status ?? "draft";
+  if (status === "published" && !hasPermission(session, "content.publish")) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
   const existing = await prisma.blogPost.findUnique({
     where: { slug: parsed.data.slug },
   });

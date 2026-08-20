@@ -1,10 +1,10 @@
-import { requireAdmin } from "@/lib/auth/require-admin";
+import { requirePermission } from "@/lib/auth/require-admin";
 import { AdminPageHeader } from "@/components/admin";
 
 import { JobOpeningEditor } from "../JobOpeningEditor";
 
 export default async function NewJobOpeningPage() {
-  await requireAdmin();
+  await requirePermission("content.create");
 
   return (
     <div>

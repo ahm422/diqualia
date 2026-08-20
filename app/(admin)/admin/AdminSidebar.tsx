@@ -9,10 +9,12 @@ import { BrandLogo } from "@/app/components/BrandLogo";
 
 import {
   ADMIN_NAV,
+  filterAdminNav,
   findActiveGroupId,
   isLeafActive,
   type NavGroup,
 } from "./adminNav";
+import { useAdminSession } from "./AdminSessionProvider";
 
 const FOCUS =
   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]";
@@ -21,7 +23,9 @@ export function AdminSidebar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const currentGroupId = findActiveGroupId(pathname, searchParams);
+  const session = useAdminSession();
+  const nav = filterAdminNav(ADMIN_NAV, session.permissions);
+  const currentGroupId = findActiveGroupId(pathname, searchParams, nav);
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
@@ -51,6 +55,7 @@ export function AdminSidebar() {
       <nav aria-label="Admin" className="min-h-0 flex-1 overflow-y-auto px-3 pb-4">
         <NavTree
           key={currentGroupId ?? "none"}
+          groups={nav}
           currentGroupId={currentGroupId}
           pathname={pathname}
           searchParams={searchParams}
@@ -80,10 +85,12 @@ export function AdminSidebar() {
 }
 
 function NavTree({
+  groups,
   currentGroupId,
   pathname,
   searchParams,
 }: {
+  groups: NavGroup[];
   currentGroupId: string | null;
   pathname: string;
   searchParams: Pick<URLSearchParams, "get">;
@@ -103,7 +110,7 @@ function NavTree({
 
   return (
     <ul className="flex flex-col gap-0.5">
-      {ADMIN_NAV.map((group) => (
+      {groups.map((group) => (
         <NavGroupItem
           key={group.id}
           group={group}

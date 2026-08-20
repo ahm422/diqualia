@@ -3,7 +3,7 @@ import "server-only";
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 
-import { requireAdminApi } from "@/lib/auth/require-admin-api";
+import { requirePermissionApi } from "@/lib/auth/require-admin-api";
 import { getEnv } from "@/lib/cloudflare-env";
 import { checkRateLimit } from "@/lib/rateLimit";
 import { getStorage, publicUrl } from "@/lib/storage";
@@ -26,7 +26,7 @@ const DeleteSchema = z.object({
 
 export async function POST(request: NextRequest) {
   // 1. Auth — returns 401 JSON if invalid; never redirects
-  const session = await requireAdminApi();
+  const session = await requirePermissionApi("content.edit");
   if (session instanceof NextResponse) return session;
 
   // 2. Rate limit — 20 uploads per minute per admin
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const session = await requireAdminApi();
+  const session = await requirePermissionApi("content.edit");
   if (session instanceof NextResponse) return session;
 
   let body: unknown;

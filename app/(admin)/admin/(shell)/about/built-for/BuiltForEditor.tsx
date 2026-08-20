@@ -3,10 +3,13 @@
 import { useState } from "react";
 
 import { AdminSection } from "@/components/admin";
+import { useCan } from "@/app/(admin)/admin/AdminSessionProvider";
 
 import type { BuiltForItem } from "../types";
 
 export function BuiltForEditor({ initial }: { initial: BuiltForItem[] }) {
+  const canCreate = useCan("content.create");
+  const canDelete = useCan("content.delete");
   const [items, setItems] = useState<BuiltForItem[]>(initial);
   const [newTitle, setNewTitle] = useState("");
   const [newDesc, setNewDesc] = useState("");
@@ -86,12 +89,15 @@ export function BuiltForEditor({ initial }: { initial: BuiltForItem[] }) {
                 <button onClick={() => move(item.id, -1)} disabled={idx === 0} className="rounded px-1 text-[var(--diq_mid)] hover:text-foreground disabled:opacity-30 text-xs">↑</button>
                 <button onClick={() => move(item.id, 1)} disabled={idx === items.length - 1} className="rounded px-1 text-[var(--diq_mid)] hover:text-foreground disabled:opacity-30 text-xs">↓</button>
               </div>
-              <button onClick={() => del(item.id)} className="ml-auto text-xs text-red-400 hover:text-red-300">Delete</button>
+              {canDelete && (
+                <button onClick={() => del(item.id)} className="ml-auto text-xs text-red-400 hover:text-red-300">Delete</button>
+              )}
             </div>
           </div>
         ))}
       </div>
 
+      {canCreate && (
       <div className="mt-4 border-t border-[var(--diq_border2)] pt-4">
         <div className="text-xs uppercase tracking-widest text-[var(--diq_mid)] mb-3">Add item</div>
         <div className="mb-2">
@@ -109,6 +115,7 @@ export function BuiltForEditor({ initial }: { initial: BuiltForItem[] }) {
           Add Item
         </button>
       </div>
+      )}
     </AdminSection>
   );
 }

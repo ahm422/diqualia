@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { requireAdmin } from "@/lib/auth/require-admin";
+import { hasPermission } from "@/lib/auth/session";
 import { getDb } from "@/lib/cloudflare-env";
 import { Button } from "@/components/ui/button";
 
@@ -8,7 +9,8 @@ import { BlogPostsList } from "./BlogPostsList";
 
 export default async function BlogAdminPage() {
   const prisma = await getDb();
-  await requireAdmin();
+  const session = await requireAdmin();
+  const canCreate = hasPermission(session, "content.create");
 
   const posts = await prisma.blogPost.findMany({
     orderBy: { updatedAt: "desc" },
@@ -23,9 +25,11 @@ export default async function BlogAdminPage() {
             Draft and publish Insights posts. Drafts stay off the public site.
           </p>
         </div>
-        <Button asChild variant="secondary" className="shrink-0">
-          <Link href="/admin/blog/new">New post</Link>
-        </Button>
+        {canCreate && (
+          <Button asChild variant="secondary" className="shrink-0">
+            <Link href="/admin/blog/new">New post</Link>
+          </Button>
+        )}
       </div>
       <BlogPostsList initialPosts={posts} />
     </div>

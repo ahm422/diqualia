@@ -15,6 +15,7 @@ import {
   useAdminSave,
 } from "@/components/admin";
 import { slugify } from "@/lib/slugify";
+import { useCan } from "@/app/(admin)/admin/AdminSessionProvider";
 
 export type BlogPostData = {
   id: string;
@@ -36,6 +37,8 @@ type Props = {
 export function BlogPostEditor({ initial }: Props) {
   const router = useRouter();
   const isNew = !initial;
+  const canDelete = useCan("content.delete");
+  const canPublish = useCan("content.publish");
 
   const [slug, setSlug] = useState(initial?.slug ?? "");
   const [title, setTitle] = useState(initial?.title ?? "");
@@ -171,14 +174,20 @@ export function BlogPostEditor({ initial }: Props) {
         </AdminField>
 
         <AdminField label="Status">
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value as "draft" | "published")}
-            className="w-full rounded border border-[var(--diq_border)] bg-[var(--diq_deep)] px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-[var(--gold)]"
-          >
-            <option value="draft">Draft</option>
-            <option value="published">Published</option>
-          </select>
+          {canPublish ? (
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value as "draft" | "published")}
+              className="w-full rounded border border-[var(--diq_border)] bg-[var(--diq_deep)] px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-[var(--gold)]"
+            >
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
+            </select>
+          ) : (
+            <p className="text-sm text-[var(--diq_mid)]">
+              {status === "published" ? "Published" : "Draft"}
+            </p>
+          )}
         </AdminField>
 
         <AdminImageField
@@ -194,7 +203,7 @@ export function BlogPostEditor({ initial }: Props) {
           ) : (
             <AdminSaveButton onClick={handleSave} saving={saving} />
           )}
-          {!isNew && (
+          {!isNew && canDelete && (
             <button
               type="button"
               onClick={handleDelete}

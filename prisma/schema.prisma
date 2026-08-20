@@ -22,12 +22,45 @@ model Lead {
   @@map("leads")
 }
 
+model Role {
+  id          String           @id @default(uuid())
+  name        String           @unique
+  isSystem    Boolean          @default(false) @map("is_system")
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+  permissions RolePermission[]
+  users       AdminUser[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id    String           @id @default(uuid())
+  key   String           @unique
+  roles RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  roleId       String     @map("role_id")
+  permissionId String     @map("permission_id")
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
 model AdminUser {
   id            String         @id @default(uuid())
   email         String         @unique
+  name          String?
   passwordHash  String         @map("password_hash")
+  roleId        String         @map("role_id")
   createdAt     DateTime       @default(now()) @map("created_at")
   updatedAt     DateTime       @updatedAt @map("updated_at")
+  role          Role           @relation(fields: [roleId], references: [id])
   refreshTokens RefreshToken[]
 
   @@map("admin_users")

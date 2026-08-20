@@ -1,10 +1,10 @@
-import { requireAdmin } from "@/lib/auth/require-admin";
+import { requirePermission } from "@/lib/auth/require-admin";
 import { AdminPageHeader } from "@/components/admin";
 
 import { BlogPostEditor } from "../BlogPostEditor";
 
 export default async function NewBlogPostPage() {
-  await requireAdmin();
+  await requirePermission("content.create");
 
   return (
     <div>

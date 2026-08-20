@@ -5,10 +5,13 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { useCan } from "@/app/(admin)/admin/AdminSessionProvider";
 import type { JobOpeningData } from "./JobOpeningEditor";
 
 export function JobOpeningsList({ initialOpenings }: { initialOpenings: JobOpeningData[] }) {
   const router = useRouter();
+  const canCreate = useCan("content.create");
+  const canDelete = useCan("content.delete");
   const [openings, setOpenings] = useState(initialOpenings);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
@@ -38,12 +41,14 @@ export function JobOpeningsList({ initialOpenings }: { initialOpenings: JobOpeni
     return (
       <div className="rounded border border-[var(--diq_border)] px-6 py-12 text-center">
         <p className="text-sm text-[var(--diq_mid)]">No openings yet.</p>
-        <Link
-          href="/admin/careers/openings/new"
-          className="mt-4 inline-block text-xs uppercase tracking-widest text-[var(--gold)] hover:underline"
-        >
-          Create the first opening
-        </Link>
+        {canCreate && (
+          <Link
+            href="/admin/careers/openings/new"
+            className="mt-4 inline-block text-xs uppercase tracking-widest text-[var(--gold)] hover:underline"
+          >
+            Create the first opening
+          </Link>
+        )}
       </div>
     );
   }
@@ -80,14 +85,16 @@ export function JobOpeningsList({ initialOpenings }: { initialOpenings: JobOpeni
               <td className="px-4 py-3 text-[var(--diq_mid)]">{opening.visible ? "Yes" : "No"}</td>
               <td className="px-4 py-3 text-[var(--diq_mid)]">{opening.order}</td>
               <td className="px-4 py-3 text-right">
-                <button
-                  type="button"
-                  onClick={() => handleDelete(opening)}
-                  disabled={deletingId === opening.id}
-                  className="text-xs text-red-400 hover:text-red-300 disabled:opacity-50"
-                >
-                  {deletingId === opening.id ? "Deleting…" : "Delete"}
-                </button>
+                {canDelete && (
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(opening)}
+                    disabled={deletingId === opening.id}
+                    className="text-xs text-red-400 hover:text-red-300 disabled:opacity-50"
+                  >
+                    {deletingId === opening.id ? "Deleting…" : "Delete"}
+                  </button>
+                )}
               </td>
             </tr>
           ))}

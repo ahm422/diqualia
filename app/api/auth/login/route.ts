@@ -41,10 +41,6 @@ export async function POST(request: NextRequest) {
 
   const { email, password } = parsed.data;
 
-  if (!process.env.ADMIN_EMAIL || email !== process.env.ADMIN_EMAIL) {
-    return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
-  }
-
   const adminUser = await prisma.adminUser.findUnique({ where: { email } });
   if (!adminUser) {
     return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });

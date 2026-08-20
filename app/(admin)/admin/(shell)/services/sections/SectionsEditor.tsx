@@ -11,8 +11,10 @@ import {
 } from "@/components/admin";
 
 import type { ServiceItem, ServiceSection } from "../types";
+import { useCan } from "@/app/(admin)/admin/AdminSessionProvider";
 
 export function SectionsEditor({ initial }: { initial: ServiceSection[] }) {
+  const canCreate = useCan("content.create");
   const [sections, setSections] = useState<ServiceSection[]>(initial);
   const [openId, setOpenId] = useState<number | null>(null);
   const [newTabId, setNewTabId] = useState("");
@@ -97,6 +99,7 @@ export function SectionsEditor({ initial }: { initial: ServiceSection[] }) {
         ))}
       </div>
 
+      {canCreate && (
       <div className="mt-6 border-t border-[var(--diq_border2)] pt-5">
         <div className="text-xs uppercase tracking-widest text-[var(--diq_mid)] mb-3">Add section</div>
         <div className="grid gap-3 sm:grid-cols-2">
@@ -113,6 +116,7 @@ export function SectionsEditor({ initial }: { initial: ServiceSection[] }) {
           Add Section
         </button>
       </div>
+      )}
     </AdminSection>
   );
 }
@@ -131,6 +135,8 @@ type SectionPanelProps = {
 
 function SectionPanel({ section, idx, total, isOpen, onToggle, onPatch, onMove, onDelete, onItemsChange }: SectionPanelProps) {
   const [saving, setSaving] = useState(false);
+  const canDelete = useCan("content.delete");
+  const canEdit = useCan("content.edit");
 
   async function saveSection() {
     setSaving(true);
@@ -154,7 +160,9 @@ function SectionPanel({ section, idx, total, isOpen, onToggle, onPatch, onMove, 
         <div className="flex gap-1 shrink-0">
           <button onClick={() => onMove(-1)} disabled={idx === 0} className="rounded px-1 text-[var(--diq_mid)] hover:text-foreground disabled:opacity-30 text-xs">↑</button>
           <button onClick={() => onMove(1)} disabled={idx === total - 1} className="rounded px-1 text-[var(--diq_mid)] hover:text-foreground disabled:opacity-30 text-xs">↓</button>
-          <button onClick={onDelete} className="ml-2 text-xs text-red-400 hover:text-red-300">Delete</button>
+          {canDelete && (
+            <button onClick={onDelete} className="ml-2 text-xs text-red-400 hover:text-red-300">Delete</button>
+          )}
         </div>
       </div>
 
@@ -194,6 +202,7 @@ function SectionPanel({ section, idx, total, isOpen, onToggle, onPatch, onMove, 
             </div>
           </div>
           <div className="flex items-center gap-3 mb-6">
+            {canEdit && (
             <button
               onClick={saveSection}
               disabled={saving}
@@ -201,6 +210,7 @@ function SectionPanel({ section, idx, total, isOpen, onToggle, onPatch, onMove, 
             >
               {saving ? "Saving…" : "Save Section"}
             </button>
+            )}
           </div>
 
           <ItemsEditor section={section} onItemsChange={onItemsChange} />
@@ -211,6 +221,8 @@ function SectionPanel({ section, idx, total, isOpen, onToggle, onPatch, onMove, 
 }
 
 function ItemsEditor({ section, onItemsChange }: { section: ServiceSection; onItemsChange: (items: ServiceItem[]) => void }) {
+  const canCreate = useCan("content.create");
+  const canDelete = useCan("content.delete");
   const [items, setItems] = useState<ServiceItem[]>(section.items);
   const [newGroupLabel, setNewGroupLabel] = useState("");
   const [newTitle, setNewTitle] = useState("");
@@ -323,12 +335,15 @@ function ItemsEditor({ section, onItemsChange }: { section: ServiceSection; onIt
             <div className="flex items-center gap-2">
               <button onClick={() => moveItem(item.id, -1)} disabled={idx === 0} className="text-[var(--diq_mid)] hover:text-foreground disabled:opacity-30 text-xs">↑</button>
               <button onClick={() => moveItem(item.id, 1)} disabled={idx === items.length - 1} className="text-[var(--diq_mid)] hover:text-foreground disabled:opacity-30 text-xs">↓</button>
-              <button onClick={() => deleteItem(item.id)} className="ml-auto text-xs text-red-400 hover:text-red-300">Delete</button>
+              {canDelete && (
+                <button onClick={() => deleteItem(item.id)} className="ml-auto text-xs text-red-400 hover:text-red-300">Delete</button>
+              )}
             </div>
           </div>
         ))}
       </div>
 
+      {canCreate && (
       <div className="mt-4 border-t border-[var(--diq_border2)] pt-3">
         <div className="text-[10px] uppercase tracking-widest text-[var(--diq_mid)] mb-2">Add item</div>
         <div className="grid gap-2 sm:grid-cols-3 mb-2">
@@ -353,6 +368,7 @@ function ItemsEditor({ section, onItemsChange }: { section: ServiceSection; onIt
           Add Item
         </button>
       </div>
+      )}
     </div>
   );
 }

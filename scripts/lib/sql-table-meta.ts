@@ -1,4 +1,15 @@
+import { ROLE_IDS } from "@/lib/auth/rbac-ids";
+
 import type { ExportTableKey } from "./migration-types";
+
+/** Legacy export rows have no roleId; 0007 requires NOT NULL role_id. */
+export function withAdminUserRole(row: Record<string, unknown>): Record<string, unknown> {
+  const roleId = row.roleId ?? row.role_id;
+  if (typeof roleId === "string" && roleId.length > 0) {
+    return { ...row, roleId };
+  }
+  return { ...row, roleId: ROLE_IDS.super_admin };
+}
 
 /** Prisma @@map table names for SQL generation. */
 export const SQL_TABLE_NAMES: Record<ExportTableKey, string> = {
