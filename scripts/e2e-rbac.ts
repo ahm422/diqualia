@@ -301,7 +301,8 @@ async function main() {
     apply.append("dateOfBirth", "1994-04-04");
     apply.append("gender", "male");
     apply.append("nationality", "Pakistan");
-    apply.append("cnic", "3520112345678");
+    const rbacCnic = `35401${String(Date.now()).slice(-8)}`;
+    apply.append("cnic", rbacCnic);
     apply.append("currentAddress", "Street 1");
     apply.append("city", "Lahore");
     apply.append("highestQualification", "bachelor");
@@ -309,7 +310,9 @@ async function main() {
     apply.append("keySkills", "research");
     apply.append("noticePeriodDays", "15");
     apply.append("expectedSalary", "120000");
-    apply.append("availableFrom", new Date().toISOString().slice(0, 10));
+    const now = new Date();
+    const availableFrom = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    apply.append("availableFrom", availableFrom);
     apply.append("declarationAccepted", "true");
     apply.append("resume", new Blob(["%PDF-1.4\n"], { type: "application/pdf" }), "resume.pdf");
     apply.append("photo", jpegBlob(), "photo.jpg");
@@ -337,7 +340,7 @@ async function main() {
     assert(superPhoto.status === 200, stepLabel(`super_admin GET photo → 200 (got ${superPhoto.status})`));
     const superDetail = await superSession.request(`/api/admin/job-applications/${applyJson.id}`);
     const superRow = superDetail.json as { cnic?: string | null };
-    assert(superRow.cnic === "3520112345678", stepLabel("super_admin detail has raw CNIC"));
+    assert(superRow.cnic === rbacCnic, stepLabel("super_admin detail has raw CNIC"));
     logOk("editor matrix");
 
     section("Negative auth");
