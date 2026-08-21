@@ -485,6 +485,12 @@ model JobApplication {
   @@map("job_applications")
 }
 
+// Stale-draft retention (issue #102): status = 'in_progress' drafts with
+// updatedAt older than 30 days (and no matching JobApplication) are
+// hard-deleted by the daily cleanup Cron Trigger — see
+// lib/careers/cleanup-drafts.ts. status = 'completed' drafts are retained
+// indefinitely (their resume/photo R2 keys are shared with the resulting
+// JobApplication row).
 model CareerApplicationDraft {
   token        String   @id
   jobOpeningId Int      @map("job_opening_id")
@@ -497,6 +503,7 @@ model CareerApplicationDraft {
   professional CareerApplicationDraftProfessional?
   other        CareerApplicationDraftOther?
 
+  @@index([status, updatedAt])
   @@map("career_application_drafts")
 }
 

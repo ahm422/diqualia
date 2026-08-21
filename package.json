@@ -26,7 +26,8 @@
     "cf:d1:local": "wrangler d1 execute diqualia-db --local",
     "cf:e2e": "tsx scripts/e2e-preview.ts",
     "cf:e2e:rbac": "tsx scripts/e2e-rbac.ts",
-    "test:career-apply": "tsx --test lib/schemas/public/career-apply.test.ts"
+    "test:career-apply": "tsx --test lib/schemas/public/career-apply.test.ts",
+    "test:cleanup-drafts": "tsx --test lib/careers/cleanup-drafts.test.ts"
   },
   "dependencies": {
     "@prisma/adapter-d1": "^7.8.0",

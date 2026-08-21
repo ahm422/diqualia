@@ -46,3 +46,18 @@ For fast UI iteration you can also use `npm run dev` (Next only; no Worker bindi
 ## Deploy
 
 See [`docs/DEPLOY-PHASE9.md`](docs/DEPLOY-PHASE9.md) and [`MIGRATION_D1_R2_WORKERS.md`](MIGRATION_D1_R2_WORKERS.md).
+
+## Scheduled jobs
+
+| Job | Schedule | What it does |
+|-----|----------|---------------|
+| Stale career-application draft cleanup | Daily 03:00 UTC (`triggers.crons` in `wrangler.jsonc`) | Hard-deletes `career_application_drafts` rows with `status = 'in_progress'` and `updated_at` older than 30 days (no matching submitted application), including their R2 resume/photo objects. `status = 'completed'` drafts are never touched — their R2 keys are shared with the resulting `job_applications` row. See [`lib/careers/cleanup-drafts.ts`](lib/careers/cleanup-drafts.ts) and issue #102. |
+
+The Cron Trigger is wired via [`src/worker/custom-worker.ts`](src/worker/custom-worker.ts), which wraps OpenNext's generated `fetch` handler and adds `scheduled()` (OpenNext's Cloudflare adapter doesn't expose a hook for this). `wrangler.jsonc`'s `main` points here instead of directly at `.open-next/worker.js`.
+
+Dry-run / manual invocation (see the script's header comment for all flags):
+
+```bash
+npx tsx scripts/cleanup-stale-drafts.ts              # local D1, dry-run (default)
+npx tsx scripts/cleanup-stale-drafts.ts --remote --run
+```
