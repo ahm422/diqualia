@@ -439,6 +439,7 @@ model JobOpening {
   createdAt        DateTime         @default(now()) @map("created_at")
   updatedAt        DateTime         @updatedAt @map("updated_at")
   applications     JobApplication[]
+  drafts           CareerApplicationDraft[]
 
   @@map("job_openings")
 }
@@ -477,7 +478,78 @@ model JobApplication {
   declarationAccepted Boolean     @default(false) @map("declaration_accepted")
   jobOpening          JobOpening? @relation(fields: [jobOpeningId], references: [id], onDelete: SetNull)
 
+  @@unique([jobOpeningId, email], map: "job_applications_opening_email_key")
+  @@unique([jobOpeningId, cnic], map: "job_applications_opening_cnic_key")
   @@index([jobOpeningId])
   @@index([status])
   @@map("job_applications")
+}
+
+model CareerApplicationDraft {
+  token        String   @id
+  jobOpeningId Int      @map("job_opening_id")
+  status       String   @default("in_progress")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  jobOpening   JobOpening @relation(fields: [jobOpeningId], references: [id], onDelete: Cascade)
+  personal     CareerApplicationDraftPersonal?
+  education    CareerApplicationDraftEducation?
+  professional CareerApplicationDraftProfessional?
+  other        CareerApplicationDraftOther?
+
+  @@map("career_application_drafts")
+}
+
+model CareerApplicationDraftPersonal {
+  draftToken          String  @id @map("draft_token")
+  name                String
+  email               String
+  phone               String
+  fatherOrHusbandName String? @map("father_or_husband_name")
+  dateOfBirth         String  @map("date_of_birth")
+  gender              String
+  maritalStatus       String? @map("marital_status")
+  nationality         String
+  cnic                String?
+  currentAddress      String  @map("current_address")
+  city                String
+  draft               CareerApplicationDraft @relation(fields: [draftToken], references: [token], onDelete: Cascade)
+
+  @@map("career_application_draft_personal")
+}
+
+model CareerApplicationDraftEducation {
+  draftToken           String  @id @map("draft_token")
+  highestQualification String  @map("highest_qualification")
+  fieldOfStudy         String? @map("field_of_study")
+  institutionName      String? @map("institution_name")
+  yearOfCompletion     Int?    @map("year_of_completion")
+  draft                CareerApplicationDraft @relation(fields: [draftToken], references: [token], onDelete: Cascade)
+
+  @@map("career_application_draft_education")
+}
+
+model CareerApplicationDraftProfessional {
+  draftToken        String  @id @map("draft_token")
+  yearsOfExperience Int     @map("years_of_experience")
+  currentEmployer   String? @map("current_employer")
+  currentJobTitle   String? @map("current_job_title")
+  coverNote         String? @map("cover_note")
+  draft             CareerApplicationDraft @relation(fields: [draftToken], references: [token], onDelete: Cascade)
+
+  @@map("career_application_draft_professional")
+}
+
+model CareerApplicationDraftOther {
+  draftToken          String  @id @map("draft_token")
+  keySkills           String  @map("key_skills")
+  noticePeriodDays    Int     @map("notice_period_days")
+  expectedSalary      Int     @map("expected_salary")
+  availableFrom       String  @map("available_from")
+  resumeKey           String? @map("resume_key")
+  photoKey            String? @map("photo_key")
+  declarationAccepted Boolean @default(false) @map("declaration_accepted")
+  draft               CareerApplicationDraft @relation(fields: [draftToken], references: [token], onDelete: Cascade)
+
+  @@map("career_application_draft_other")
 }

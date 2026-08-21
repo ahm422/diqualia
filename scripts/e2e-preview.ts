@@ -584,7 +584,11 @@ function pdfBlob(): Blob {
 }
 
 function todayIso() {
-  return new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
 }
 
 function validApplyForm(email: string, extras?: { cnic?: string; dob?: string; photo?: Blob | null; photoName?: string; photoType?: string; declaration?: string | null }) {
@@ -740,6 +744,156 @@ async function testCareers() {
   );
   logOk("admin resume + photo download → 200");
   logOk("apply 200 is independent of applicant confirmation email");
+
+  const noTokenEdu = await fetch(`${base}/api/careers/apply/draft/education`, {
+    method: "PUT",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ highestQualification: "bachelor" }),
+    redirect: "manual",
+  });
+  assert(
+    noTokenEdu.status === 400 || noTokenEdu.status === 404,
+    stepLabel(`education PUT without token → 400/404 (got ${noTokenEdu.status})`),
+  );
+
+  const draftCreate = await fetch(`${base}/api/careers/apply/draft`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ jobSlug: "research-analyst" }),
+    redirect: "manual",
+  });
+  const draftCreateJson = (await draftCreate.json()) as { token?: string; jobOpeningId?: number };
+  assert(draftCreate.status === 200, stepLabel(`draft create → 200 (got ${draftCreate.status})`));
+  assert(typeof draftCreateJson.token === "string", stepLabel("draft create returns token"));
+  logOk("draft step 1 create returns token");
+
+  const stamp = String(Date.now()).slice(-8);
+  const cnicDup = `35301${stamp}`;
+  const emailDup = `dup-${TS}@example.com`;
+  const emailCnic = `cnic-dup-${TS}@example.com`;
+
+  async function putPersonal(token: string, applyEmail: string, applyCnic: string) {
+    return fetch(`${base}/api/careers/apply/draft/personal`, {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        token,
+        name: `Wizard ${TS}`,
+        email: applyEmail,
+        phone: "+923001111111",
+        dateOfBirth: "1995-06-15",
+        gender: "female",
+        nationality: "Pakistan",
+        cnic: applyCnic,
+        currentAddress: "Street 1, Gulberg",
+        city: "Lahore",
+      }),
+      redirect: "manual",
+    });
+  }
+
+  async function putEducation(token: string) {
+    return fetch(`${base}/api/careers/apply/draft/education`, {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ token, highestQualification: "bachelor" }),
+      redirect: "manual",
+    });
+  }
+
+  async function putProfessional(token: string) {
+    return fetch(`${base}/api/careers/apply/draft/professional`, {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ token, yearsOfExperience: 3, coverNote: `Cover ${TS}` }),
+      redirect: "manual",
+    });
+  }
+
+  async function putOther(token: string) {
+    const form = new FormData();
+    form.append("token", token);
+    form.append("keySkills", "research, writing");
+    form.append("noticePeriodDays", "30");
+    form.append("expectedSalary", "150000");
+    form.append("availableFrom", todayIso());
+    form.append("declarationAccepted", "true");
+    form.append("resume", pdfBlob(), "resume.pdf");
+    form.append("photo", jpegBlob(), "photo.jpg");
+    return fetch(`${base}/api/careers/apply/draft/other`, { method: "PUT", body: form, redirect: "manual" });
+  }
+
+  async function fillDraft(applyEmail: string, applyCnic: string) {
+    const created = await fetch(`${base}/api/careers/apply/draft`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ jobSlug: "research-analyst" }),
+      redirect: "manual",
+    });
+    const createdJson = (await created.json()) as { token?: string };
+    assert(created.status === 200 && typeof createdJson.token === "string", stepLabel("draft header created"));
+    const token = createdJson.token!;
+    const personal = await putPersonal(token, applyEmail, applyCnic);
+    assert(personal.status === 200, stepLabel(`draft personal → 200 (got ${personal.status})`));
+    const education = await putEducation(token);
+    assert(education.status === 200, stepLabel(`draft education → 200 (got ${education.status})`));
+    const professional = await putProfessional(token);
+    assert(professional.status === 200, stepLabel(`draft professional → 200 (got ${professional.status})`));
+    const other = await putOther(token);
+    assert(other.status === 200, stepLabel(`draft other → 200 (got ${other.status})`));
+    return token;
+  }
+
+  const tokenA = await fillDraft(emailDup, cnicDup);
+  const tokenB = await fillDraft(emailDup, cnicDup);
+  const tokenC = await fillDraft(emailCnic, cnicDup);
+  logOk("two in-progress drafts for same email+job allowed");
+
+  await new Promise((resolve) => setTimeout(resolve, 61_000));
+
+  const submitA = await fetch(`${base}/api/careers/apply/draft/submit`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ token: tokenA }),
+    redirect: "manual",
+  });
+  const submitAJson = (await submitA.json()) as Record<string, unknown>;
+  assert(submitA.status === 200, stepLabel(`draft submit A → 200 (got ${submitA.status})`));
+  assert(submitAJson.ok === true, stepLabel("draft submit A ok:true"));
+  assert(typeof submitAJson.id === "string", stepLabel("draft submit A returns id"));
+  assert(!("resumeKey" in submitAJson), stepLabel("draft submit JSON has no resumeKey"));
+  assert(!("photoKey" in submitAJson), stepLabel("draft submit JSON has no photoKey"));
+
+  const wizardDetail = await request(`/api/admin/job-applications/${submitAJson.id}`);
+  assert(wizardDetail.status === 200, stepLabel(`wizard application detail → 200 (got ${wizardDetail.status})`));
+  const wizardRow = wizardDetail.json as { cnic?: string | null; resumeKey?: string; photoKey?: string };
+  assert(wizardRow.cnic === cnicDup, stepLabel("wizard CNIC stored as 13 digits"));
+  assert(typeof wizardRow.resumeKey === "string" && wizardRow.resumeKey.startsWith("resumes/"), stepLabel("wizard resume_key under resumes/"));
+  assert(typeof wizardRow.photoKey === "string" && wizardRow.photoKey.startsWith("photos/"), stepLabel("wizard photo_key under photos/"));
+
+  const submitB = await fetch(`${base}/api/careers/apply/draft/submit`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ token: tokenB }),
+    redirect: "manual",
+  });
+  const submitBJson = (await submitB.json()) as { error?: string };
+  assert(submitB.status === 409, stepLabel(`second submit same email → 409 (got ${submitB.status})`));
+  assert(submitBJson.error === "You have already applied for this role.", stepLabel("duplicate message is stable"));
+
+  const submitC = await fetch(`${base}/api/careers/apply/draft/submit`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ token: tokenC }),
+    redirect: "manual",
+  });
+  assert(submitC.status === 409, stepLabel(`same CNIC different email → 409 (got ${submitC.status})`));
+
+  const inboxAfter = await request("/api/admin/job-applications");
+  const inboxApps = inboxAfter.json as { id?: string; email?: string }[];
+  const dupRows = Array.isArray(inboxApps) ? inboxApps.filter((row) => row.email === emailDup) : [];
+  assert(dupRows.length === 1, stepLabel(`one job_applications row for duplicate email (got ${dupRows.length})`));
+  logOk("draft uniqueness: email + CNIC 409, one row");
 }
 
 // ─── 7. Public routes ────────────────────────────────────────────────────────

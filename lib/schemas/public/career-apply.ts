@@ -53,15 +53,20 @@ const optionalLong = z.string().trim().max(10000).optional().or(z.literal(""));
 
 const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
-function parseIsoDate(value: string): Date | null {
+/** UTC-calendar Date for YYYY-MM-DD civil days. Never local midnight / toISOString(). */
+export function parseIsoDate(value: string): Date | null {
   if (!ISO_DATE_RE.test(value)) return null;
-  const parsed = new Date(`${value}T00:00:00`);
-  if (Number.isNaN(parsed.getTime())) return null;
-  if (parsed.toISOString().slice(0, 10) !== value) return null;
-  return parsed;
+  const [y, m, d] = value.split("-").map(Number);
+  if (!Number.isInteger(y) || !Number.isInteger(m) || !Number.isInteger(d)) return null;
+  const utc = new Date(Date.UTC(y, m - 1, d));
+  if (Number.isNaN(utc.getTime())) return null;
+  if (utc.getUTCFullYear() !== y || utc.getUTCMonth() !== m - 1 || utc.getUTCDate() !== d) {
+    return null;
+  }
+  return utc;
 }
 
-function todayLocalIso(): string {
+export function todayLocalIso(): string {
   const now = new Date();
   const y = now.getFullYear();
   const m = String(now.getMonth() + 1).padStart(2, "0");
@@ -69,11 +74,14 @@ function todayLocalIso(): string {
   return `${y}-${m}-${d}`;
 }
 
-function addDaysIso(iso: string, days: number): string {
+export function addDaysIso(iso: string, days: number): string {
   const date = parseIsoDate(iso);
   if (!date) return iso;
-  date.setDate(date.getDate() + days);
-  return date.toISOString().slice(0, 10);
+  date.setUTCDate(date.getUTCDate() + days);
+  const y = date.getUTCFullYear();
+  const m = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const d = String(date.getUTCDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
 }
 
 function ageYears(dobIso: string, onIso: string): number {
@@ -88,99 +96,169 @@ const declarationAcceptedSchema = z
   .union([z.literal(true), z.literal("true"), z.literal("on"), z.literal("1")])
   .transform(() => true as const);
 
-export const CareerApplyFieldsSchema = z
-  .object({
-    name: z.string().trim().min(1).max(200),
-    email: z.string().trim().email().max(254),
-    phone: z.string().trim().min(1).max(50),
-    jobSlug: z.string().trim().max(200).optional().or(z.literal("")),
-    jobOpeningId: z.string().trim().max(20).optional().or(z.literal("")),
-    coverNote: optionalLong,
-    website: optionalText,
-    fatherOrHusbandName: optionalText,
-    dateOfBirth: z.string().trim().min(1),
-    gender: z.enum(GENDER_VALUES),
-    maritalStatus: z.enum(MARITAL_VALUES).optional().or(z.literal("")),
-    cnic: optionalText,
-    nationality: z.string().trim().min(1).max(80),
-    currentAddress: z.string().trim().min(1).max(500),
-    city: z.string().trim().min(1).max(120),
-    highestQualification: z.enum(QUALIFICATION_VALUES),
-    fieldOfStudy: optionalText,
-    institutionName: optionalText,
-    yearOfCompletion: z.preprocess(
-      (v) => (v === "" || v == null ? undefined : v),
-      z.coerce.number().int().min(1950).max(2100).optional(),
-    ),
-    yearsOfExperience: z.coerce.number().int().min(0).max(80),
-    currentEmployer: optionalText,
-    currentJobTitle: optionalText,
-    keySkills: z.string().trim().min(1).max(4000),
-    noticePeriodDays: z.coerce.number().int().min(0).max(3650),
-    expectedSalary: z.coerce.number().int().positive().max(1_000_000_000),
-    availableFrom: z.string().trim().min(1),
-    declarationAccepted: declarationAcceptedSchema,
-  })
-  .superRefine((data, ctx) => {
-    const dob = parseIsoDate(data.dateOfBirth);
-    if (!dob) {
-      ctx.addIssue({ code: "custom", path: ["dateOfBirth"], message: "Enter a valid date of birth." });
-    } else {
-      const today = todayLocalIso();
-      if (data.dateOfBirth > today) {
-        ctx.addIssue({ code: "custom", path: ["dateOfBirth"], message: "Date of birth cannot be in the future." });
-      } else if (ageYears(data.dateOfBirth, today) < 16) {
-        ctx.addIssue({ code: "custom", path: ["dateOfBirth"], message: "You must be at least 16 years old." });
-      }
-    }
+function refineDateOfBirth(dateOfBirth: string, ctx: z.RefinementCtx) {
+  const dob = parseIsoDate(dateOfBirth);
+  if (!dob) {
+    ctx.addIssue({ code: "custom", path: ["dateOfBirth"], message: "Enter a valid date of birth." });
+    return;
+  }
+  const today = todayLocalIso();
+  if (dateOfBirth > today) {
+    ctx.addIssue({ code: "custom", path: ["dateOfBirth"], message: "Date of birth cannot be in the future." });
+  } else if (ageYears(dateOfBirth, today) < 16) {
+    ctx.addIssue({ code: "custom", path: ["dateOfBirth"], message: "You must be at least 16 years old." });
+  }
+}
 
-    const available = parseIsoDate(data.availableFrom);
-    if (!available) {
-      ctx.addIssue({ code: "custom", path: ["availableFrom"], message: "Enter a valid available-from date." });
-    } else {
-      const min = addDaysIso(todayLocalIso(), -1);
-      if (data.availableFrom < min) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["availableFrom"],
-          message: "Available-from cannot be more than one day in the past.",
-        });
-      }
-    }
+function refineAvailableFrom(availableFrom: string, ctx: z.RefinementCtx) {
+  const available = parseIsoDate(availableFrom);
+  if (!available) {
+    ctx.addIssue({ code: "custom", path: ["availableFrom"], message: "Enter a valid available-from date." });
+    return;
+  }
+  const min = addDaysIso(todayLocalIso(), -1);
+  if (availableFrom < min) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["availableFrom"],
+      message: "Available-from cannot be more than one day in the past.",
+    });
+  }
+}
 
-    const cnicRaw = data.cnic?.trim() ?? "";
-    if (isPakistanNationality(data.nationality)) {
-      if (!cnicRaw) {
-        ctx.addIssue({ code: "custom", path: ["cnic"], message: "CNIC is required for Pakistani applicants." });
-      } else if (!CNIC_INPUT_RE.test(cnicRaw) || !normalizeCnic(cnicRaw)) {
-        ctx.addIssue({
-          code: "custom",
-          path: ["cnic"],
-          message: "Enter a 13-digit CNIC, with or without dashes.",
-        });
-      }
-    } else if (cnicRaw && (!CNIC_INPUT_RE.test(cnicRaw) || !normalizeCnic(cnicRaw))) {
+function refineCnic(nationality: string, cnic: string | undefined, ctx: z.RefinementCtx) {
+  const cnicRaw = cnic?.trim() ?? "";
+  if (isPakistanNationality(nationality)) {
+    if (!cnicRaw) {
+      ctx.addIssue({ code: "custom", path: ["cnic"], message: "CNIC is required for Pakistani applicants." });
+    } else if (!CNIC_INPUT_RE.test(cnicRaw) || !normalizeCnic(cnicRaw)) {
       ctx.addIssue({
         code: "custom",
         path: ["cnic"],
         message: "Enter a 13-digit CNIC, with or without dashes.",
       });
     }
+  } else if (cnicRaw && (!CNIC_INPUT_RE.test(cnicRaw) || !normalizeCnic(cnicRaw))) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["cnic"],
+      message: "Enter a 13-digit CNIC, with or without dashes.",
+    });
+  }
+}
+
+const personalObject = {
+  name: z.string().trim().min(1).max(200),
+  email: z.string().trim().email().max(254),
+  phone: z.string().trim().min(1).max(50),
+  fatherOrHusbandName: optionalText,
+  dateOfBirth: z.string().trim().min(1),
+  gender: z.enum(GENDER_VALUES),
+  maritalStatus: z.enum(MARITAL_VALUES).optional().or(z.literal("")),
+  cnic: optionalText,
+  nationality: z.string().trim().min(1).max(80),
+  currentAddress: z.string().trim().min(1).max(500),
+  city: z.string().trim().min(1).max(120),
+};
+
+const educationObject = {
+  highestQualification: z.enum(QUALIFICATION_VALUES),
+  fieldOfStudy: optionalText,
+  institutionName: optionalText,
+  yearOfCompletion: z.preprocess(
+    (v) => (v === "" || v == null ? undefined : v),
+    z.coerce.number().int().min(1950).max(2100).optional(),
+  ),
+};
+
+const professionalObject = {
+  yearsOfExperience: z.coerce.number().int().min(0).max(80),
+  currentEmployer: optionalText,
+  currentJobTitle: optionalText,
+  coverNote: optionalLong,
+};
+
+const otherObject = {
+  keySkills: z.string().trim().min(1).max(4000),
+  noticePeriodDays: z.coerce.number().int().min(0).max(3650),
+  expectedSalary: z.coerce.number().int().positive().max(1_000_000_000),
+  availableFrom: z.string().trim().min(1),
+  declarationAccepted: declarationAcceptedSchema,
+};
+
+function nullIfBlank(value: string | undefined): string | null {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : null;
+}
+
+export const CareerApplyPersonalSchema = z
+  .object(personalObject)
+  .superRefine((data, ctx) => {
+    refineDateOfBirth(data.dateOfBirth, ctx);
+    refineCnic(data.nationality, data.cnic, ctx);
   })
   .transform((data) => ({
     ...data,
+    email: data.email.trim().toLowerCase(),
     cnic: data.cnic?.trim() ? normalizeCnic(data.cnic) : null,
-    fatherOrHusbandName: data.fatherOrHusbandName?.trim() ? data.fatherOrHusbandName.trim() : null,
+    fatherOrHusbandName: nullIfBlank(data.fatherOrHusbandName),
     maritalStatus: data.maritalStatus?.trim() ? data.maritalStatus : null,
-    coverNote: data.coverNote?.trim() ? data.coverNote.trim() : null,
-    fieldOfStudy: data.fieldOfStudy?.trim() ? data.fieldOfStudy.trim() : null,
-    institutionName: data.institutionName?.trim() ? data.institutionName.trim() : null,
-    currentEmployer: data.currentEmployer?.trim() ? data.currentEmployer.trim() : null,
-    currentJobTitle: data.currentJobTitle?.trim() ? data.currentJobTitle.trim() : null,
+  }));
+
+export const CareerApplyEducationSchema = z.object(educationObject).transform((data) => ({
+  ...data,
+  fieldOfStudy: nullIfBlank(data.fieldOfStudy),
+  institutionName: nullIfBlank(data.institutionName),
+  yearOfCompletion: data.yearOfCompletion ?? null,
+}));
+
+export const CareerApplyProfessionalSchema = z.object(professionalObject).transform((data) => ({
+  ...data,
+  coverNote: nullIfBlank(data.coverNote),
+  currentEmployer: nullIfBlank(data.currentEmployer),
+  currentJobTitle: nullIfBlank(data.currentJobTitle),
+}));
+
+export const CareerApplyOtherSchema = z
+  .object(otherObject)
+  .superRefine((data, ctx) => {
+    refineAvailableFrom(data.availableFrom, ctx);
+  });
+
+export const CareerApplyFieldsSchema = z
+  .object({
+    ...personalObject,
+    ...educationObject,
+    ...professionalObject,
+    ...otherObject,
+    jobSlug: z.string().trim().max(200).optional().or(z.literal("")),
+    jobOpeningId: z.string().trim().max(20).optional().or(z.literal("")),
+    website: optionalText,
+  })
+  .superRefine((data, ctx) => {
+    refineDateOfBirth(data.dateOfBirth, ctx);
+    refineAvailableFrom(data.availableFrom, ctx);
+    refineCnic(data.nationality, data.cnic, ctx);
+  })
+  .transform((data) => ({
+    ...data,
+    email: data.email.trim().toLowerCase(),
+    cnic: data.cnic?.trim() ? normalizeCnic(data.cnic) : null,
+    fatherOrHusbandName: nullIfBlank(data.fatherOrHusbandName),
+    maritalStatus: data.maritalStatus?.trim() ? data.maritalStatus : null,
+    coverNote: nullIfBlank(data.coverNote),
+    fieldOfStudy: nullIfBlank(data.fieldOfStudy),
+    institutionName: nullIfBlank(data.institutionName),
+    currentEmployer: nullIfBlank(data.currentEmployer),
+    currentJobTitle: nullIfBlank(data.currentJobTitle),
     yearOfCompletion: data.yearOfCompletion ?? null,
   }));
 
 export type CareerApplyFields = z.infer<typeof CareerApplyFieldsSchema>;
+export type CareerApplyPersonal = z.infer<typeof CareerApplyPersonalSchema>;
+export type CareerApplyEducation = z.infer<typeof CareerApplyEducationSchema>;
+export type CareerApplyProfessional = z.infer<typeof CareerApplyProfessionalSchema>;
+export type CareerApplyOther = z.infer<typeof CareerApplyOtherSchema>;
 
 function extensionFromName(file: File): string {
   const name = file.name.toLowerCase();
