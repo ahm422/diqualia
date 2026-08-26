@@ -12,10 +12,14 @@
 import type { ChatbotDataSource } from "../models/datasource";
 import { getRagConfig } from "../config/config";
 import { assembleContext, buildSystemMessages } from "../rag/context/context";
-import { guardUserInput } from "../guardrails/input";
+import {
+  guardUserInput,
+  isGreeting,
+  GREETING_RESPONSE,
+} from "../guardrails/input";
 import {
   checkOutputStreaming,
-  STREAM_CUTOFF_NOTICE,
+  GROUNDED_FALLBACK,
 } from "../guardrails/output";
 import { streamDeepSeekTokens, type ChatTurn } from "../llm/deepseek";
 import type { RagLogger } from "../utils/logger";
@@ -75,6 +79,12 @@ export async function runRag(
     return textStream(guarded.message);
   }
 
+  // 1b. Greetings — instant reply, no LLM call.
+  if (isGreeting(lastUser)) {
+    logger.count("greeting", 1);
+    return textStream(GREETING_RESPONSE);
+  }
+
   // 2. Query analysis — general-knowledge and technical questions are
   //    blocked here and never reach the LLM.
   logger.mark("query_analysis");
@@ -130,16 +140,28 @@ export async function runRag(
   // context; general-knowledge answers (no context) skip price/stat checks.
   const groundNumbers = assembled.items.length > 0;
   let acc = "";
+  // Chars of `acc` already enqueued. Tokens are held back until a sentence
+  // boundary is reached so a guardrail cutoff always lands on a clean,
+  // complete sentence instead of mid-word.
+  let emitted = 0;
   let violation: string | null = null;
 
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
+      const flushCompletedSentences = () => {
+        const pending = acc.slice(emitted);
+        const m = pending.match(/^([\s\S]*[.!?])(\s|$)/);
+        if (!m) return;
+        controller.enqueue(encoder.encode(m[1]));
+        emitted += m[1].length;
+      };
+
       try {
         for await (const token of streamDeepSeekTokens(systemPrompt, historyWindow, cfg)) {
           acc += token;
           violation = checkOutputStreaming(acc, assembled.plainText, { groundNumbers });
           if (violation) break;
-          controller.enqueue(encoder.encode(token));
+          flushCompletedSentences();
         }
       } catch (err) {
         logger.count("llm_error", 1);
@@ -160,11 +182,19 @@ export async function runRag(
       if (violation) {
         logger.count("guardrail_output", 1);
         logger.count(`guardrail_output:${violation}`, 1);
-        controller.enqueue(encoder.encode(STREAM_CUTOFF_NOTICE));
-      } else if (!acc.trim()) {
-        logger.count("guardrail_output", 1);
-        logger.count("guardrail_output:empty", 1);
-        controller.enqueue(encoder.encode(NO_RESPONSE_FALLBACK));
+        if (emitted === 0) {
+          // Nothing safe was emitted — fall back to a complete, helpful reply.
+          controller.enqueue(encoder.encode(GROUNDED_FALLBACK));
+        }
+        // Otherwise the answer simply ends at the last complete sentence.
+      } else {
+        const rest = acc.slice(emitted);
+        if (rest) controller.enqueue(encoder.encode(rest));
+        if (!acc.trim()) {
+          logger.count("guardrail_output", 1);
+          logger.count("guardrail_output:empty", 1);
+          controller.enqueue(encoder.encode(NO_RESPONSE_FALLBACK));
+        }
       }
       logger.mark("guardrail_done");
       logger.flush();

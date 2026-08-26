@@ -32,6 +32,19 @@ describe("output guardrails", () => {
     assert.equal(res.ok, false);
   });
 
+  it("blocks AI-speak and source disclosure", async () => {
+    for (const answer of [
+      "I'm a large language model, so I don't have direct access.",
+      "According to the content provided, the best way is the contact page.",
+      "Based on the supplied website content, DiQualia offers research services.",
+      "As an AI, I can help you draft a message.",
+    ]) {
+      const res = await guardOutput(answer, context);
+      assert.equal(res.ok, false, `should block: ${answer}`);
+      assert.equal(res.reason, "meta-disclosure");
+    }
+  });
+
   it("blocks private-data references", async () => {
     const res = await guardOutput("The applicants' CNIC numbers are stored in D1.", context);
     assert.equal(res.ok, false);

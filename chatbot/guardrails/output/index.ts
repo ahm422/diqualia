@@ -24,6 +24,20 @@ const LEAK_PATTERNS = [
   /\b(cnic|national\s+id\s+number|applicant\s+photos?|job\s+applications?)\b/i,
 ];
 
+/**
+ * Meta-disclosure / AI-speak: the model describing its own internals or the
+ * source of its answers instead of answering as DiQualia's assistant.
+ */
+const META_PATTERNS = [
+  /\blarge\s+language\s+model\b/i,
+  /\bas\s+an?\s+(ai|language\s+model|chatbot|bot)\b/i,
+  /\bi(?:'m|\u2019m|\s+am)\s+(?:an?\s+)?(ai|language\s+model|chatbot|bot|program)\b/i,
+  /\b(according\s+to|based\s+on|from)\s+(the\s+)?(provided|supplied|given|retrieved|referenced)\b/i,
+  /\b(provided|supplied|retrieved|referenced)\s+(content|context|documents?|texts?|materials?)\b/i,
+  /\b(content|context|information|documents?)\s+(that\s+(was|is)\s+)?(provided|supplied|given|shared)\b/i,
+  /\b(my\s+)?(training\s+data|retrieval\s+system|knowledge\s+base)\b/i,
+];
+
 const GUARANTEE_PATTERNS = [
   /\bguarantee[ds]?\b/i,
   /\bwe\s+promise\b/i,
@@ -48,6 +62,10 @@ function currencyAmounts(text: string): string[] {
 
 function containsLeakage(text: string): boolean {
   return LEAK_PATTERNS.some((re) => re.test(text));
+}
+
+function containsMetaDisclosure(text: string): boolean {
+  return META_PATTERNS.some((re) => re.test(text));
 }
 
 function containsGuarantee(text: string): boolean {
@@ -79,7 +97,10 @@ function containsUnsupportedNumbers(text: string, contextText: string): boolean 
 }
 
 const GENERIC_FALLBACK =
-  "I couldn't verify that from the website information. The available DiQualia content doesn't specify it — I'd rather not guess. Ask me about services, industries, the process, or how to contact DiQualia.";
+  "I don't have enough verified information to answer that fully. Ask me about DiQualia's services, industries, process, or how to get in touch.";
+
+/** Exported for the streaming path when a guardrail fires before any safe output. */
+export const GROUNDED_FALLBACK = GENERIC_FALLBACK;
 
 /** Reserved for a future LLM-based groundedness judge (optional, off by default). */
 export async function llmJudgeGrounded(
@@ -103,6 +124,9 @@ export async function guardOutput(
 
   if (containsLeakage(text)) {
     return { ok: false, reason: "leakage", fallback: GENERIC_FALLBACK };
+  }
+  if (containsMetaDisclosure(text)) {
+    return { ok: false, reason: "meta-disclosure", fallback: GENERIC_FALLBACK };
   }
   if (containsGuarantee(text)) {
     return { ok: false, reason: "guarantee", fallback: GENERIC_FALLBACK };
@@ -138,13 +162,10 @@ export function checkOutputStreaming(
 ): string | null {
   const groundNumbers = opts?.groundNumbers ?? true;
   if (containsLeakage(accumulated)) return "leakage";
+  if (containsMetaDisclosure(accumulated)) return "meta-disclosure";
   if (containsGuarantee(accumulated)) return "guarantee";
   if (!groundNumbers) return null;
   if (containsInventedPricing(accumulated, contextText)) return "invented-price";
   if (containsUnsupportedNumbers(accumulated, contextText)) return "unsupported-stat";
   return null;
 }
-
-/** Appended when a streamed answer had to be cut off mid-generation. */
-export const STREAM_CUTOFF_NOTICE =
-  "\n\n_(I stopped there because part of that answer couldn't be verified against DiQualia's website content.)_";

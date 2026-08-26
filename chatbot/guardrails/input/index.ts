@@ -69,18 +69,38 @@ function isDirectRevealAttempt(text: string): boolean {
     /\bwhat\s+is\s+your\s+system\s+prompt\b/i,
     /\bshow\s+me\s+(your\s+|the\s+)?(system\s+)?prompt\b/i,
     /\bignore\s+all\s+previous\s+instructions\b.{0,120}\breveal\b/i,
+    // Roman Urdu / Hindi / Hinglish extraction attempts.
+    /\bprompt\b[^.\n]{0,80}\b(dekh\w*|dikha\w*|batao?\w*|copy|paste|send|share)\b/i,
+    /\binstructions?\b[^.\n]{0,80}\b(copy|paste|bhejo|dikha\w*|dekha?\b|share)\b/i,
+    /\b(tumhare?|apke?|aapke?|meray|mere|your)\s+(andar|paas|pas|inside)\b[^.\n]{0,60}\b(prompt|instruction\w*)\b/i,
+    /\b(andar|inside)\s+(kya|jo|what)\b[^.\n]{0,60}\b(prompt|instruction\w*)\b/i,
   ];
   return direct.some((re) => re.test(text));
 }
 
-/** A purely conceptual question about prompt injection is allowed. */
+/**
+ * A purely conceptual question about prompt injection is allowed. Note: only
+ * the *concept* of prompt injection — questions about this assistant's own
+ * system prompt are extraction attempts and must not pass here.
+ */
 function isConceptualQuestion(text: string): boolean {
   const trimmed = text.trim().replace(/[?.!]+$/, "");
   if (!/^(what|how|why|is|are|can|do|does|explain|describe|tell\s+me|about)\b/i.test(trimmed)) {
     return false;
   }
-  return /\bprompt\s+injection\b|\bprompt\s+injections?\b|\bsystem\s+prompt\b/i.test(trimmed);
+  return /\bprompt\s+injections?\b/i.test(trimmed);
 }
+
+const GREETING_RE =
+  /^(hi+|hey+|hello+|yo|assalam(?:u)?\s*(?:o|u)?\s*alaikum|as[-\s]?salam(?:u)?\s*alaikum|salam|aoa|good\s*(morning|afternoon|evening|day))[\s!,.?]*$/i;
+
+/** Simple greetings get an instant reply without an LLM call. */
+export function isGreeting(text: string): boolean {
+  return GREETING_RE.test(text.trim());
+}
+
+export const GREETING_RESPONSE =
+  "Hello! I'm DiQualia's website assistant. Ask me anything about our services, industries, process, careers, or how to get in touch.";
 
 /** Detects spam / gibberish: character floods or symbol-heavy payloads. */
 function isSpamOrGarbage(text: string): boolean {
