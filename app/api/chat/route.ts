@@ -8,7 +8,9 @@ import {
   CHAT_MODEL,
   CHAT_RATE_LIMIT,
 } from "@/lib/chat/config";
-import { getAI } from "@/lib/cloudflare-env";
+import { getAI, getDb } from "@/lib/cloudflare-env";
+import { runChat, getRagConfig } from "@/chatbot/api";
+import { RagLogger } from "@/chatbot/utils/logger";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rateLimit";
 
 const MessageSchema = z.object({
@@ -112,6 +114,37 @@ export async function POST(request: NextRequest) {
 
   const trimmed = parsed.data.messages.slice(-CHAT_MAX_MESSAGES);
 
+  // ── RAG path (DeepSeek + Qdrant + Qwen embeddings) ───────────────────────
+  // Enabled only when the server-side RAG env vars are configured. Uses the
+  // existing frontend contract: POST { messages } → text/plain stream.
+  const ragCfg = getRagConfig();
+  if (ragCfg.enabled) {
+    const requestId = crypto.randomUUID();
+    const logger = new RagLogger(requestId);
+    try {
+      const prisma = await getDb();
+      const stream = await runChat(
+        prisma,
+        trimmed.map((m) => ({ role: m.role, content: m.content })),
+        logger,
+      );
+      return new Response(stream, {
+        status: 200,
+        headers: {
+          "Content-Type": "text/plain; charset=utf-8",
+          "Cache-Control": "no-store",
+          "X-Request-Id": requestId,
+        },
+      });
+    } catch (err) {
+      console.error("[chat][rag] Failed:", err);
+      logger.count("route_error", 1);
+      logger.flush();
+      return NextResponse.json({ error: "Assistant temporarily unavailable." }, { status: 503 });
+    }
+  }
+
+  // ── Legacy Workers AI path (kept as fallback when RAG is not configured) ─
   let ai: Ai | undefined;
   try {
     ai = await getAI();

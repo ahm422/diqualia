@@ -1,6 +1,6 @@
 # DiQualia
 
-Marketing site (Next.js on Cloudflare Workers via OpenNext) with **D1**, **R2**, **Workers**, and **Cloudflare Email Service**. Admin auth is custom JWT (`jose`) + `bcryptjs`.
+Marketing site (Next.js on Cloudflare Workers via OpenNext) with **D1**, **R2**, **Workers**, and **Cloudflare Email Service**. Admin auth is custom JWT (`jose`) + `bcryptjs`. Includes a self-contained RAG chatbot (`chatbot/`, see [`chatbot/README.md`](chatbot/README.md)).
 
 ## Getting started
 
@@ -23,15 +23,39 @@ npm run db:seed:admin
 # npm run db:import:local -- --force
 ```
 
-### 3) Preview (authoritative Worker path)
+### 3) Run frontend
 
 ```bash
+npm run dev       # http://127.0.0.1:3000 (fast UI iteration; no Worker bindings)
+# OR authoritative Worker path:
 npm run build
 npm run preview   # http://127.0.0.1:8787
-npm run cf:e2e    # local loopback only — never point at shared/preview/prod D1
 ```
 
-For fast UI iteration you can also use `npm run dev` (Next only; no Worker bindings — contact email is skipped gracefully).
+Network-accessible dev server:
+
+```bash
+EMBEDDINGS_PROVIDER=dummy RAG_ENABLED=true QDRANT_URL=http://localhost:6333 \
+  npx next dev -H 0.0.0.0   # → http://localhost:3000
+```
+
+### 4) Run AI (chatbot / RAG)
+
+```bash
+docker start qdrant            # vector DB (or: docker run -d --name qdrant -p 6333:6333 -v qdrant_storage:/qdrant/storage qdrant/qdrant)
+
+# one-time setup: add to .env → DEEPSEEK_API_KEY=sk-..., EMBEDDINGS_PROVIDER=dummy, QDRANT_URL=http://localhost:6333
+npm run kb:ingest              # build knowledge base (incremental; --force = full re-embed)
+npm run dev                    # start server — RAG auto-enables when DEEPSEEK_API_KEY + Qdrant are up
+```
+
+Re-run `npm run kb:ingest` after CMS changes. Optional: `npm run kb:eval`.
+
+## API
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| POST | `/api/chat` | RAG chatbot (`{"messages":[{"role":"user","content":"..."}]}`, streamed `text/plain`) |
 
 ## Stack
 
@@ -41,7 +65,8 @@ For fast UI iteration you can also use `npm run dev` (Next only; no Worker bindi
 | Database | Cloudflare D1 + Prisma D1 adapter |
 | Storage | Cloudflare R2 |
 | Email | Cloudflare Email Service (`send_email` → `EMAIL`) |
-| Auth | Custom JWT (`jose`) + `bcryptjs` + RBAC (seeded `super_admin` / `admin` / `editor`; `ADMIN_EMAIL` is bootstrap seed + notification recipient, not a login allowlist) |
+| Auth | Custom JWT (`jose`) + `bcryptjs` + RBAC |
+| AI | LangChain + DeepSeek + Qwen3 embeddings + Qdrant |
 
 ## Deploy
 

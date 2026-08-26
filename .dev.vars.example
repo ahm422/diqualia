@@ -8,3 +8,10 @@ JWT_SECRET=your-jwt-secret-here
 ADMIN_EMAIL=admin@example.com
 # Set false for local HTTP preview (wrangler.jsonc sets NODE_ENV=production)
 COOKIE_SECURE=false
+
+# --- RAG chatbot secrets (server-side only; production: wrangler secret put) ---
+# See .env.example for the full list and defaults. Only secrets belong here.
+DEEPSEEK_API_KEY=
+EMBEDDINGS_API_KEY=
+# QDRANT_API_KEY=
+# CHAT_SYSTEM_PROMPT=

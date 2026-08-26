@@ -21,6 +21,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { NAV_COLLAPSE_MQ } from "@/lib/breakpoints";
+import { renderMarkdown, stripDecorations } from "@/lib/markdown";
 import { BrandLogo } from "./BrandLogo";
 
 type ChatMessage = {
@@ -149,21 +150,29 @@ function ChatPanel({
               key={`${m.role}-${i}`}
               className={m.role === "user" ? "flex justify-end" : "flex justify-start"}
             >
-              <div
-                className={`max-w-[85%] px-3 py-2 text-[13px] leading-6 ${
-                  m.role === "user" ? "bg-gold text-ink" : "text-foreground"
-                }`}
-                style={
-                  m.role === "assistant"
-                    ? {
-                        background: "var(--bg-elev)",
-                        border: "1px solid color-mix(in oklab, var(--border) 80%, transparent)",
-                      }
-                    : undefined
-                }
-              >
-                {m.content || (streaming && i === messages.length - 1 ? "…" : "")}
-              </div>
+              {m.role === "user" ? (
+                <div className="max-w-[85%] px-3 py-2 text-[13px] leading-6 bg-gold text-ink">
+                  {m.content}
+                </div>
+              ) : (
+                <div
+                  className="max-w-[92%] px-3 py-2 text-[13px] leading-6 text-foreground [&_p]:my-2 [&_p:first-child]:mt-0 [&_p:last-child]:mb-0 [&_ul]:my-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:my-2 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:my-1 [&_h1]:mt-3 [&_h1]:mb-1 [&_h1]:text-[15px] [&_h1]:font-semibold [&_h2]:mt-3 [&_h2]:mb-1 [&_h2]:text-[14px] [&_h2]:font-semibold [&_h3]:mt-2 [&_h3]:mb-1 [&_h3]:text-[13px] [&_h3]:font-semibold [&_strong]:font-semibold [&_a]:text-gold [&_a]:underline [&_a]:underline-offset-2 [&_code]:text-[12px] [&_blockquote]:border-l-2 [&_blockquote]:pl-3 [&_blockquote]:italic"
+                  style={{
+                    background: "var(--bg-elev)",
+                    border: "1px solid color-mix(in oklab, var(--border) 80%, transparent)",
+                  }}
+                >
+                  {m.content ? (
+                    <span
+                      dangerouslySetInnerHTML={{
+                        __html: renderMarkdown(stripDecorations(m.content)),
+                      }}
+                    />
+                  ) : streaming && i === messages.length - 1 ? (
+                    "…"
+                  ) : null}
+                </div>
+              )}
             </div>
           ))
         )}
@@ -188,7 +197,7 @@ function ChatPanel({
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={onKeyDown}
               rows={2}
-              maxLength={2000}
+              maxLength={500}
               disabled={streaming}
               placeholder="Ask a question…"
               className="w-full resize-none border bg-transparent px-3 py-2 text-[13px] text-foreground outline-none"

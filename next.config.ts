@@ -2,17 +2,20 @@ import type { NextConfig } from "next";
 import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 import { URL } from "url";
 
-// remoteBindings must be true so per-binding `remote: true` (R2 in wrangler.jsonc) works.
-// D1 stays local (no remote flag). R2 is remote so uploads are reachable via R2_PUBLIC_URL / r2.dev.
+// Local dev: remoteBindings false runs every binding (D1, R2, AI, EMAIL) via miniflare,
+// so no Cloudflare login / OAuth is required. R2 + AI are emulated locally.
 initOpenNextCloudflareForDev({
   persist: true,
-  remoteBindings: true,
+  remoteBindings: false,
 });
 
 const assetsPublicUrl = (process.env.R2_PUBLIC_URL ?? "").replace(/^["']|["']$/g, "");
 const assetsOrigin = assetsPublicUrl ? new URL(assetsPublicUrl) : null;
 
 const nextConfig: NextConfig = {
+  // Allow cross-origin dev asset requests when the app is accessed via the
+  // VM's LAN IP (http://localhost:3000) while the server binds localhost.
+  allowedDevOrigins: ["localhost"],
   experimental: {
     // Local D1 (SQLite) cannot handle parallel static-generation workers.
     staticGenerationMaxConcurrency: 1,

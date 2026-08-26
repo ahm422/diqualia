@@ -98,3 +98,11 @@ export function renderMarkdown(markdown: string): string {
   const html = marked.parse(markdown, { async: false }) as string;
   return sanitizeHtml(html);
 }
+
+const EMOJI_RE =
+  /[\p{Extended_Pictographic}\u{1F000}-\u{1FAFF}\u2600-\u27BF\uFE0F]/gu;
+
+/** Removes markdown emphasis markers and emojis from chat text. */
+export function stripDecorations(text: string): string {
+  return text.replace(/(\*\*|__|\*)/g, "").replace(EMOJI_RE, "");
+}
