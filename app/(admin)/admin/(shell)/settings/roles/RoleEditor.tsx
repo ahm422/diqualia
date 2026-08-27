@@ -12,18 +12,12 @@ import {
   AdminSaveButton,
 } from "@/components/admin";
 import { Button } from "@/components/ui/button";
+import { PERMISSION_CATALOG } from "@/lib/auth/permission-catalog";
 import { PERMISSION_KEYS, type PermissionKey } from "@/lib/auth/session";
 
-const PERMISSION_LABELS: Record<PermissionKey, string> = {
-  "content.create": "Create CMS rows",
-  "content.edit": "Edit CMS rows, uploads, mark submissions",
-  "content.delete": "Delete CMS rows",
-  "content.publish": "Publish blog posts",
-  "users.manage": "List / create / edit users",
-  "users.delete": "Delete users",
-  "roles.manage": "Manage roles",
-  "applications.pii": "Reveal applicant CNIC; download resume/photo; export CSV",
-};
+const PERMISSION_LABELS = Object.fromEntries(
+  PERMISSION_CATALOG.map((entry) => [entry.key, entry.label]),
+) as Record<PermissionKey, string>;
 
 export type RoleEditorInitial = {
   id: string;

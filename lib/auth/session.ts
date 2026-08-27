@@ -11,6 +11,13 @@ export const PERMISSION_KEYS = [
   "users.delete",
   "roles.manage",
   "applications.pii",
+  "cms.view",
+  "cms.edit",
+  "careers.openings.manage",
+  "careers.applications.view",
+  "careers.applications.manage",
+  "contact.view",
+  "contact.manage",
 ] as const;
 
 export type PermissionKey = (typeof PERMISSION_KEYS)[number];
