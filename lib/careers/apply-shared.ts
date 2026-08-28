@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { cnicLast4 } from "@/lib/cnic";
 import { getEmail } from "@/lib/cloudflare-env";
+import { sendEmail } from "@/lib/email";
 import type { PrismaClient } from "@/lib/generated/prisma/client";
 import { Prisma } from "@/lib/generated/prisma/client";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rateLimit";
@@ -164,9 +165,8 @@ export async function sendApplicationEmails({
         `Review: ${inboxUrl}`,
       ].join("\n");
 
-      await mailer.send({
+      await sendEmail(mailer, {
         to: process.env.ADMIN_EMAIL!,
-        from: { email: "noreply@diqualia.com", name: "DiQualia" },
         replyTo: fields.email,
         subject,
         html,
@@ -189,9 +189,8 @@ export async function sendApplicationEmails({
         `Reference: ${applicationId}`,
       ].join("\n");
 
-      await mailer.send({
+      await sendEmail(mailer, {
         to: fields.email,
-        from: { email: "noreply@diqualia.com", name: "DiQualia" },
         ...(process.env.ADMIN_EMAIL ? { replyTo: process.env.ADMIN_EMAIL } : {}),
         subject,
         html,
