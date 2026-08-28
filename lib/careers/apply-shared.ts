@@ -121,14 +121,62 @@ export async function persistJobApplication({
   }
 }
 
+/**
+ * Portal account email for one submit: `portalPassword` is a string only when
+ * the account was just created (send credentials); `null` for a returning
+ * applicant (just point them at the portal). Best-effort — its own try/catch.
+ */
+async function sendApplicantCredentialsEmail(
+  mailer: SendEmail,
+  { email, password, openingTitle }: { email: string; password: string | null; openingTitle: string },
+) {
+  const portalUrl = "https://diqualia.com/portal/login";
+  try {
+    if (password) {
+      const subject = "Your DiQualia applicant portal account";
+      const html = `
+        <p>You can track <b>${esc(openingTitle)}</b> and any future applications in the DiQualia applicant portal.</p>
+        <p><b>Sign in:</b> <a href="${esc(portalUrl)}">${esc(portalUrl)}</a><br>
+        <b>Email:</b> ${esc(email)}<br>
+        <b>Temporary password:</b> <code>${esc(password)}</code></p>
+        <p>You&rsquo;ll be asked to set a new password on first sign-in.</p>
+      `;
+      const text = [
+        `Track your DiQualia applications in the applicant portal.`,
+        `Sign in: ${portalUrl}`,
+        `Email: ${email}`,
+        `Temporary password: ${password}`,
+        `You'll set a new password on first sign-in.`,
+      ].join("\n");
+      await sendEmail(mailer, { to: email, subject, html, text });
+    } else {
+      const subject = `New application received — ${openingTitle}`;
+      const html = `
+        <p>We received your application for <b>${esc(openingTitle)}</b>.</p>
+        <p>Sign in to the applicant portal to track it: <a href="${esc(portalUrl)}">${esc(portalUrl)}</a></p>
+      `;
+      const text = [
+        `We received your application for ${openingTitle}.`,
+        `Track it in the applicant portal: ${portalUrl}`,
+      ].join("\n");
+      await sendEmail(mailer, { to: email, subject, html, text });
+    }
+  } catch (err) {
+    console.error("[careers/apply] Credentials email failed:", err);
+  }
+}
+
 export async function sendApplicationEmails({
   fields,
   openingTitle,
   applicationId,
+  portalPassword,
 }: {
   fields: CareerApplyFields;
   openingTitle: string;
   applicationId: string;
+  /** New-account single-use password to email, or null for a returning applicant. */
+  portalPassword?: string | null;
 }) {
   try {
     const mailer = await getEmail();
@@ -198,6 +246,14 @@ export async function sendApplicationEmails({
       });
     } catch (err) {
       console.error("[careers/apply] Applicant email failed:", err);
+    }
+
+    if (portalPassword !== undefined) {
+      await sendApplicantCredentialsEmail(mailer, {
+        email: fields.email,
+        password: portalPassword,
+        openingTitle,
+      });
     }
   } catch (err) {
     console.error("[careers/apply] Email send failed:", err);

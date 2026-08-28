@@ -9,6 +9,7 @@ import {
   sendApplicationEmails,
   validationError,
 } from "@/lib/careers/apply-shared";
+import { ensureApplicantAccount } from "@/lib/careers/applicant-account";
 import { getDb, getEnv } from "@/lib/cloudflare-env";
 import {
   CareerApplyFieldsSchema,
@@ -157,10 +158,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: persisted.error }, { status: persisted.status });
   }
 
+  const account = await ensureApplicantAccount(prisma, fields.email);
+  await prisma.jobApplication.update({
+    where: { id: persisted.id },
+    data: { applicantUserId: account.applicantUserId },
+  });
+
   await sendApplicationEmails({
     fields,
     openingTitle: opening.title,
     applicationId: persisted.id,
+    portalPassword: account.generatedPassword,
   });
 
   return NextResponse.json({ ok: true, id: persisted.id });

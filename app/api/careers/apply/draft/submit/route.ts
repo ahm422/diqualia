@@ -7,6 +7,7 @@ import {
   sendApplicationEmails,
   validationError,
 } from "@/lib/careers/apply-shared";
+import { ensureApplicantAccount } from "@/lib/careers/applicant-account";
 import { DRAFT_COMPLETED, DraftTokenSchema, findDraftByToken } from "@/lib/careers/draft";
 import { getDb } from "@/lib/cloudflare-env";
 import { CareerApplyFieldsSchema } from "@/lib/schemas/public/career-apply";
@@ -112,10 +113,17 @@ export async function POST(request: NextRequest) {
     data: { status: DRAFT_COMPLETED, updatedAt: new Date() },
   });
 
+  const account = await ensureApplicantAccount(prisma, parsed.data.email);
+  await prisma.jobApplication.update({
+    where: { id: persisted.id },
+    data: { applicantUserId: account.applicantUserId },
+  });
+
   await sendApplicationEmails({
     fields: parsed.data,
     openingTitle: opening.title,
     applicationId: persisted.id,
+    portalPassword: account.generatedPassword,
   });
 
   return NextResponse.json({ ok: true, id: persisted.id });
