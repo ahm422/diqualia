@@ -1,9 +1,11 @@
+import { redirect } from "next/navigation";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { AdminPageHeader } from "@/components/admin";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { resolveAdminLanding } from "@/lib/admin/section-redirect";
 import { requireAdmin } from "@/lib/auth/require-admin";
 import { hasPermission } from "@/lib/auth/session";
 import { getDb } from "@/lib/cloudflare-env";
@@ -21,8 +23,15 @@ type ActivityItem = {
 };
 
 export default async function AdminDashboard() {
-  const prisma = await getDb();
   const session = await requireAdmin();
+  // The dashboard is a content-and-inbox overview. Anyone without cms.view
+  // (hr, employee, a narrow custom role) is bounced to their first permitted
+  // screen; editor/admin/super_admin keep it.
+  if (!hasPermission(session, "cms.view")) {
+    redirect(resolveAdminLanding(session));
+  }
+
+  const prisma = await getDb();
   // Rolling 7 days from this request, not a calendar week.
   const weekAgo = new Date();
   weekAgo.setUTCDate(weekAgo.getUTCDate() - 7);

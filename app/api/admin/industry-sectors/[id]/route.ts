@@ -16,7 +16,7 @@ function emptyToNull(value: string | null | undefined): string | null | undefine
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const prisma = await getDb();
-  const session = await requirePermissionApi("content.edit");
+  const session = await requirePermissionApi("cms.edit");
   if (session instanceof NextResponse) return session;
 
   const { id } = await params;
@@ -80,7 +80,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
 export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const prisma = await getDb();
-  const session = await requirePermissionApi("content.delete");
+  const session = await requirePermissionApi("cms.edit");
   if (session instanceof NextResponse) return session;
 
   const { id } = await params;

@@ -3,7 +3,7 @@ import "server-only";
 import { NextResponse, type NextRequest } from "next/server";
 
 import { JOB_APPLICATION_ADMIN_SELECT, toJobApplicationAdminView } from "@/lib/admin/job-application-view";
-import { requireAdminApi, requirePermissionApi } from "@/lib/auth/require-admin-api";
+import { requirePermissionApi } from "@/lib/auth/require-admin-api";
 import { hasPermission } from "@/lib/auth/session";
 import { getDb } from "@/lib/cloudflare-env";
 import { jobApplicationPatchSchema } from "@/lib/schemas/admin/career";
@@ -16,7 +16,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const prisma = await getDb();
-  const session = await requireAdminApi();
+  const session = await requirePermissionApi("careers.applications.view");
   if (session instanceof NextResponse) return session;
 
   const { id } = await params;
@@ -39,7 +39,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const prisma = await getDb();
-  const session = await requirePermissionApi("content.edit");
+  const session = await requirePermissionApi("careers.applications.manage");
   if (session instanceof NextResponse) return session;
 
   const { id } = await params;

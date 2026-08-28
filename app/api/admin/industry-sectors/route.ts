@@ -2,7 +2,7 @@ import "server-only";
 
 import { NextResponse } from "next/server";
 
-import { requireAdminApi, requirePermissionApi } from "@/lib/auth/require-admin-api";
+import { requirePermissionApi } from "@/lib/auth/require-admin-api";
 import { getDb } from "@/lib/cloudflare-env";
 import { industrySectorPostSchema } from "@/lib/schemas/admin/industries";
 import { revalidateIndustrySector, revalidatePage } from "@/lib/revalidate-site";
@@ -10,7 +10,7 @@ import { uniqueSlug } from "@/lib/slugify";
 
 export async function GET() {
   const prisma = await getDb();
-  const session = await requireAdminApi();
+  const session = await requirePermissionApi("cms.view");
   if (session instanceof NextResponse) return session;
 
   const sectors = await prisma.industrySector.findMany({ orderBy: { order: "asc" } });
@@ -19,7 +19,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   const prisma = await getDb();
-  const session = await requirePermissionApi("content.create");
+  const session = await requirePermissionApi("cms.edit");
   if (session instanceof NextResponse) return session;
 
   let body: unknown;

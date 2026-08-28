@@ -4,7 +4,7 @@ import { AdminPageHeader } from "@/components/admin";
 import { BlogPostEditor } from "../BlogPostEditor";
 
 export default async function NewBlogPostPage() {
-  await requirePermission("content.create");
+  await requirePermission("cms.view");
 
   return (
     <div>

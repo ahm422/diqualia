@@ -1,8 +1,13 @@
 #!/usr/bin/env node
 /**
- * Phase 8 RBAC matrix against local preview (http://127.0.0.1:8787).
+ * RBAC matrix against local preview (http://127.0.0.1:8787).
  *
- * DANGER: mutates local D1 (creates/deletes extra admin users and a marquee row).
+ * Covers: bootstrap super_admin, admin, editor, hr (seeded system role), and a
+ * custom "Recruiter" role (careers.applications.view only) — nav/route guards,
+ * post-login landing, and the applications PII sub-gate.
+ *
+ * DANGER: mutates local D1 (creates/deletes extra admin users, a custom role,
+ * a marquee row, a blog draft, one job application).
  * Loopback-only — same host allowlist as scripts/e2e-preview.ts.
  *
  * Prerequisites: migrate + seed-admin, preview running, ADMIN_EMAIL/ADMIN_PASSWORD in .env
@@ -83,6 +88,7 @@ async function main() {
   logOk("bootstrap session is super_admin");
 
   const createdUserIds: string[] = [];
+  const createdRoleIds: string[] = [];
   let customRoleId: string | null = null;
   let marqueeId: number | null = null;
   let draftPostId: string | null = null;
@@ -180,20 +186,20 @@ async function main() {
     const adminSession = await login(adminEmail, extraPassword);
     const adminMe = await adminSession.request("/api/admin/me");
     const adminPerms = (adminMe.json as Json).permissions as string[];
+    // admin (system role) holds every permission except users.delete.
     assert(!adminPerms.includes("users.delete"), stepLabel("admin lacks users.delete"));
-    assert(!adminPerms.includes("roles.manage"), stepLabel("admin lacks roles.manage"));
+    assert(adminPerms.includes("roles.manage"), stepLabel("admin has roles.manage"));
+    assert(adminPerms.includes("users.manage"), stepLabel("admin has users.manage"));
 
     const usersPage = await adminSession.request("/admin/settings/users");
     assert(usersPage.status === 200, stepLabel(`admin Users page → 200 (got ${usersPage.status})`));
     const rolesPage = await adminSession.request("/admin/settings/roles");
-    assert(
-      rolesPage.status === 307 || rolesPage.status === 302,
-      stepLabel(`admin Roles page → redirect (got ${rolesPage.status})`),
-    );
+    assert(rolesPage.status === 200, stepLabel(`admin Roles page → 200 (got ${rolesPage.status})`));
 
     const rolesApi = await adminSession.request("/api/admin/roles");
-    assert(rolesApi.status === 403, stepLabel(`admin GET roles → 403 (got ${rolesApi.status})`));
+    assert(rolesApi.status === 200, stepLabel(`admin GET roles → 200 (got ${rolesApi.status})`));
 
+    // ...but not users.delete.
     const delUser = await adminSession.request(`/api/admin/users/${editorId}`, { method: "DELETE" });
     assert(delUser.status === 403, stepLabel(`admin DELETE user → 403 (got ${delUser.status})`));
 
@@ -236,6 +242,19 @@ async function main() {
 
     section("C. editor");
     const editorSession = await login(editorEmail, extraPassword);
+    const editorMe = await editorSession.request("/api/admin/me");
+    const editorPerms = (editorMe.json as Json).permissions as string[];
+    assert(
+      editorPerms.includes("cms.view") && editorPerms.includes("cms.edit"),
+      stepLabel("editor has cms.view + cms.edit"),
+    );
+    assert(
+      !editorPerms.includes("careers.applications.view") &&
+        !editorPerms.includes("contact.view") &&
+        !editorPerms.includes("users.manage"),
+      stepLabel("editor lacks careers/contact/users perms"),
+    );
+
     const editorUsers = await editorSession.request("/api/admin/users");
     assert(editorUsers.status === 403, stepLabel(`editor GET users → 403 (got ${editorUsers.status})`));
     const editorRoles = await editorSession.request("/api/admin/roles");
@@ -259,31 +278,22 @@ async function main() {
     });
     assert(editorPatch.status === 200, stepLabel(`editor PATCH marquee → 200`));
 
+    // cms.edit now covers delete — the legacy content.delete key is no longer checked.
     const editorDelete = await editorSession.request(`/api/admin/home-marquee/${editorMarqueeId}`, {
       method: "DELETE",
     });
-    assert(editorDelete.status === 403, stepLabel(`editor DELETE marquee → 403 (got ${editorDelete.status})`));
+    assert(editorDelete.status === 200, stepLabel(`editor DELETE marquee → 200 (got ${editorDelete.status})`));
 
+    // editor keeps content.publish (seeded via migration 0011_rbac_expansion).
     const editorPublish = await jsonRequest(editorSession.request, `/api/admin/blog-posts/${draftPostId}`, {
       method: "PATCH",
       body: JSON.stringify({ status: "published" }),
     });
-    assert(editorPublish.status === 403, stepLabel(`editor publish → 403 (got ${editorPublish.status})`));
-
-    const editorCreatePublished = await jsonRequest(editorSession.request, "/api/admin/blog-posts", {
-      method: "POST",
-      body: JSON.stringify({
-        slug: `rbac-published-${TS}`,
-        title: `RBAC published ${TS}`,
-        excerpt: "Should be forbidden for editor.",
-        body: "Body",
-        status: "published",
-      }),
+    assert(editorPublish.status === 200, stepLabel(`editor publish → 200 (got ${editorPublish.status})`));
+    await jsonRequest(editorSession.request, `/api/admin/blog-posts/${draftPostId}`, {
+      method: "PATCH",
+      body: JSON.stringify({ status: "draft" }),
     });
-    assert(
-      editorCreatePublished.status === 403,
-      stepLabel(`editor POST published → 403 (got ${editorCreatePublished.status})`),
-    );
 
     const editorGet = await editorSession.request("/api/admin/blog-posts");
     assert(editorGet.status === 200, stepLabel(`editor GET blog-posts → 200`));
@@ -293,6 +303,17 @@ async function main() {
     const upload = await editorSession.request("/api/admin/upload", { method: "POST", body: form });
     assert(upload.status === 200, stepLabel(`editor upload POST → 200 (got ${upload.status})`));
 
+    // editor has no careers.applications.view.
+    const editorApps = await editorSession.request("/api/admin/job-applications");
+    assert(editorApps.status === 403, stepLabel(`editor GET job-applications → 403 (got ${editorApps.status})`));
+    const editorAppsPage = await editorSession.request("/admin/careers/applications");
+    assert(
+      editorAppsPage.status === 307 || editorAppsPage.status === 302,
+      stepLabel(`editor applications page → redirect (got ${editorAppsPage.status})`),
+    );
+    logOk("editor matrix");
+
+    section("Applicant fixture + PII gate");
     const apply = new FormData();
     apply.append("name", `RBAC Applicant ${TS}`);
     apply.append("email", `rbac-apply-${TS}@example.com`);
@@ -321,19 +342,6 @@ async function main() {
     const applyJson = (await applyRes.json()) as { id?: string };
     assert(typeof applyJson.id === "string", stepLabel("rbac apply returns id"));
 
-    const editorList = await editorSession.request("/api/admin/job-applications");
-    assert(editorList.status === 200, stepLabel(`editor GET job-applications → 200 (got ${editorList.status})`));
-    const editorApps = editorList.json as { id: string; cnic?: string | null; cnicMasked?: string }[];
-    const editorRow = editorApps.find((row) => row.id === applyJson.id);
-    assert(editorRow != null, stepLabel("editor list includes new application"));
-    assert(editorRow.cnic == null, stepLabel("editor list CNIC is masked/absent"));
-    assert(typeof editorRow.cnicMasked === "string", stepLabel("editor list has cnicMasked"));
-
-    const editorResume = await editorSession.request(`/api/admin/job-applications/${applyJson.id}/resume`);
-    assert(editorResume.status === 403, stepLabel(`editor GET resume → 403 (got ${editorResume.status})`));
-    const editorPhoto = await editorSession.request(`/api/admin/job-applications/${applyJson.id}/photo`);
-    assert(editorPhoto.status === 403, stepLabel(`editor GET photo → 403 (got ${editorPhoto.status})`));
-
     const adminResume = await adminSession.request(`/api/admin/job-applications/${applyJson.id}/resume`);
     assert(adminResume.status === 200, stepLabel(`admin GET resume → 200 (got ${adminResume.status})`));
     const superPhoto = await superSession.request(`/api/admin/job-applications/${applyJson.id}/photo`);
@@ -341,7 +349,129 @@ async function main() {
     const superDetail = await superSession.request(`/api/admin/job-applications/${applyJson.id}`);
     const superRow = superDetail.json as { cnic?: string | null };
     assert(superRow.cnic === rbacCnic, stepLabel("super_admin detail has raw CNIC"));
-    logOk("editor matrix");
+    logOk("applicant fixture ready");
+
+    section("D. hr");
+    const hrEmail = `rbac-hr-${TS}@example.com`;
+    const createHr = await jsonRequest(superSession.request, "/api/admin/users", {
+      method: "POST",
+      body: JSON.stringify({
+        email: hrEmail,
+        name: "RBAC HR",
+        roleId: ROLE_IDS.hr,
+        password: extraPassword,
+      }),
+    });
+    assert(createHr.status === 201, stepLabel(`create hr user → 201 (got ${createHr.status})`));
+    createdUserIds.push((createHr.json as Json).id as string);
+
+    const hrSession = await login(hrEmail, extraPassword);
+    const hrMe = await hrSession.request("/api/admin/me");
+    const hrPerms = ((hrMe.json as Json).permissions as string[]).slice().sort();
+    const expectedHrPerms = [
+      "applications.pii",
+      "careers.applications.manage",
+      "careers.applications.view",
+      "careers.openings.manage",
+      "contact.manage",
+      "contact.view",
+    ];
+    assert(
+      hrPerms.length === expectedHrPerms.length &&
+        expectedHrPerms.every((p, i) => hrPerms[i] === p),
+      stepLabel(`hr permissions == 6 careers/contact keys (got ${hrPerms.join(",")})`),
+    );
+
+    const hrHero = await jsonRequest(hrSession.request, "/api/admin/home-hero", {
+      method: "PATCH",
+      body: JSON.stringify({ headline: "nope" }),
+    });
+    assert(hrHero.status === 403, stepLabel(`hr PATCH home-hero → 403 (got ${hrHero.status})`));
+    const hrUsers = await hrSession.request("/api/admin/users");
+    assert(hrUsers.status === 403, stepLabel(`hr GET users → 403 (got ${hrUsers.status})`));
+
+    const hrApps = await hrSession.request("/api/admin/job-applications");
+    assert(hrApps.status === 200, stepLabel(`hr GET job-applications → 200 (got ${hrApps.status})`));
+    const hrRow = (hrApps.json as { id: string; cnic?: string | null; cnicMasked?: string }[]).find(
+      (row) => row.id === applyJson.id,
+    );
+    assert(hrRow != null, stepLabel("hr list includes new application"));
+    assert(hrRow.cnic === rbacCnic, stepLabel("hr sees raw CNIC (has applications.pii)"));
+
+    const hrResume = await hrSession.request(`/api/admin/job-applications/${applyJson.id}/resume`);
+    assert(hrResume.status === 200, stepLabel(`hr GET resume → 200 (got ${hrResume.status})`));
+
+    const hrHeroPage = await hrSession.request("/admin/home/hero");
+    assert(
+      hrHeroPage.status === 307 || hrHeroPage.status === 302,
+      stepLabel(`hr /admin/home/hero → redirect (got ${hrHeroPage.status})`),
+    );
+    const hrLanding = await hrSession.request("/admin");
+    assert(
+      (hrLanding.status === 307 || hrLanding.status === 302) &&
+        (hrLanding.headers.get("location") ?? "").includes("/admin/careers/applications"),
+      stepLabel(
+        `hr /admin → redirect to applications (got ${hrLanding.status} ${hrLanding.headers.get("location") ?? ""})`,
+      ),
+    );
+    logOk("hr matrix");
+
+    section("E. custom Recruiter role");
+    const recruiterRole = await jsonRequest(superSession.request, "/api/admin/roles", {
+      method: "POST",
+      body: JSON.stringify({
+        name: `rbac_recruiter_${TS}`,
+        permissionKeys: ["careers.applications.view"],
+      }),
+    });
+    assert(recruiterRole.status === 201, stepLabel(`create recruiter role → 201 (got ${recruiterRole.status})`));
+    const recruiterRoleId = (recruiterRole.json as Json).id as string;
+    createdRoleIds.push(recruiterRoleId);
+
+    const recruiterEmail = `rbac-recruiter-${TS}@example.com`;
+    const createRecruiter = await jsonRequest(superSession.request, "/api/admin/users", {
+      method: "POST",
+      body: JSON.stringify({
+        email: recruiterEmail,
+        name: "RBAC Recruiter",
+        roleId: recruiterRoleId,
+        password: extraPassword,
+      }),
+    });
+    assert(createRecruiter.status === 201, stepLabel(`create recruiter user → 201 (got ${createRecruiter.status})`));
+    createdUserIds.push((createRecruiter.json as Json).id as string);
+
+    const recruiterSession = await login(recruiterEmail, extraPassword);
+    const recruiterMe = await recruiterSession.request("/api/admin/me");
+    const recruiterPerms = (recruiterMe.json as Json).permissions as string[];
+    assert(
+      recruiterPerms.length === 1 && recruiterPerms[0] === "careers.applications.view",
+      stepLabel(`recruiter has exactly careers.applications.view (got ${recruiterPerms.join(",")})`),
+    );
+
+    const recruiterApps = await recruiterSession.request("/api/admin/job-applications");
+    assert(recruiterApps.status === 200, stepLabel(`recruiter GET job-applications → 200 (got ${recruiterApps.status})`));
+    const recruiterRow = (
+      recruiterApps.json as { id: string; cnic?: string | null; cnicMasked?: string }[]
+    ).find((row) => row.id === applyJson.id);
+    assert(recruiterRow != null, stepLabel("recruiter list includes new application"));
+    assert(recruiterRow.cnic == null, stepLabel("recruiter CNIC is masked (no applications.pii)"));
+    assert(typeof recruiterRow.cnicMasked === "string", stepLabel("recruiter row has cnicMasked"));
+
+    const recruiterResume = await recruiterSession.request(
+      `/api/admin/job-applications/${applyJson.id}/resume`,
+    );
+    assert(recruiterResume.status === 403, stepLabel(`recruiter GET resume → 403 (got ${recruiterResume.status})`));
+    const recruiterCsv = await recruiterSession.request("/api/admin/job-applications/export.csv");
+    assert(recruiterCsv.status === 403, stepLabel(`recruiter GET export.csv → 403 (got ${recruiterCsv.status})`));
+
+    const recruiterLanding = await recruiterSession.request("/admin");
+    assert(
+      (recruiterLanding.status === 307 || recruiterLanding.status === 302) &&
+        (recruiterLanding.headers.get("location") ?? "").includes("/admin/careers/applications"),
+      stepLabel(`recruiter /admin → redirect to applications (got ${recruiterLanding.status})`),
+    );
+    logOk("custom recruiter role matrix");
 
     section("Negative auth");
     const anon = client(new CookieJar());
@@ -366,6 +496,10 @@ async function main() {
     }
     for (const id of createdUserIds.reverse()) {
       await cleanup.request(`/api/admin/users/${id}`, { method: "DELETE" }).catch(() => {});
+    }
+    // Roles only after their users are gone (DELETE /roles/[id] rejects while _count.users > 0).
+    for (const id of createdRoleIds.reverse()) {
+      await cleanup.request(`/api/admin/roles/${id}`, { method: "DELETE" }).catch(() => {});
     }
     if (customRoleId) {
       await cleanup.request(`/api/admin/roles/${customRoleId}`, { method: "DELETE" }).catch(() => {});

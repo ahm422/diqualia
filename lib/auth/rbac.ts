@@ -2,7 +2,7 @@ import "server-only";
 
 import { NextResponse } from "next/server";
 
-import { ROLE_IDS, SYSTEM_ROLE_NAMES } from "@/lib/auth/rbac-ids";
+import { PERMISSION_IDS, ROLE_IDS, SYSTEM_ROLE_NAMES } from "@/lib/auth/rbac-ids";
 import type { AdminSession } from "@/lib/auth/session";
 import type { PrismaClient } from "@/lib/generated/prisma/client";
 
@@ -26,6 +26,27 @@ export function isSuperAdminSession(session: AdminSession): boolean {
 
 export async function countSuperAdminUsers(prisma: PrismaClient): Promise<number> {
   return prisma.adminUser.count({ where: { roleId: ROLE_IDS.super_admin } });
+}
+
+/** Does this role grant roles.manage (system super_admin/admin, or a custom role)? */
+export async function roleGrantsRolesManage(
+  prisma: PrismaClient,
+  roleId: string,
+): Promise<boolean> {
+  const row = await prisma.rolePermission.findFirst({
+    where: { roleId, permissionId: PERMISSION_IDS["roles.manage"] },
+    select: { roleId: true },
+  });
+  return row !== null;
+}
+
+/** Number of admin users whose role grants roles.manage — used to block removing the last one. */
+export async function countRolesManageHolders(prisma: PrismaClient): Promise<number> {
+  return prisma.adminUser.count({
+    where: {
+      role: { permissions: { some: { permissionId: PERMISSION_IDS["roles.manage"] } } },
+    },
+  });
 }
 
 export function isSystemRoleName(name: string): boolean {

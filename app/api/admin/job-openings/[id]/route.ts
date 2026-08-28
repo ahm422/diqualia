@@ -2,7 +2,7 @@ import "server-only";
 
 import { NextResponse, type NextRequest } from "next/server";
 
-import { requireAdminApi, requirePermissionApi } from "@/lib/auth/require-admin-api";
+import { requirePermissionApi } from "@/lib/auth/require-admin-api";
 import { getDb } from "@/lib/cloudflare-env";
 import { Prisma } from "@/lib/generated/prisma/client";
 import { revalidateJobOpening, revalidatePage } from "@/lib/revalidate-site";
@@ -18,7 +18,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const prisma = await getDb();
-  const session = await requireAdminApi();
+  const session = await requirePermissionApi("careers.openings.manage");
   if (session instanceof NextResponse) return session;
 
   const { id } = await params;
@@ -35,7 +35,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const prisma = await getDb();
-  const session = await requirePermissionApi("content.edit");
+  const session = await requirePermissionApi("careers.openings.manage");
   if (session instanceof NextResponse) return session;
 
   const { id } = await params;
@@ -93,7 +93,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const prisma = await getDb();
-  const session = await requirePermissionApi("content.delete");
+  const session = await requirePermissionApi("careers.openings.manage");
   if (session instanceof NextResponse) return session;
 
   const { id } = await params;
