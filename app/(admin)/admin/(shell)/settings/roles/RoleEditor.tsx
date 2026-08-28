@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import {
@@ -12,40 +12,59 @@ import {
   AdminSaveButton,
 } from "@/components/admin";
 import { Button } from "@/components/ui/button";
-import { PERMISSION_CATALOG } from "@/lib/auth/permission-catalog";
-import { PERMISSION_KEYS, type PermissionKey } from "@/lib/auth/session";
-
-const PERMISSION_LABELS = Object.fromEntries(
-  PERMISSION_CATALOG.map((entry) => [entry.key, entry.label]),
-) as Record<PermissionKey, string>;
+import { permissionCatalogByGroup } from "@/lib/auth/permission-catalog";
+import { type PermissionKey } from "@/lib/auth/session";
 
 export type RoleEditorInitial = {
-  id: string;
+  /** Present when editing an existing role; absent when seeding a new/duplicated role. */
+  id?: string;
   name: string;
-  isSystem: boolean;
+  isSystem?: boolean;
   permissionKeys: PermissionKey[];
 };
 
+function duplicateHref(name: string, keys: PermissionKey[]): string {
+  const params = new URLSearchParams({ from: `${name}_copy`, keys: keys.join(",") });
+  return `/admin/settings/roles/new?${params.toString()}`;
+}
+
 export function RoleEditor({ initial }: { initial?: RoleEditorInitial | null }) {
   const router = useRouter();
-  const isNew = !initial;
+  const isNew = !initial?.id;
   const readOnly = Boolean(initial?.isSystem);
+  const groups = useMemo(() => permissionCatalogByGroup(), []);
 
   const [name, setName] = useState(initial?.name ?? "");
   const [keys, setKeys] = useState<PermissionKey[]>(initial?.permissionKeys ?? []);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const keySet = useMemo(() => new Set(keys), [keys]);
 
   function toggle(key: PermissionKey) {
     if (readOnly) return;
     setKeys((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
   }
 
+  function setGroup(groupKeys: PermissionKey[], checked: boolean) {
+    if (readOnly) return;
+    setKeys((prev) => {
+      const next = new Set(prev);
+      for (const k of groupKeys) {
+        if (checked) next.add(k);
+        else next.delete(k);
+      }
+      return Array.from(next);
+    });
+  }
+
   async function handleSave() {
     if (readOnly) return;
     setSaving(true);
+    setError(null);
     try {
-      const res = await fetch(isNew ? "/api/admin/roles" : `/api/admin/roles/${initial.id}`, {
+      const res = await fetch(isNew ? "/api/admin/roles" : `/api/admin/roles/${initial!.id}`, {
         method: isNew ? "POST" : "PATCH",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -57,9 +76,12 @@ export function RoleEditor({ initial }: { initial?: RoleEditorInitial | null }) 
         if (isNew) router.push(`/admin/settings/roles/${result.id}`);
         router.refresh();
       } else {
-        toast.error(typeof result.error === "string" ? result.error : "Save failed");
+        const message = typeof result.error === "string" ? result.error : "Save failed";
+        setError(message);
+        toast.error(message);
       }
     } catch {
+      setError("Save failed — try again");
       toast.error("Save failed — try again");
     } finally {
       setSaving(false);
@@ -67,9 +89,10 @@ export function RoleEditor({ initial }: { initial?: RoleEditorInitial | null }) 
   }
 
   async function handleDelete() {
-    if (!initial || readOnly) return;
+    if (!initial?.id || readOnly) return;
     if (!confirm(`Delete role “${initial.name}”? This cannot be undone.`)) return;
     setDeleting(true);
+    setError(null);
     try {
       const res = await fetch(`/api/admin/roles/${initial.id}`, {
         method: "DELETE",
@@ -81,9 +104,12 @@ export function RoleEditor({ initial }: { initial?: RoleEditorInitial | null }) 
         router.push("/admin/settings/roles");
         router.refresh();
       } else {
-        toast.error(typeof result.error === "string" ? result.error : "Delete failed");
+        const message = typeof result.error === "string" ? result.error : "Delete failed";
+        setError(message);
+        toast.error(message);
       }
     } catch {
+      setError("Delete failed — try again");
       toast.error("Delete failed — try again");
     } finally {
       setDeleting(false);
@@ -111,32 +137,82 @@ export function RoleEditor({ initial }: { initial?: RoleEditorInitial | null }) 
           />
         </AdminField>
         {readOnly ? (
-          <p className="mb-4 text-xs text-[var(--diq_mid)]">
-            System roles cannot be renamed, edited, or deleted. Create a custom role to change the matrix.
-          </p>
+          <div className="mb-4 flex flex-wrap items-center gap-3">
+            <p className="text-xs text-[var(--diq_mid)]">
+              This is a system role — its permissions are fixed. Clone it to customise.
+            </p>
+            <Button asChild variant="secondary" size="admin">
+              <Link href={duplicateHref(initial!.name, initial!.permissionKeys)}>Duplicate</Link>
+            </Button>
+          </div>
         ) : null}
-        <fieldset className="mb-4" disabled={readOnly}>
+
+        <fieldset className="mb-4 flex flex-col gap-6" disabled={readOnly}>
           <legend className="mb-2 text-xs uppercase tracking-widest text-[var(--diq_mid)]">
             Permissions
           </legend>
-          <div className="flex flex-col gap-2">
-            {PERMISSION_KEYS.map((key) => (
-              <label key={key} className="flex items-start gap-2 text-sm text-foreground">
-                <input
-                  type="checkbox"
-                  checked={keys.includes(key)}
-                  onChange={() => toggle(key)}
-                  disabled={readOnly}
-                  className="mt-0.5 accent-[var(--gold)]"
-                />
-                <span>
-                  <span className="font-mono text-xs">{key}</span>
-                  <span className="block text-xs text-[var(--diq_mid)]">{PERMISSION_LABELS[key]}</span>
-                </span>
-              </label>
-            ))}
-          </div>
+
+          {groups.map(({ group, entries }) => {
+            const groupKeys = entries.map((e) => e.key);
+            const selectedInGroup = groupKeys.filter((k) => keySet.has(k)).length;
+            const allSelected = selectedInGroup === groupKeys.length;
+            const someSelected = selectedInGroup > 0 && !allSelected;
+            const groupId = `role-group-${group.replace(/[^a-z]+/gi, "-").toLowerCase()}`;
+            return (
+              <div key={group}>
+                <div className="mb-2 flex items-center gap-2 border-b border-[var(--diq_border)] pb-1">
+                  <input
+                    type="checkbox"
+                    id={groupId}
+                    className="accent-[var(--gold)]"
+                    checked={allSelected}
+                    ref={(el) => {
+                      if (el) el.indeterminate = someSelected;
+                    }}
+                    onChange={(e) => setGroup(groupKeys, e.target.checked)}
+                    disabled={readOnly}
+                  />
+                  <label htmlFor={groupId} className="text-sm font-medium text-foreground">
+                    {group}
+                    <span className="ml-2 text-xs font-normal text-[var(--diq_mid)]">
+                      {selectedInGroup}/{groupKeys.length}
+                    </span>
+                  </label>
+                </div>
+                <div className="flex flex-col gap-2 pl-6">
+                  {entries.map((entry) => (
+                    <div key={entry.key} className="flex items-start gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        id={`role-perm-${entry.key}`}
+                        className="mt-0.5 accent-[var(--gold)]"
+                        checked={keySet.has(entry.key)}
+                        onChange={() => toggle(entry.key)}
+                        disabled={readOnly}
+                      />
+                      <label htmlFor={`role-perm-${entry.key}`} className="text-foreground">
+                        <span className="font-medium">{entry.label}</span>
+                        <span className="ml-2 font-mono text-xs text-[var(--diq_mid)]">
+                          {entry.key}
+                        </span>
+                        <span className="block text-xs text-[var(--diq_mid)]">
+                          {entry.description}
+                        </span>
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
         </fieldset>
+
+        {error ? (
+          <p className="mb-3 text-sm text-[var(--diq_danger,#e5484d)]" role="alert">
+            {error}
+          </p>
+        ) : null}
+
         <div className="flex flex-wrap items-center gap-3 pt-2">
           {!readOnly && (
             <AdminSaveButton onClick={handleSave} saving={saving} requirePermission={false} />

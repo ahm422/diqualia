@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/lib/auth/require-admin";
+import { requirePermission } from "@/lib/auth/require-admin";
 import { getDb } from "@/lib/cloudflare-env";
 import { AdminPageHeader } from "@/components/admin";
 
@@ -7,7 +7,7 @@ import { SectorsEditor } from "./SectorsEditor";
 
 export default async function IndustriesSectorsAdminPage() {
   const prisma = await getDb();
-  await requireAdmin();
+  await requirePermission("cms.view");
 
   const [page, sectors] = await Promise.all([
     prisma.industriesPage.findUnique({ where: { id: 1 } }),

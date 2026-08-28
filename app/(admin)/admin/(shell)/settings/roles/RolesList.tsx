@@ -14,15 +14,29 @@ export type RoleRow = {
   permissionKeys: PermissionKey[];
 };
 
+function duplicateHref(role: RoleRow): string {
+  const params = new URLSearchParams({
+    from: `${role.name}_copy`,
+    keys: role.permissionKeys.join(","),
+  });
+  return `/admin/settings/roles/new?${params.toString()}`;
+}
+
 export function RolesList({ initialRoles }: { initialRoles: RoleRow[] }) {
   const router = useRouter();
   const [roles, setRoles] = useState(initialRoles);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [errorById, setErrorById] = useState<Record<string, string>>({});
 
   async function handleDelete(role: RoleRow) {
     if (role.isSystem) return;
     if (!confirm(`Delete role “${role.name}”? This cannot be undone.`)) return;
     setDeletingId(role.id);
+    setErrorById((prev) => {
+      const next = { ...prev };
+      delete next[role.id];
+      return next;
+    });
     try {
       const res = await fetch(`/api/admin/roles/${role.id}`, {
         method: "DELETE",
@@ -34,9 +48,12 @@ export function RolesList({ initialRoles }: { initialRoles: RoleRow[] }) {
         toast.success("Deleted");
         router.refresh();
       } else {
-        toast.error(typeof result.error === "string" ? result.error : "Delete failed");
+        const message = typeof result.error === "string" ? result.error : "Delete failed";
+        setErrorById((prev) => ({ ...prev, [role.id]: message }));
+        toast.error(message);
       }
     } catch {
+      setErrorById((prev) => ({ ...prev, [role.id]: "Delete failed — try again" }));
       toast.error("Delete failed — try again");
     } finally {
       setDeletingId(null);
@@ -82,7 +99,14 @@ export function RolesList({ initialRoles }: { initialRoles: RoleRow[] }) {
                   >
                     {role.isSystem ? "View" : "Edit"}
                   </Link>
-                  {!role.isSystem && (
+                  {role.isSystem ? (
+                    <Link
+                      href={duplicateHref(role)}
+                      className="text-xs text-[var(--diq_mid)] hover:text-[var(--gold)]"
+                    >
+                      Duplicate
+                    </Link>
+                  ) : (
                     <button
                       type="button"
                       onClick={() => handleDelete(role)}
@@ -93,6 +117,11 @@ export function RolesList({ initialRoles }: { initialRoles: RoleRow[] }) {
                     </button>
                   )}
                 </div>
+                {errorById[role.id] ? (
+                  <p className="mt-1 text-xs text-red-400" role="alert">
+                    {errorById[role.id]}
+                  </p>
+                ) : null}
               </td>
             </tr>
           ))}

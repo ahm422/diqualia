@@ -27,6 +27,7 @@
     "cf:e2e": "tsx scripts/e2e-preview.ts",
     "cf:e2e:rbac": "tsx scripts/e2e-rbac.ts",
     "test:career-apply": "tsx --test lib/schemas/public/career-apply.test.ts",
+    "test:roles-schema": "tsx --test lib/schemas/admin/roles.test.ts",
     "test:cleanup-drafts": "tsx --test lib/careers/cleanup-drafts.test.ts"
   },
   "dependencies": {

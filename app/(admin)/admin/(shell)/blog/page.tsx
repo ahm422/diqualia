@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { requireAdmin } from "@/lib/auth/require-admin";
+import { requirePermission } from "@/lib/auth/require-admin";
 import { hasPermission } from "@/lib/auth/session";
 import { getDb } from "@/lib/cloudflare-env";
 import { Button } from "@/components/ui/button";
@@ -9,8 +9,8 @@ import { BlogPostsList } from "./BlogPostsList";
 
 export default async function BlogAdminPage() {
   const prisma = await getDb();
-  const session = await requireAdmin();
-  const canCreate = hasPermission(session, "content.create");
+  const session = await requirePermission("cms.view");
+  const canCreate = hasPermission(session, "cms.edit");
 
   const posts = await prisma.blogPost.findMany({
     orderBy: { updatedAt: "desc" },

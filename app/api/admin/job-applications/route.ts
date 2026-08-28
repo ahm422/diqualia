@@ -3,14 +3,14 @@ import "server-only";
 import { NextResponse } from "next/server";
 
 import { JOB_APPLICATION_ADMIN_SELECT, toJobApplicationAdminView } from "@/lib/admin/job-application-view";
-import { requireAdminApi } from "@/lib/auth/require-admin-api";
+import { requirePermissionApi } from "@/lib/auth/require-admin-api";
 import { hasPermission } from "@/lib/auth/session";
 import { getDb } from "@/lib/cloudflare-env";
 import { jobApplicationStatusEnum } from "@/lib/schemas/admin/career";
 
 export async function GET(request: Request) {
   const prisma = await getDb();
-  const session = await requireAdminApi();
+  const session = await requirePermissionApi("careers.applications.view");
   if (session instanceof NextResponse) return session;
 
   const { searchParams } = new URL(request.url);

@@ -3,7 +3,7 @@ import "server-only";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { requireAdminApi, requirePermissionApi } from "@/lib/auth/require-admin-api";
+import { requirePermissionApi } from "@/lib/auth/require-admin-api";
 import { getDb } from "@/lib/cloudflare-env";
 import { revalidatePage } from "@/lib/revalidate-site";
 
@@ -29,7 +29,7 @@ const PatchSchema = z.object({
 
 export async function GET() {
   const prisma = await getDb();
-  const session = await requireAdminApi();
+  const session = await requirePermissionApi("cms.view");
   if (session instanceof NextResponse) return session;
 
   const page = await prisma.servicesPage.findUnique({ where: { id: 1 } });
@@ -38,7 +38,7 @@ export async function GET() {
 
 export async function PATCH(request: Request) {
   const prisma = await getDb();
-  const session = await requirePermissionApi("content.edit");
+  const session = await requirePermissionApi("cms.edit");
   if (session instanceof NextResponse) return session;
 
   let body: unknown;

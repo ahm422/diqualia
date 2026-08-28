@@ -1,4 +1,5 @@
 import { redirectAdminSection } from "@/lib/admin/section-redirect";
+import { requirePermission } from "@/lib/auth/require-admin";
 
 const PROCESS_SECTIONS = {
   hero: "/admin/process/hero",
@@ -11,6 +12,7 @@ export default async function ProcessAdminRedirect({
 }: {
   searchParams: Promise<{ section?: string }>;
 }) {
+  await requirePermission("cms.view");
   const { section } = await searchParams;
   redirectAdminSection(PROCESS_SECTIONS, section, "hero");
 }

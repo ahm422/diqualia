@@ -13,7 +13,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const prisma = await getDb();
-  const session = await requirePermissionApi("content.edit");
+  const session = await requirePermissionApi("contact.manage");
   if (session instanceof NextResponse) return session;
 
   let body: unknown;

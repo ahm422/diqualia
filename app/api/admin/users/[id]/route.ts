@@ -6,9 +6,11 @@ import { hashPassword } from "@/lib/auth/password";
 import { ROLE_IDS } from "@/lib/auth/rbac-ids";
 import {
   ADMIN_USER_PUBLIC_SELECT,
+  countRolesManageHolders,
   countSuperAdminUsers,
   isSuperAdminSession,
   jsonError,
+  roleGrantsRolesManage,
 } from "@/lib/auth/rbac";
 import { requirePermissionApi } from "@/lib/auth/require-admin-api";
 import { getDb } from "@/lib/cloudflare-env";
@@ -81,6 +83,16 @@ export async function PATCH(
     if (!role) return jsonError("Role not found", 400);
   }
 
+  // Don't let a role change strip the last roles.manage holder.
+  if (parsed.data.roleId && parsed.data.roleId !== existing.roleId) {
+    const losesRolesManage =
+      (await roleGrantsRolesManage(prisma, existing.roleId)) &&
+      !(await roleGrantsRolesManage(prisma, parsed.data.roleId));
+    if (losesRolesManage && (await countRolesManageHolders(prisma)) <= 1) {
+      return jsonError("Cannot remove the last roles.manage holder", 400);
+    }
+  }
+
   if (parsed.data.email && parsed.data.email !== existing.email) {
     const conflict = await prisma.adminUser.findUnique({
       where: { email: parsed.data.email },
@@ -124,6 +136,12 @@ export async function DELETE(
     const remaining = await countSuperAdminUsers(prisma);
     if (remaining <= 1) {
       return jsonError("Cannot delete the last super_admin", 400);
+    }
+  }
+
+  if (await roleGrantsRolesManage(prisma, existing.roleId)) {
+    if ((await countRolesManageHolders(prisma)) <= 1) {
+      return jsonError("Cannot remove the last roles.manage holder", 400);
     }
   }
 

@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { requireAdmin } from "@/lib/auth/require-admin";
+import { requirePermission } from "@/lib/auth/require-admin";
 import { hasPermission } from "@/lib/auth/session";
 import { getDb } from "@/lib/cloudflare-env";
 import { JOB_APPLICATION_ADMIN_SELECT, toJobApplicationAdminView } from "@/lib/admin/job-application-view";
@@ -15,7 +15,7 @@ export default async function JobApplicationsAdminPage({
   searchParams: Promise<{ highlight?: string; status?: string }>;
 }) {
   const prisma = await getDb();
-  const session = await requireAdmin();
+  const session = await requirePermission("careers.applications.view");
   const sp = await searchParams;
   const statusParsed = sp.status ? jobApplicationStatusEnum.safeParse(sp.status) : null;
   const status = statusParsed?.success ? statusParsed.data : undefined;

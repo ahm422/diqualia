@@ -4,7 +4,7 @@ import { AdminPageHeader } from "@/components/admin";
 import { JobOpeningEditor } from "../JobOpeningEditor";
 
 export default async function NewJobOpeningPage() {
-  await requirePermission("content.create");
+  await requirePermission("careers.openings.manage");
 
   return (
     <div>
