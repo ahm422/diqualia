@@ -126,19 +126,26 @@ function refineAvailableFrom(availableFrom: string, ctx: z.RefinementCtx) {
   }
 }
 
+// Accept the canonical dashed shape (12345-1234567-8) that the form now produces,
+// OR any value that normalizes to 13 digits — draft-resume and direct API callers
+// may still send bare digits.
+function isValidCnicInput(cnicRaw: string): boolean {
+  return CNIC_INPUT_RE.test(cnicRaw) || normalizeCnic(cnicRaw) != null;
+}
+
 function refineCnic(nationality: string, cnic: string | undefined, ctx: z.RefinementCtx) {
   const cnicRaw = cnic?.trim() ?? "";
   if (isPakistanNationality(nationality)) {
     if (!cnicRaw) {
       ctx.addIssue({ code: "custom", path: ["cnic"], message: "CNIC is required for Pakistani applicants." });
-    } else if (!CNIC_INPUT_RE.test(cnicRaw) || !normalizeCnic(cnicRaw)) {
+    } else if (!isValidCnicInput(cnicRaw)) {
       ctx.addIssue({
         code: "custom",
         path: ["cnic"],
         message: "Enter a 13-digit CNIC, with or without dashes.",
       });
     }
-  } else if (cnicRaw && (!CNIC_INPUT_RE.test(cnicRaw) || !normalizeCnic(cnicRaw))) {
+  } else if (cnicRaw && !isValidCnicInput(cnicRaw)) {
     ctx.addIssue({
       code: "custom",
       path: ["cnic"],

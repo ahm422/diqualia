@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 
 import { FileDropzone } from "@/app/components/FileDropzone";
 import { Button } from "@/components/ui/button";
+import { formatCnicInput } from "@/lib/cnic";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { fieldErrorsFromFlatten, readApiError, type FieldErrors } from "@/lib/public-form";
 import {
@@ -285,7 +286,7 @@ export function CareerApplyForm({
         setDateOfBirth(String(personal.dateOfBirth ?? ""));
         setGender(String(personal.gender ?? ""));
         setMaritalStatus(String(personal.maritalStatus ?? ""));
-        setCnic(String(personal.cnic ?? ""));
+        setCnic(formatCnicInput(String(personal.cnic ?? "")));
         setNationality(String(personal.nationality ?? "Pakistan"));
         setCurrentAddress(String(personal.currentAddress ?? ""));
         setCity(String(personal.city ?? ""));
@@ -792,14 +793,15 @@ export function CareerApplyForm({
               <input
                 value={cnic}
                 onChange={(e) => {
-                  setCnic(e.target.value);
+                  setCnic(formatCnicInput(e.target.value));
                   clearField("cnic");
                 }}
                 className={inputClass}
                 style={controlStyle("cnic")}
-                placeholder="xxxxx-xxxxxxx-x"
+                placeholder="12345-1234567-8"
                 maxLength={15}
                 inputMode="numeric"
+                aria-invalid={Boolean(fields.cnic)}
               />
             </Field>
             <Field label="Email" htmlFor="apply-email" error={fields.email}>
