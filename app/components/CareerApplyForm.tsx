@@ -25,6 +25,7 @@ type SubmitState =
   | { status: "idle" }
   | { status: "submitting"; progress: number | null }
   | { status: "success"; id: string }
+  | { status: "already-applied"; portalUrl: string }
   | { status: "error"; message: string };
 
 type StepId = "personal" | "education" | "professional" | "other";
@@ -574,6 +575,14 @@ export function CareerApplyForm({
       website,
     });
     if (submitted.status < 200 || submitted.status >= 300) {
+      const body = submitted.json as { alreadyApplied?: boolean; portalUrl?: string } | null;
+      if (submitted.status === 409 && body?.alreadyApplied) {
+        setState({
+          status: "already-applied",
+          portalUrl: body.portalUrl ?? "/portal/login?next=/portal",
+        });
+        return false;
+      }
       applyApiError(submitted.json);
       return false;
     }
@@ -646,6 +655,35 @@ export function CareerApplyForm({
         <div className="mt-8">
           <Button type="button" variant="primary" onClick={resetForm}>
             Submit another
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (state.status === "already-applied") {
+    return (
+      <div className="border p-8 md:p-10" style={panelStyle} role="status" aria-live="polite">
+        <div className="text-[10px] tracking-[0.22em] uppercase text-primary">Already applied</div>
+        <p
+          className="mt-3 text-foreground"
+          style={{
+            fontFamily: "var(--font-display)",
+            fontWeight: 300,
+            fontStyle: "italic",
+            fontSize: "clamp(1.15rem, 2vw, 1.5rem)",
+            lineHeight: 1.3,
+          }}
+        >
+          You&rsquo;ve already applied for this role.
+        </p>
+        <p className="mt-4 text-[13px] leading-7 text-muted-foreground">
+          We have one application from you for {jobTitle} on file. Sign in to the applicant portal to
+          check its status — use the email and password sent when you first applied.
+        </p>
+        <div className="mt-8">
+          <Button asChild variant="primary">
+            <a href={state.portalUrl}>See your application</a>
           </Button>
         </div>
       </div>

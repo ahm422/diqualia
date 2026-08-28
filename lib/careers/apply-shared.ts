@@ -9,7 +9,18 @@ import { checkRateLimit, rateLimitResponse } from "@/lib/rateLimit";
 import type { CareerApplyFields } from "@/lib/schemas/public/career-apply";
 import type { getStorage } from "@/lib/storage";
 
-export const ALREADY_APPLIED_MESSAGE = "You have already applied for this role.";
+export const ALREADY_APPLIED_MESSAGE = "You've already applied for this role.";
+/** Where the "already applied" panel sends the applicant. No PII in the URL. */
+export const ALREADY_APPLIED_PORTAL_URL = "/portal/login?next=/portal";
+
+/** 409 JSON body for an unauthenticated duplicate-application attempt. */
+export function alreadyAppliedBody() {
+  return {
+    error: ALREADY_APPLIED_MESSAGE,
+    alreadyApplied: true as const,
+    portalUrl: ALREADY_APPLIED_PORTAL_URL,
+  };
+}
 
 export type DbClient = PrismaClient;
 export type StorageClient = ReturnType<typeof getStorage>;
@@ -76,7 +87,11 @@ export async function persistJobApplication({
   opening: { id: number; title: string };
   resumeKey: string;
   photoKey: string;
-}): Promise<{ ok: true; id: string } | { ok: false; status: 409 | 500; error: string }> {
+}): Promise<
+  | { ok: true; id: string }
+  | { ok: false; status: 409; error: string; existingId?: string }
+  | { ok: false; status: 500; error: string }
+> {
   try {
     const application = await prisma.jobApplication.create({
       data: {
@@ -114,7 +129,24 @@ export async function persistJobApplication({
     return { ok: true, id: application.id };
   } catch (err) {
     if (isUniqueConstraintError(err)) {
-      return { ok: false, status: 409, error: ALREADY_APPLIED_MESSAGE };
+      const email = fields.email.trim().toLowerCase();
+      const existing =
+        (fields.cnic
+          ? await prisma.jobApplication.findFirst({
+              where: { jobOpeningId: opening.id, cnic: fields.cnic },
+              select: { id: true },
+            })
+          : null) ??
+        (await prisma.jobApplication.findFirst({
+          where: { jobOpeningId: opening.id, email },
+          select: { id: true },
+        }));
+      return {
+        ok: false,
+        status: 409,
+        error: ALREADY_APPLIED_MESSAGE,
+        ...(existing ? { existingId: existing.id } : {}),
+      };
     }
     console.error("[careers/apply] persist failed:", err);
     return { ok: false, status: 500, error: "Failed to save application" };

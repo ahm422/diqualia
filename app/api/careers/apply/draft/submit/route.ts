@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import {
-  ALREADY_APPLIED_MESSAGE,
+  alreadyAppliedBody,
   careersSubmitRateLimit,
   persistJobApplication,
   sendApplicationEmails,
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
   });
   if (!persisted.ok) {
     if (persisted.status === 409) {
-      return NextResponse.json({ error: ALREADY_APPLIED_MESSAGE }, { status: 409 });
+      return NextResponse.json(alreadyAppliedBody(), { status: 409 });
     }
     return NextResponse.json({ error: persisted.error }, { status: persisted.status });
   }

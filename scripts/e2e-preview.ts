@@ -877,9 +877,19 @@ async function testCareers() {
     body: JSON.stringify({ token: tokenB }),
     redirect: "manual",
   });
-  const submitBJson = (await submitB.json()) as { error?: string };
+  const submitBJson = (await submitB.json()) as {
+    error?: string;
+    alreadyApplied?: boolean;
+    portalUrl?: string;
+  };
   assert(submitB.status === 409, stepLabel(`second submit same email → 409 (got ${submitB.status})`));
-  assert(submitBJson.error === "You have already applied for this role.", stepLabel("duplicate message is stable"));
+  assert(submitBJson.error === "You've already applied for this role.", stepLabel("duplicate message is stable"));
+  assert(submitBJson.alreadyApplied === true, stepLabel("duplicate response has alreadyApplied:true"));
+  assert(
+    submitBJson.portalUrl === "/portal/login?next=/portal",
+    stepLabel("duplicate response points at the portal"),
+  );
+  assert(!("existingId" in submitBJson), stepLabel("duplicate response leaks no application id"));
 
   const submitC = await fetch(`${base}/api/careers/apply/draft/submit`, {
     method: "POST",
