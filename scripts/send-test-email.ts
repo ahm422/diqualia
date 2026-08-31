@@ -12,7 +12,7 @@
 import "dotenv/config";
 import { getPlatformProxy } from "wrangler";
 
-import { EMAIL_FROM } from "../lib/email";
+import { EMAIL_FROM } from "../lib/email-shared";
 
 function readToFlag(argv: string[]): string {
   const idx = argv.indexOf("--to");

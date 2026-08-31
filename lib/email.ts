@@ -8,15 +8,9 @@ import "server-only";
  * Delivery only works once `diqualia.com` is onboarded for Cloudflare Email
  * Sending (SPF/DKIM/DMARC verified) — see docs/DEPLOY-108.md.
  */
-export const EMAIL_FROM = { email: "noreply@diqualia.com", name: "DiQualia" } as const;
+import { EMAIL_FROM, type OutboundEmail } from "./email-shared";
 
-export type OutboundEmail = {
-  to: string;
-  subject: string;
-  html: string;
-  text: string;
-  replyTo?: string;
-};
+export { EMAIL_FROM, type OutboundEmail };
 
 export async function sendEmail(mailer: SendEmail, msg: OutboundEmail): Promise<string> {
   if (!msg.html.trim() || !msg.text.trim()) {
