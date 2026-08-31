@@ -5,6 +5,7 @@ interface __BaseEnv_Env {
 	DB: D1Database;
 	ASSETS: Fetcher;
 	JWT_SECRET: string;
+	PORTAL_JWT_SECRET: string;
 	ADMIN_EMAIL: string;
 	COOKIE_SECURE: string;
 	R2_PUBLIC_URL: string;
@@ -21,6 +22,7 @@ declare namespace Cloudflare {
 		DB: D1Database;
 		ASSETS: Fetcher;
 		JWT_SECRET: string;
+		PORTAL_JWT_SECRET: string;
 		ADMIN_EMAIL: string;
 		COOKIE_SECURE: string;
 		R2_PUBLIC_URL: string;
@@ -32,7 +34,7 @@ type StringifyValues<EnvType extends Record<string, unknown>> = {
 	[Binding in keyof EnvType]: EnvType[Binding] extends string ? EnvType[Binding] : string;
 };
 declare namespace NodeJS {
-	interface ProcessEnv extends StringifyValues<Pick<Cloudflare.Env, "JWT_SECRET" | "ADMIN_EMAIL" | "COOKIE_SECURE" | "R2_PUBLIC_URL" | "NODE_ENV">> {}
+	interface ProcessEnv extends StringifyValues<Pick<Cloudflare.Env, "JWT_SECRET" | "PORTAL_JWT_SECRET" | "ADMIN_EMAIL" | "COOKIE_SECURE" | "R2_PUBLIC_URL" | "NODE_ENV">> {}
 }
 
 // Begin runtime types

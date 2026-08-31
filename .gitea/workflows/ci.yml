@@ -1,0 +1,111 @@
+# CI for #108 — unit test scripts + RBAC/portal e2e.
+#
+# Gitea Actions (GitHub-Actions-compatible). Runs on push/PR to main and on the
+# #108 feature branch. The `unit` job is fast and gates every change; the `e2e`
+# job builds the Workers bundle, boots `opennextjs-cloudflare preview` on
+# 127.0.0.1:8787, migrates + seeds a throwaway local D1, then runs the RBAC and
+# applicant-portal matrices (scripts/e2e-rbac.ts, scripts/e2e-portal.ts).
+#
+# All credentials here are ephemeral, generated per run — nothing to configure
+# in repo secrets.
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - "feat/108-**"
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Prisma client + schema validate
+        run: |
+          npx prisma validate
+          npx prisma generate
+
+      - run: npm run lint
+
+      - name: Unit test scripts
+        run: |
+          npm run test:cnic
+          npm run test:career-apply
+          npm run test:cleanup-drafts
+          npm run test:roles-schema
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: unit
+    env:
+      # Ephemeral per-run credentials — seed-admin and the e2e suites read these
+      # from the same env, so no repo secret is required.
+      ADMIN_EMAIL: ci-admin@example.com
+      ADMIN_PASSWORD: ci-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - run: npx prisma generate
+
+      - name: Local preview secrets (.dev.vars)
+        run: |
+          {
+            echo "JWT_SECRET=$(openssl rand -base64 48)"
+            echo "PORTAL_JWT_SECRET=$(openssl rand -base64 48)"
+            echo "ADMIN_EMAIL=${ADMIN_EMAIL}"
+            echo "COOKIE_SECURE=false"
+          } > .dev.vars
+
+      - name: Migrate + seed throwaway local D1
+        run: |
+          npm run db:migrate
+          npm run db:seed:admin
+
+      - name: Build Workers bundle
+        run: npm run build
+
+      - name: Start preview server
+        run: |
+          npm run preview > preview.log 2>&1 &
+          echo $! > preview.pid
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8787/ >/dev/null 2>&1; then
+              echo "preview up after ${i}s"; exit 0
+            fi
+            sleep 1
+          done
+          echo "preview did not come up in time"; cat preview.log; exit 1
+
+      - name: RBAC matrix
+        run: npm run cf:e2e:rbac
+
+      - name: Applicant portal matrix
+        run: npm run cf:e2e:portal
+
+      - name: Stop preview server
+        if: always()
+        run: |
+          [ -f preview.pid ] && kill "$(cat preview.pid)" 2>/dev/null || true
+
+      - name: Preview log (on failure)
+        if: failure()
+        run: cat preview.log || true

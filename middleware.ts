@@ -2,9 +2,22 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { verifyAdminToken } from "@/lib/auth/jwt";
 import { getTokenFromRequest } from "@/lib/auth/session";
+import { getPortalTokenFromRequest } from "@/lib/portal/session";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // Applicant portal — auth-only, mirrors the /admin branch. The edge cannot
+  // verify PORTAL_JWT_SECRET (build-time inlined), so bounce only when there is
+  // no cookie at all; the shell layout's requireApplicant() is the real gate.
+  if (pathname.startsWith("/portal")) {
+    if (pathname === "/portal/login") return NextResponse.next();
+    if (!getPortalTokenFromRequest(request)) {
+      const next = encodeURIComponent(pathname);
+      return NextResponse.redirect(new URL(`/portal/login?next=${next}`, request.url));
+    }
+    return NextResponse.next();
+  }
 
   if (!pathname.startsWith("/admin")) return NextResponse.next();
 
