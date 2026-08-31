@@ -45,6 +45,8 @@ jobs:
           npm run test:career-apply
           npm run test:cleanup-drafts
           npm run test:roles-schema
+          npm run test:portal-status
+          npm run test:portal-format
 
   e2e:
     runs-on: ubuntu-latest

@@ -2,7 +2,8 @@ import { redirect } from "next/navigation";
 
 import { requireApplicant } from "@/lib/portal/require-applicant";
 
-import { PortalHeader } from "./PortalHeader";
+import { PortalTopBar } from "./PortalTopBar";
+import { Sidebar } from "./Sidebar";
 
 export const dynamic = "force-dynamic";
 
@@ -11,9 +12,12 @@ export default async function PortalShellLayout({ children }: { children: React.
   if (session.mustChangePassword) redirect("/portal/change-password");
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-3xl flex-col">
-      <PortalHeader email={session.email} />
-      <main className="flex-1 px-4 py-8 md:px-8">{children}</main>
+    <div className="min-h-screen md:flex">
+      <Sidebar email={session.email} />
+      <div className="flex min-w-0 flex-1 flex-col">
+        <PortalTopBar email={session.email} />
+        <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 md:px-8">{children}</main>
+      </div>
     </div>
   );
 }

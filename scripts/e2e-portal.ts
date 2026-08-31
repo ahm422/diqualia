@@ -58,20 +58,26 @@ async function login(path: string, body: unknown) {
 
 const aEmail = `portal-a-${TS}@example.com`;
 const bEmail = `portal-b-${TS}@example.com`;
+const cEmail = `portal-c-${TS}@example.com`;
 const aInitialPw = `portal-a-${TS}-Aa1!`;
 const bPw = `portal-b-${TS}-Aa1!`;
+const cPw = `portal-c-${TS}-Aa1!`;
 const aNewPw = `portal-a-${TS}-Zz9-new`;
 
+// appA1 -> reviewing, appA2 -> hired, appA3 -> rejected (exercises every stepper state)
 const appA1 = crypto.randomUUID();
 const appA2 = crypto.randomUUID();
+const appA3 = crypto.randomUUID();
 
 const aUserId = crypto.randomUUID();
 const bUserId = crypto.randomUUID();
+const cUserId = crypto.randomUUID();
 
 async function main() {
   async function seed() {
     const aHash = await hashPassword(aInitialPw);
     const bHash = await hashPassword(bPw);
+    const cHash = await hashPassword(cPw);
     d1(
       `INSERT INTO applicant_users (id, email, password_hash, must_change_password, created_at)
        VALUES (${q(aUserId)}, ${q(aEmail)}, ${q(aHash)}, 1, CURRENT_TIMESTAMP)`,
@@ -80,20 +86,26 @@ async function main() {
       `INSERT INTO applicant_users (id, email, password_hash, must_change_password, created_at)
        VALUES (${q(bUserId)}, ${q(bEmail)}, ${q(bHash)}, 0, CURRENT_TIMESTAMP)`,
     );
-    for (const [id, title] of [
-      [appA1, `Portal Role One ${TS}`],
-      [appA2, `Portal Role Two ${TS}`],
+    // Applicant C has an account but zero applications — the dashboard empty state.
+    d1(
+      `INSERT INTO applicant_users (id, email, password_hash, must_change_password, created_at)
+       VALUES (${q(cUserId)}, ${q(cEmail)}, ${q(cHash)}, 0, CURRENT_TIMESTAMP)`,
+    );
+    for (const [id, title, status] of [
+      [appA1, `Portal Role One ${TS}`, "reviewing"],
+      [appA2, `Portal Role Two ${TS}`, "hired"],
+      [appA3, `Portal Role Three ${TS}`, "rejected"],
     ] as const) {
       d1(
         `INSERT INTO job_applications (id, name, email, job_title, resume_key, status, submitted_at, declaration_accepted, applicant_user_id)
-         VALUES (${q(id)}, 'Portal A', ${q(aEmail)}, ${q(title)}, ${q(`resumes/${crypto.randomUUID()}.pdf`)}, 'new', CURRENT_TIMESTAMP, 1, ${q(aUserId)})`,
+         VALUES (${q(id)}, 'Portal A', ${q(aEmail)}, ${q(title)}, ${q(`resumes/${crypto.randomUUID()}.pdf`)}, ${q(status)}, CURRENT_TIMESTAMP, 1, ${q(aUserId)})`,
       );
     }
   }
 
   function cleanup() {
-    d1(`DELETE FROM job_applications WHERE email IN (${q(aEmail)}, ${q(bEmail)})`);
-    d1(`DELETE FROM applicant_users WHERE email IN (${q(aEmail)}, ${q(bEmail)})`);
+    d1(`DELETE FROM job_applications WHERE email IN (${q(aEmail)}, ${q(bEmail)}, ${q(cEmail)})`);
+    d1(`DELETE FROM applicant_users WHERE email IN (${q(aEmail)}, ${q(bEmail)}, ${q(cEmail)})`);
   }
 
   section("Seed");
@@ -145,13 +157,47 @@ async function main() {
     const dash = await a2.request("/portal");
     assert(dash.status === 200, stepLabel(`/portal → 200 (got ${dash.status})`));
     assert(
-      dash.text.includes(`Portal Role One ${TS}`) && dash.text.includes(`Portal Role Two ${TS}`),
-      stepLabel("/portal lists both of A's applications"),
+      dash.text.includes(`Portal Role One ${TS}`) &&
+        dash.text.includes(`Portal Role Two ${TS}`) &&
+        dash.text.includes(`Portal Role Three ${TS}`),
+      stepLabel("/portal lists all three of A's applications"),
+    );
+    assert(
+      dash.text.includes("In review") &&
+        dash.text.includes("Hired") &&
+        dash.text.includes("Not selected"),
+      stepLabel("/portal summary + badges reflect reviewing / hired / rejected"),
     );
 
-    const detail = await a2.request(`/portal/${appA1}`);
+    const detail = await a2.request(`/portal/${appA2}`);
     assert(detail.status === 200, stepLabel(`/portal/<id> → 200 (got ${detail.status})`));
-    logOk("dashboard + detail");
+    assert(
+      detail.text.includes("Submitted") &&
+        detail.text.includes("In review") &&
+        detail.text.includes("Hired"),
+      stepLabel("detail stepper shows every node for a hired application"),
+    );
+    assert(
+      detail.text.includes("Personal") &&
+        detail.text.includes("Professional") &&
+        detail.text.includes("Documents"),
+      stepLabel("detail renders grouped sections + documents panel"),
+    );
+
+    const rejectedDetail = await a2.request(`/portal/${appA3}`);
+    assert(
+      rejectedDetail.status === 200 && rejectedDetail.text.includes("Not selected"),
+      stepLabel(`rejected detail → 200 + "Not selected" (got ${rejectedDetail.status})`),
+    );
+
+    const emptyC = await login("/api/portal/login", { email: cEmail, password: cPw });
+    assert(emptyC.res.status === 200, stepLabel(`login C → 200 (got ${emptyC.res.status})`));
+    const dashC = await emptyC.request("/portal");
+    assert(
+      dashC.status === 200 && dashC.text.includes("No applications yet"),
+      stepLabel(`empty-account /portal → 200 + empty state (got ${dashC.status})`),
+    );
+    logOk("dashboard + detail + empty state");
 
     section("C. ownership + cross-surface isolation");
     const b = await login("/api/portal/login", { email: bEmail, password: bPw });

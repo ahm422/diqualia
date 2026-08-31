@@ -3,8 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-const inputClass =
-  "w-full rounded-lg border border-[var(--diq_border)] bg-[var(--card)] px-3 py-2 text-sm outline-none focus:border-[var(--gold)] transition-colors";
+import { Button } from "../_components/Button";
+import { PasswordInput } from "../_components/PasswordInput";
+import { PasswordStrength } from "../_components/PasswordStrength";
 
 export function ChangePasswordForm({ forced }: { forced: boolean }) {
   const router = useRouter();
@@ -45,63 +46,58 @@ export function ChangePasswordForm({ forced }: { forced: boolean }) {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      {forced && (
+      {forced && !error ? (
         <p className="text-sm text-[var(--diq_mid)]">
-          Set a new password to continue — the one from your email is temporary.
+          You can&apos;t skip this step — pick something only you would know.
         </p>
-      )}
+      ) : null}
       <div>
         <label htmlFor="current" className="mb-1 block text-sm text-[var(--diq_mid)]">
           Current password
         </label>
-        <input
+        <PasswordInput
           id="current"
-          type="password"
           autoComplete="current-password"
           required
           value={currentPassword}
           onChange={(e) => setCurrentPassword(e.target.value)}
-          className={inputClass}
         />
       </div>
       <div>
         <label htmlFor="new" className="mb-1 block text-sm text-[var(--diq_mid)]">
           New password
         </label>
-        <input
+        <PasswordInput
           id="new"
-          type="password"
           autoComplete="new-password"
           required
           minLength={8}
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
-          className={inputClass}
         />
+        <PasswordStrength value={newPassword} />
       </div>
       <div>
         <label htmlFor="confirm" className="mb-1 block text-sm text-[var(--diq_mid)]">
           Confirm new password
         </label>
-        <input
+        <PasswordInput
           id="confirm"
-          type="password"
           autoComplete="new-password"
           required
           minLength={8}
           value={confirm}
           onChange={(e) => setConfirm(e.target.value)}
-          className={inputClass}
         />
       </div>
-      {error && <p className="text-sm text-red-500">{error}</p>}
-      <button
-        type="submit"
-        disabled={loading}
-        className="rounded-lg bg-[var(--gold)] px-4 py-2 text-sm font-medium text-[var(--ink)] transition-opacity hover:opacity-90 disabled:opacity-50"
-      >
+      {error && (
+        <p role="alert" aria-live="polite" className="text-sm text-[var(--status-negative)]">
+          {error}
+        </p>
+      )}
+      <Button type="submit" variant="primary" size="md" loading={loading}>
         {loading ? "Saving…" : "Save new password"}
-      </button>
+      </Button>
     </form>
   );
 }
