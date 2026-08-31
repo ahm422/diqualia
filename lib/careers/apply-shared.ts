@@ -13,12 +13,16 @@ export const ALREADY_APPLIED_MESSAGE = "You've already applied for this role.";
 /** Where the "already applied" panel sends the applicant. No PII in the URL. */
 export const ALREADY_APPLIED_PORTAL_URL = "/portal/login?next=/portal";
 
-/** 409 JSON body for an unauthenticated duplicate-application attempt. */
-export function alreadyAppliedBody() {
+/**
+ * 409 JSON body for an unauthenticated duplicate-application attempt.
+ * `field` (when known) tells the client which input to flag inline.
+ */
+export function alreadyAppliedBody(field?: "cnic" | "email") {
   return {
     error: ALREADY_APPLIED_MESSAGE,
     alreadyApplied: true as const,
     portalUrl: ALREADY_APPLIED_PORTAL_URL,
+    ...(field ? { field } : {}),
   };
 }
 
@@ -89,7 +93,7 @@ export async function persistJobApplication({
   photoKey: string;
 }): Promise<
   | { ok: true; id: string }
-  | { ok: false; status: 409; error: string; existingId?: string }
+  | { ok: false; status: 409; error: string; existingId?: string; field?: "cnic" | "email" }
   | { ok: false; status: 500; error: string }
 > {
   try {
@@ -130,22 +134,26 @@ export async function persistJobApplication({
   } catch (err) {
     if (isUniqueConstraintError(err)) {
       const email = fields.email.trim().toLowerCase();
-      const existing =
-        (fields.cnic
-          ? await prisma.jobApplication.findFirst({
-              where: { jobOpeningId: opening.id, cnic: fields.cnic },
-              select: { id: true },
-            })
-          : null) ??
-        (await prisma.jobApplication.findFirst({
-          where: { jobOpeningId: opening.id, email },
-          select: { id: true },
-        }));
+      const cnicMatch = fields.cnic
+        ? await prisma.jobApplication.findFirst({
+            where: { jobOpeningId: opening.id, cnic: fields.cnic },
+            select: { id: true },
+          })
+        : null;
+      const emailMatch = cnicMatch
+        ? null
+        : await prisma.jobApplication.findFirst({
+            where: { jobOpeningId: opening.id, email },
+            select: { id: true },
+          });
+      const existing = cnicMatch ?? emailMatch;
+      const field = cnicMatch ? "cnic" : emailMatch ? "email" : undefined;
       return {
         ok: false,
         status: 409,
         error: ALREADY_APPLIED_MESSAGE,
         ...(existing ? { existingId: existing.id } : {}),
+        ...(field ? { field } : {}),
       };
     }
     console.error("[careers/apply] persist failed:", err);
