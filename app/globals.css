@@ -84,6 +84,18 @@
   --destructive: #b91c1c;
   --destructive-foreground: #ffffff;
 
+  /* Portal status tones — semantic only, never the brand accent.
+     Consumed by portal _components (StatusBadge / StatusStepper / StatCard).
+     base = border + text (target AA >= 4.5:1 on --card); -tint = fill. */
+  --status-neutral: var(--diq_mid);
+  --status-neutral-tint: color-mix(in oklab, var(--diq_mid) 10%, var(--card));
+  --status-progress: #9a6212;
+  --status-progress-tint: color-mix(in oklab, #c8801f 14%, var(--card));
+  --status-positive: color-mix(in oklab, var(--green) 70%, var(--ink));
+  --status-positive-tint: color-mix(in oklab, var(--green) 14%, var(--card));
+  --status-negative: var(--destructive);
+  --status-negative-tint: color-mix(in oklab, var(--destructive) 12%, var(--card));
+
   --border: color-mix(in oklab, var(--ink) 14%, transparent);
   --input: color-mix(in oklab, var(--ink) 18%, transparent);
   --ring: var(--primary);
@@ -188,6 +200,11 @@ html.dark {
 
   --destructive: #ef4444;
   --destructive-foreground: #0b0b0c;
+
+  /* Portal status tones — only the two whose light base fails contrast on the
+     dark --card (--obsidian); neutral/negative and every -tint recompute. */
+  --status-progress: #e0a94a;
+  --status-positive: color-mix(in oklab, var(--green) 42%, var(--paper));
 
   --border: color-mix(in oklab, var(--gold) 16%, transparent);
   --input: color-mix(in oklab, var(--gold) 22%, transparent);
