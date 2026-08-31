@@ -1,6 +1,7 @@
 import { ChatWidget } from "../components/ChatWidget";
 import { SiteFooter } from "../components/SiteFooter";
 import { SiteHeader } from "../components/SiteHeader";
+import { SiteToaster } from "../components/SiteToaster";
 import { ReferenceInteractions } from "../components/ReferenceInteractions";
 
 export const dynamic = "force-dynamic";
@@ -15,6 +16,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
       <main className="flex-1">{children}</main>
       <SiteFooter />
       <ChatWidget />
+      <SiteToaster />
     </>
   );
 }

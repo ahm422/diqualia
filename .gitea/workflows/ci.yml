@@ -44,6 +44,7 @@ jobs:
           npm run test:cnic
           npm run test:career-apply
           npm run test:cleanup-drafts
+          npm run test:apply-check
           npm run test:roles-schema
           npm run test:portal-status
           npm run test:portal-format

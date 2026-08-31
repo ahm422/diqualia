@@ -32,6 +32,7 @@
     "test:career-apply": "tsx --test lib/schemas/public/career-apply.test.ts",
     "test:roles-schema": "tsx --test lib/schemas/admin/roles.test.ts",
     "test:cleanup-drafts": "tsx --test lib/careers/cleanup-drafts.test.ts",
+    "test:apply-check": "tsx --test lib/careers/apply-check.test.ts",
     "test:portal-status": "tsx --test lib/portal/status.test.ts",
     "test:portal-format": "tsx --test lib/portal/format.test.ts"
   },

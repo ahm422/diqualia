@@ -157,7 +157,7 @@ export async function POST(request: NextRequest) {
   if (!persisted.ok) {
     await deleteUploadedKeys(storage, [resumeKey, photoKey]);
     if (persisted.status === 409) {
-      return NextResponse.json(alreadyAppliedBody(), { status: 409 });
+      return NextResponse.json(alreadyAppliedBody(persisted.field), { status: 409 });
     }
     return NextResponse.json({ error: persisted.error }, { status: persisted.status });
   }

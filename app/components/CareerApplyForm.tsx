@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { toast } from "sonner";
 
 import { FileDropzone } from "@/app/components/FileDropzone";
 import { Button } from "@/components/ui/button";
-import { formatCnicInput } from "@/lib/cnic";
+import { CNIC_INPUT_RE, formatCnicInput } from "@/lib/cnic";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { fieldErrorsFromFlatten, readApiError, type FieldErrors } from "@/lib/public-form";
 import {
@@ -39,6 +40,10 @@ const STEPS: { id: StepId; label: string }[] = [
 
 const idleBorder = "color-mix(in oklab, var(--border) 80%, transparent)";
 const errorBorder = "color-mix(in oklab, var(--destructive) 75%, var(--border))";
+
+/** Cheap "is this a fully-formed address" gate before we hit the check endpoint. */
+const EMAIL_INPUT_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const DUP_CHECK_DEBOUNCE_MS = 400;
 
 const GENDER_LABELS: Record<(typeof GENDER_VALUES)[number], string> = {
   female: "Female",
@@ -257,6 +262,31 @@ export function CareerApplyForm({
   const [fields, setFields] = useState<FieldErrors>({});
   const [state, setState] = useState<SubmitState>({ status: "idle" });
 
+  // Live duplicate detection (Personal step). Kept in refs, not state: nothing
+  // here needs a re-render — the visible error rides on `fields.email` /
+  // `fields.cnic`, and this only gates progression + the one-shot toast.
+  const dupEmailRef = useRef(false);
+  const dupCnicRef = useRef(false);
+  const emailAbortRef = useRef<AbortController | null>(null);
+  const cnicAbortRef = useRef<AbortController | null>(null);
+  const emailReqIdRef = useRef(0);
+  const cnicReqIdRef = useRef(0);
+  const emailDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cnicDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const emailDebounce = emailDebounceRef;
+    const cnicDebounce = cnicDebounceRef;
+    const emailAbort = emailAbortRef;
+    const cnicAbort = cnicAbortRef;
+    return () => {
+      if (emailDebounce.current) clearTimeout(emailDebounce.current);
+      if (cnicDebounce.current) clearTimeout(cnicDebounce.current);
+      emailAbort.current?.abort();
+      cnicAbort.current?.abort();
+    };
+  }, []);
+
   useEffect(() => {
     const token = readStoredToken(jobOpeningId);
     if (!token) return;
@@ -330,6 +360,63 @@ export function CareerApplyForm({
 
   function clearField(key: string) {
     setFields((prev) => (prev[key] ? { ...prev, [key]: "" } : prev));
+  }
+
+  /**
+   * Check one identifier against this opening. Called on blur (immediately) and
+   * after a debounce while typing, once the value is syntactically complete.
+   * Race-safe: aborts the prior in-flight request and drops any response whose
+   * request-id is no longer the latest for that field.
+   */
+  async function checkDuplicate(field: "email" | "cnic", rawValue?: string) {
+    const source = rawValue ?? (field === "email" ? email : cnic);
+    const complete =
+      field === "email" ? EMAIL_INPUT_RE.test(source.trim()) : CNIC_INPUT_RE.test(source);
+    if (!complete) return;
+    const value = field === "email" ? source.trim().toLowerCase() : source;
+
+    const abortRef = field === "email" ? emailAbortRef : cnicAbortRef;
+    const reqIdRef = field === "email" ? emailReqIdRef : cnicReqIdRef;
+    const dupRef = field === "email" ? dupEmailRef : dupCnicRef;
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    const reqId = ++reqIdRef.current;
+
+    const qs = new URLSearchParams({ openingId: String(jobOpeningId) });
+    qs.set(field, value);
+    try {
+      const res = await fetch(`/api/careers/apply/check?${qs.toString()}`, {
+        signal: controller.signal,
+      });
+      if (!res.ok) return;
+      const data = (await res.json()) as { email?: boolean; cnic?: boolean };
+      if (reqId !== reqIdRef.current) return; // a newer request has superseded this one
+      const hit = Boolean(data[field]);
+      if (hit && !dupRef.current) {
+        toast.warning(
+          `You've already applied to ${jobTitle} with this ${field === "email" ? "email" : "CNIC"}.`,
+        );
+      }
+      dupRef.current = hit;
+      if (hit) {
+        const message =
+          field === "email"
+            ? "You've already applied to this role with this email."
+            : "You've already applied to this role with this CNIC.";
+        setFields((prev) => ({ ...prev, [field]: message }));
+      }
+    } catch {
+      // aborted or offline — the submit-time unique constraint still catches it
+    }
+  }
+
+  function scheduleDuplicateCheck(field: "email" | "cnic", value: string) {
+    const ref = field === "email" ? emailDebounceRef : cnicDebounceRef;
+    if (ref.current) clearTimeout(ref.current);
+    ref.current = setTimeout(() => {
+      void checkDuplicate(field, value);
+    }, DUP_CHECK_DEBOUNCE_MS);
   }
 
   function applyResume(file: File | null) {
@@ -416,9 +503,19 @@ export function CareerApplyForm({
     if (parsedErr.fields.resume) setResumeError(parsedErr.fields.resume);
     if (parsedErr.fields.photo) setPhotoError(parsedErr.fields.photo);
     setState({ status: "error", message: parsedErr.message });
+    // Single choke point for every non-2xx response — no ad-hoc toasts at call sites.
+    toast.error(parsedErr.message);
   }
 
   async function savePersonal(): Promise<boolean> {
+    if (dupEmailRef.current || dupCnicRef.current) {
+      setState({
+        status: "error",
+        message: "Please use a different email or CNIC — this one already applied to this role.",
+      });
+      toast.error("This email or CNIC has already applied to this role.");
+      return false;
+    }
     const parsed = CareerApplyPersonalSchema.safeParse({
       name,
       email,
@@ -435,6 +532,7 @@ export function CareerApplyForm({
     if (!parsed.success) {
       setFields(fieldErrorsFromFlatten(parsed.error.flatten()));
       setState({ status: "error", message: "Please fix the highlighted fields." });
+      toast.error("Please fix the highlighted fields.");
       return false;
     }
     setFields({});
@@ -471,6 +569,7 @@ export function CareerApplyForm({
     if (!parsed.success) {
       setFields(fieldErrorsFromFlatten(parsed.error.flatten()));
       setState({ status: "error", message: "Please fix the highlighted fields." });
+      toast.error("Please fix the highlighted fields.");
       return false;
     }
     if (!draftToken) {
@@ -502,6 +601,7 @@ export function CareerApplyForm({
     if (!parsed.success) {
       setFields(fieldErrorsFromFlatten(parsed.error.flatten()));
       setState({ status: "error", message: "Please fix the highlighted fields." });
+      toast.error("Please fix the highlighted fields.");
       return false;
     }
     if (!draftToken) {
@@ -542,6 +642,7 @@ export function CareerApplyForm({
     setFields(nextFields);
     if (!parsed.success || fileErr || picErr || !declarationAccepted) {
       setState({ status: "error", message: "Please fix the highlighted fields." });
+      toast.error("Please fix the highlighted fields.");
       return false;
     }
     if (!draftToken) {
@@ -575,12 +676,27 @@ export function CareerApplyForm({
       website,
     });
     if (submitted.status < 200 || submitted.status >= 300) {
-      const body = submitted.json as { alreadyApplied?: boolean; portalUrl?: string } | null;
+      const body = submitted.json as {
+        alreadyApplied?: boolean;
+        portalUrl?: string;
+        field?: "email" | "cnic";
+      } | null;
       if (submitted.status === 409 && body?.alreadyApplied) {
+        // Panel is the primary UI; also flag the offending input inline for a
+        // user who somehow bypassed the live check.
+        if (body.field === "email" || body.field === "cnic") {
+          const message =
+            body.field === "email"
+              ? "You've already applied to this role with this email."
+              : "You've already applied to this role with this CNIC.";
+          setFields((prev) => ({ ...prev, [body.field as "email" | "cnic"]: message }));
+          (body.field === "email" ? dupEmailRef : dupCnicRef).current = true;
+        }
         setState({
           status: "already-applied",
           portalUrl: body.portalUrl ?? "/portal/login?next=/portal",
         });
+        toast.warning("You've already applied for this role.");
         return false;
       }
       applyApiError(submitted.json);
@@ -594,6 +710,7 @@ export function CareerApplyForm({
     clearStoredToken(jobOpeningId);
     setDraftToken(null);
     setState({ status: "success", id });
+    toast.success(`Application submitted for ${jobTitle}`);
     return true;
   }
 
@@ -611,13 +728,13 @@ export function CareerApplyForm({
       if (!ok) return;
       if (step !== "other") {
         setState({ status: "idle" });
+        toast.success(`Saved — step ${stepIndex + 1} of ${STEPS.length}`);
         setStepIndex((index) => Math.min(index + 1, STEPS.length - 1));
       }
     } catch (caught) {
-      setState({
-        status: "error",
-        message: caught instanceof Error ? caught.message : "Submission failed",
-      });
+      const message = caught instanceof Error ? caught.message : "Submission failed";
+      setState({ status: "error", message });
+      toast.error(message);
     }
   }
 
@@ -831,9 +948,13 @@ export function CareerApplyForm({
               <input
                 value={cnic}
                 onChange={(e) => {
-                  setCnic(formatCnicInput(e.target.value));
+                  const next = formatCnicInput(e.target.value);
+                  setCnic(next);
                   clearField("cnic");
+                  dupCnicRef.current = false;
+                  scheduleDuplicateCheck("cnic", next);
                 }}
+                onBlur={() => void checkDuplicate("cnic")}
                 className={inputClass}
                 style={controlStyle("cnic")}
                 placeholder="12345-1234567-8"
@@ -847,9 +968,13 @@ export function CareerApplyForm({
                 id="apply-email"
                 value={email}
                 onChange={(e) => {
-                  setEmail(e.target.value);
+                  const next = e.target.value;
+                  setEmail(next);
                   clearField("email");
+                  dupEmailRef.current = false;
+                  scheduleDuplicateCheck("email", next);
                 }}
+                onBlur={() => void checkDuplicate("email")}
                 className={inputClass}
                 style={controlStyle("email")}
                 placeholder="you@company.com"
