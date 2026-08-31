@@ -1468,6 +1468,249 @@ a.diq-homeCard:focus-visible {
   }
 }
 
+/* ============================
+   Careers
+   ============================ */
+
+.diq-career-wash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 60% 50% at 82% -4%,
+    color-mix(in oklab, var(--gold) 12%, transparent),
+    transparent 60%
+  );
+}
+
+.diq-career-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(color-mix(in oklab, var(--gold) 6%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in oklab, var(--gold) 6%, transparent) 1px, transparent 1px);
+  background-size: 72px 72px;
+  opacity: 0.3;
+  mask-image: linear-gradient(180deg, #000 0%, transparent 82%);
+}
+
+/* Role card — shared by the listing grid and the "related roles" strip */
+.diq-career-roleCard {
+  position: relative;
+  display: block;
+  padding: clamp(24px, 3vw, 34px);
+  border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
+  background: var(--card);
+  text-decoration: none;
+  overflow: hidden;
+  transition:
+    border-color 0.3s ease,
+    background 0.3s ease;
+}
+.diq-career-roleCard::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--gold);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 0.3s ease;
+}
+.diq-career-roleCard:hover,
+.diq-career-roleCard:focus-visible {
+  border-color: color-mix(in oklab, var(--gold) 55%, transparent);
+  background: color-mix(in oklab, var(--gold) 5%, var(--card));
+}
+.diq-career-roleCard:hover::before,
+.diq-career-roleCard:focus-visible::before {
+  transform: scaleY(1);
+}
+.diq-career-roleCard:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--gold) 70%, #ffffff);
+  outline-offset: -2px;
+}
+.diq-career-roleArrow {
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+.diq-career-roleCard:hover .diq-career-roleArrow,
+.diq-career-roleCard:focus-visible .diq-career-roleArrow {
+  transform: translateX(4px);
+}
+
+/* Benefit card */
+.diq-career-benefit {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 20px;
+  border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
+  background: color-mix(in oklab, var(--card) 60%, transparent);
+  transition:
+    border-color 0.3s ease,
+    background 0.3s ease;
+}
+.diq-career-benefit:hover {
+  border-color: color-mix(in oklab, var(--gold) 45%, transparent);
+  background: color-mix(in oklab, var(--gold) 5%, var(--card));
+}
+
+/* "How we hire" timeline — adapted from .diq-homeProcess */
+.diq-career-process {
+  display: grid;
+  grid-template-columns: 1fr;
+  position: relative;
+  padding-left: 24px;
+}
+.diq-career-processStep {
+  position: relative;
+  padding: 8px 0 32px 36px;
+  border-left: 1px solid color-mix(in oklab, var(--border) 90%, transparent);
+}
+.diq-career-processStep:last-child {
+  padding-bottom: 0;
+}
+.diq-career-processNum {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in oklab, var(--border) 90%, transparent);
+  background: var(--card);
+  color: var(--gold);
+  font-family: var(--font-display), ui-serif, serif;
+  font-size: 18px;
+  font-weight: 500;
+  margin-left: -61px;
+}
+@media (min-width: 1024px) {
+  .diq-career-process {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0 20px;
+    padding-left: 0;
+  }
+  .diq-career-process::before {
+    content: "";
+    position: absolute;
+    top: 24px;
+    left: 6%;
+    right: 6%;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in oklab, var(--border) 100%, transparent),
+      transparent
+    );
+  }
+  .diq-career-processStep {
+    border-left: none;
+    padding: 0;
+  }
+  .diq-career-processNum {
+    margin-left: 0;
+  }
+}
+
+/* Framed CTA — adapted from .diq-homeCtaFrame */
+.diq-career-ctaFrame {
+  position: relative;
+  padding: clamp(32px, 6vw, 64px) clamp(20px, 4vw, 40px);
+  border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
+  background: color-mix(in oklab, var(--card) 55%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--gold) 10%, transparent);
+  overflow: hidden;
+}
+.diq-career-ctaFrame::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(80vw, 720px);
+  height: min(50vw, 360px);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse,
+    color-mix(in oklab, var(--gold) 10%, transparent) 0%,
+    transparent 70%
+  );
+}
+
+/* Apply-form stepper */
+.diq-career-stepper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.diq-career-stepDot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border: 1px solid color-mix(in oklab, var(--border) 90%, transparent);
+  background: var(--card);
+  color: var(--muted-foreground);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 12px;
+  transition:
+    border-color 0.25s ease,
+    color 0.25s ease,
+    background 0.25s ease;
+}
+.diq-career-stepDot[data-state="current"] {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: color-mix(in oklab, var(--gold) 8%, var(--card));
+}
+.diq-career-stepDot[data-state="done"] {
+  border-color: color-mix(in oklab, var(--gold) 55%, transparent);
+  color: var(--gold);
+}
+.diq-career-stepBar {
+  flex: 1;
+  height: 1px;
+  background: color-mix(in oklab, var(--border) 90%, transparent);
+}
+.diq-career-stepBar[data-state="done"] {
+  background: color-mix(in oklab, var(--gold) 55%, transparent);
+}
+.diq-career-progressTrack {
+  height: 2px;
+  width: 100%;
+  background: color-mix(in oklab, var(--border) 90%, transparent);
+  overflow: hidden;
+}
+.diq-career-progressFill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--gold) 55%, transparent),
+    var(--gold)
+  );
+  transition: width 0.4s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .diq-career-roleCard,
+  .diq-career-roleCard::before,
+  .diq-career-roleArrow,
+  .diq-career-benefit,
+  .diq-career-stepDot,
+  .diq-career-progressFill {
+    transition: none !important;
+  }
+}
+
 @media (max-width: 960px) {
   .diq-hero {
     padding-block: var(--diq-heroTop) clamp(56px, 8vw, 80px);

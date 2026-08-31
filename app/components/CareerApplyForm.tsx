@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { toast } from "sonner";
 
@@ -155,18 +156,24 @@ function Field({
   label,
   htmlFor,
   error,
+  className,
   children,
 }: {
   label: string;
   htmlFor?: string;
   error?: string;
+  className?: string;
   children: ReactNode;
 }) {
   return (
-    <label className="block" htmlFor={htmlFor}>
+    <label className={`block ${className ?? ""}`} htmlFor={htmlFor}>
       <div className="text-[11px] tracking-[0.18em] uppercase text-muted-foreground">{label}</div>
       {children}
-      {error ? <p className="mt-2 text-[12px] text-red-400">{error}</p> : null}
+      {error ? (
+        <p className="mt-2 text-[12px]" style={{ color: "var(--destructive)" }}>
+          {error}
+        </p>
+      ) : null}
     </label>
   );
 }
@@ -747,32 +754,37 @@ export function CareerApplyForm({
 
   if (state.status === "success") {
     return (
-      <div className="border p-8 md:p-10" style={panelStyle} role="status" aria-live="polite">
-        <div className="text-[10px] tracking-[0.22em] uppercase text-primary">Received</div>
-        <p
-          className="mt-3 text-foreground"
-          style={{
-            fontFamily: "var(--font-display)",
-            fontWeight: 300,
-            fontStyle: "italic",
-            fontSize: "clamp(1.15rem, 2vw, 1.5rem)",
-            lineHeight: 1.3,
-          }}
-        >
-          We received your application for {jobTitle}.
-        </p>
-        <p className="mt-4 text-[13px] leading-7 text-muted-foreground">
-          The team will reply with next steps. Typical response is within 5–7 business days.
-        </p>
-        {state.id ? (
-          <p className="mt-4 text-[11px] text-muted-foreground">
-            Reference: <span className="font-mono">{state.id}</span>
+      <div className="diq-career-ctaFrame" role="status" aria-live="polite">
+        <div className="relative">
+          <div className="text-[10px] tracking-[0.22em] uppercase text-primary">Received</div>
+          <p
+            className="mt-3 text-foreground"
+            style={{
+              fontFamily: "var(--font-display)",
+              fontWeight: 300,
+              fontStyle: "italic",
+              fontSize: "clamp(1.15rem, 2vw, 1.5rem)",
+              lineHeight: 1.3,
+            }}
+          >
+            We received your application for {jobTitle}.
           </p>
-        ) : null}
-        <div className="mt-8">
-          <Button type="button" variant="primary" onClick={resetForm}>
-            Submit another
-          </Button>
+          <p className="mt-4 text-[13px] leading-7 text-muted-foreground">
+            The team will reply with next steps. Typical response is within 5–7 business days.
+          </p>
+          {state.id ? (
+            <p className="mt-4 text-[11px] text-muted-foreground">
+              Reference: <span className="font-mono">{state.id}</span>
+            </p>
+          ) : null}
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Button type="button" variant="primary" onClick={resetForm}>
+              Submit another
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/careers">Browse all roles</Link>
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -780,28 +792,30 @@ export function CareerApplyForm({
 
   if (state.status === "already-applied") {
     return (
-      <div className="border p-8 md:p-10" style={panelStyle} role="status" aria-live="polite">
-        <div className="text-[10px] tracking-[0.22em] uppercase text-primary">Already applied</div>
-        <p
-          className="mt-3 text-foreground"
-          style={{
-            fontFamily: "var(--font-display)",
-            fontWeight: 300,
-            fontStyle: "italic",
-            fontSize: "clamp(1.15rem, 2vw, 1.5rem)",
-            lineHeight: 1.3,
-          }}
-        >
-          You&rsquo;ve already applied for this role.
-        </p>
-        <p className="mt-4 text-[13px] leading-7 text-muted-foreground">
-          We have one application from you for {jobTitle} on file. Sign in to the applicant portal to
-          check its status — use the email and password sent when you first applied.
-        </p>
-        <div className="mt-8">
-          <Button asChild variant="primary">
-            <a href={state.portalUrl}>See your application</a>
-          </Button>
+      <div className="diq-career-ctaFrame" role="status" aria-live="polite">
+        <div className="relative">
+          <div className="text-[10px] tracking-[0.22em] uppercase text-primary">Already applied</div>
+          <p
+            className="mt-3 text-foreground"
+            style={{
+              fontFamily: "var(--font-display)",
+              fontWeight: 300,
+              fontStyle: "italic",
+              fontSize: "clamp(1.15rem, 2vw, 1.5rem)",
+              lineHeight: 1.3,
+            }}
+          >
+            You&rsquo;ve already applied for this role.
+          </p>
+          <p className="mt-4 text-[13px] leading-7 text-muted-foreground">
+            We have one application from you for {jobTitle} on file. Sign in to the applicant portal to
+            check its status — use the email and password sent when you first applied.
+          </p>
+          <div className="mt-8">
+            <Button asChild variant="primary">
+              <a href={state.portalUrl}>See your application</a>
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -829,8 +843,8 @@ export function CareerApplyForm({
         </div>
       ) : null}
 
-      <div className="mt-6 grid grid-cols-1 gap-4">
-        <div className="text-[11px] tracking-[0.18em] uppercase text-primary">Position</div>
+      <div className="mt-8 text-[11px] tracking-[0.18em] uppercase text-primary">Role details</div>
+      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Field label="Position">
           <input className={inputClass} style={{ borderColor: idleBorder }} value={jobTitle} readOnly />
         </Field>
@@ -847,26 +861,51 @@ export function CareerApplyForm({
         </Field>
       </div>
 
-      <ol className="mt-8 flex flex-wrap gap-2" aria-label="Application steps">
-        {STEPS.map((item, index) => {
-          const current = index === stepIndex;
-          return (
-            <li
-              key={item.id}
-              className="min-h-11 px-3 py-2 text-[11px] tracking-[0.18em] uppercase"
-              style={{
-                border: `1px solid ${current ? "var(--gold)" : idleBorder}`,
-                color: current ? "var(--gold)" : "var(--muted-foreground)",
-              }}
-              aria-current={current ? "step" : undefined}
-            >
-              {index + 1}. {item.label}
-            </li>
-          );
-        })}
-      </ol>
+      <div className="mt-8">
+        <div className="diq-career-progressTrack" aria-hidden>
+          <span
+            className="diq-career-progressFill"
+            style={{ width: `${((stepIndex + 1) / STEPS.length) * 100}%` }}
+          />
+        </div>
+        <p className="mt-3 text-[11px] tracking-[0.18em] uppercase text-muted-foreground">
+          Step {stepIndex + 1} of {STEPS.length} — {step.label}
+        </p>
+        <ol className="diq-career-stepper mt-4" aria-label="Application steps">
+          {STEPS.map((item, index) => {
+            const current = index === stepIndex;
+            const done = index < stepIndex;
+            return (
+              <li key={item.id} className="contents">
+                {index > 0 ? (
+                  <span
+                    aria-hidden
+                    className="diq-career-stepBar"
+                    data-state={done || current ? "done" : undefined}
+                  />
+                ) : null}
+                <span className="flex items-center gap-2">
+                  <span
+                    className="diq-career-stepDot"
+                    data-state={done ? "done" : current ? "current" : undefined}
+                    aria-current={current ? "step" : undefined}
+                  >
+                    {done ? "✓" : index + 1}
+                  </span>
+                  <span
+                    className="hidden text-[10px] tracking-[0.18em] uppercase sm:inline"
+                    style={{ color: current ? "var(--gold)" : "var(--muted-foreground)" }}
+                  >
+                    {item.label}
+                  </span>
+                </span>
+              </li>
+            );
+          })}
+        </ol>
+      </div>
 
-      <div className="mt-8 grid grid-cols-1 gap-4">
+      <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
         {step.id === "personal" ? (
           <>
             <Field label="Name" htmlFor="apply-name" error={fields.name}>
@@ -1000,7 +1039,7 @@ export function CareerApplyForm({
                 aria-invalid={Boolean(fields.phone)}
               />
             </Field>
-            <Field label="Current address" error={fields.currentAddress}>
+            <Field label="Current address" error={fields.currentAddress} className="sm:col-span-2">
               <textarea
                 value={currentAddress}
                 onChange={(e) => {
@@ -1109,7 +1148,7 @@ export function CareerApplyForm({
                 maxLength={200}
               />
             </Field>
-            <Field label="Cover note (optional)">
+            <Field label="Cover note (optional)" className="sm:col-span-2">
               <textarea
                 value={coverNote}
                 onChange={(e) => setCoverNote(e.target.value)}
@@ -1124,7 +1163,7 @@ export function CareerApplyForm({
 
         {step.id === "other" ? (
           <>
-            <Field label="Key skills" error={fields.keySkills}>
+            <Field label="Key skills" error={fields.keySkills} className="sm:col-span-2">
               <textarea
                 value={keySkills}
                 onChange={(e) => {
@@ -1200,7 +1239,7 @@ export function CareerApplyForm({
                 emptyLabel={photoUploaded ? "Photo already on file — drop to replace" : "Drop a photo here"}
               />
             </div>
-            <label className="flex items-start gap-3 text-[13px] leading-7 text-muted-foreground">
+            <label className="flex items-start gap-3 text-[13px] leading-7 text-muted-foreground sm:col-span-2">
               <input
                 type="checkbox"
                 className="mt-1 size-4 shrink-0"
@@ -1217,7 +1256,9 @@ export function CareerApplyForm({
               </span>
             </label>
             {fields.declarationAccepted ? (
-              <p className="text-[12px] text-red-400">{fields.declarationAccepted}</p>
+              <p className="text-[12px] sm:col-span-2" style={{ color: "var(--destructive)" }}>
+                {fields.declarationAccepted}
+              </p>
             ) : null}
           </>
         ) : null}
@@ -1252,7 +1293,11 @@ export function CareerApplyForm({
       ) : null}
 
       {state.status === "error" ? (
-        <p className="mt-6 text-[13px] leading-7 text-red-400" role="alert">
+        <p
+          className="mt-6 text-[13px] leading-7"
+          style={{ color: "var(--destructive)" }}
+          role="alert"
+        >
           {state.message}
         </p>
       ) : state.status === "idle" ? (

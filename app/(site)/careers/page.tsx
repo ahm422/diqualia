@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 
 import { Container } from "@/app/components/Container";
+import { CareerRolesFilter } from "@/app/components/CareerRolesFilter";
+import { Button } from "@/components/ui/button";
 import { getDb } from "@/lib/cloudflare-env";
 
 export const revalidate = 60;
@@ -68,6 +69,17 @@ export default async function CareersPage() {
     : [];
 
   const departmentCount = new Set(openings.map((o) => o.department).filter(Boolean)).size;
+  const locationCount = new Set(openings.map((o) => o.location).filter(Boolean)).size;
+  const typeCount = new Set(openings.map((o) => o.type).filter(Boolean)).size;
+
+  const stats = [
+    { value: openings.length, label: openings.length === 1 ? "Open role" : "Open roles" },
+    { value: departmentCount, label: departmentCount === 1 ? "Department" : "Departments" },
+    { value: locationCount, label: locationCount === 1 ? "Location" : "Locations" },
+    { value: typeCount, label: typeCount === 1 ? "Contract type" : "Contract types" },
+  ].filter((s) => s.value > 0);
+
+  const applyHref = openings.length > 0 ? `/careers/${openings[0].slug}#apply` : "#roles";
 
   const hireSteps = [
     {
@@ -103,90 +115,98 @@ export default async function CareersPage() {
         className="relative overflow-hidden border-b"
         style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}
       >
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              "linear-gradient(color-mix(in oklab, var(--gold) 6%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in oklab, var(--gold) 6%, transparent) 1px, transparent 1px)",
-            backgroundSize: "72px 72px",
-            opacity: 0.35,
-          }}
-        />
-        <Container className="relative pb-16 pt-20 md:pb-20 md:pt-28">
-          <Eyebrow>{page.eyebrow}</Eyebrow>
-          <h1
-            className="mt-8 text-foreground"
-            style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 300,
-              lineHeight: 1.02,
-              fontSize: "clamp(2.6rem, 6vw, 4.8rem)",
-            }}
-          >
-            {page.headlineLine1}
-            <br />
-            <em className="text-primary" style={{ fontStyle: "italic" }}>
-              {page.headlineLine2}
-            </em>
-          </h1>
-          <p className="mt-8 max-w-[70ch] text-[15px] leading-8 text-muted-foreground">
-            {page.body}
-          </p>
+        <div aria-hidden className="diq-career-grid" />
+        <div aria-hidden className="diq-career-wash" />
+        <Container className="relative pb-16 pt-20 md:pb-24 md:pt-28">
+          <div className="max-w-[52ch]">
+            <Eyebrow>{page.eyebrow}</Eyebrow>
+            <h1
+              className="mt-8 text-foreground"
+              style={{
+                fontFamily: "var(--font-display)",
+                fontWeight: 300,
+                lineHeight: 1.02,
+                fontSize: "clamp(2.6rem, 6vw, 4.8rem)",
+              }}
+            >
+              {page.headlineLine1}
+              <br />
+              <em className="text-primary" style={{ fontStyle: "italic" }}>
+                {page.headlineLine2}
+              </em>
+            </h1>
+            <p className="mt-8 max-w-[70ch] text-[15px] leading-8 text-muted-foreground">
+              {page.body}
+            </p>
+            <div className="mt-10 flex flex-wrap items-center gap-3">
+              <Button asChild variant="primary" size="sm">
+                <a href="#roles">
+                  {openings.length > 0 ? "View open roles" : "See how we hire"}
+                </a>
+              </Button>
+              <Button asChild variant="outline" size="sm">
+                <a href="#how">How we hire</a>
+              </Button>
+            </div>
+          </div>
         </Container>
       </section>
 
-      <section
-        className="border-b"
-        style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}
-      >
-        <Container className="grid grid-cols-2 gap-px md:grid-cols-2" style={{ background: "color-mix(in oklab, var(--border) 100%, transparent)" }}>
-          {[
-            { value: String(openings.length).padStart(2, "0"), label: "Open roles" },
-            { value: String(departmentCount).padStart(2, "0"), label: departmentCount === 1 ? "Department" : "Departments" },
-          ].map((stat) => (
-            <div key={stat.label} className="px-8 py-10" style={{ background: "var(--bg-elev)" }}>
-              <div
-                className="diq-ghostNum text-[36px] leading-none"
-                style={{ fontFamily: "var(--font-display)", fontWeight: 300 }}
-              >
-                {stat.value}
+      {stats.length > 0 ? (
+        <section
+          className="border-b"
+          style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}
+        >
+          <Container
+            className="grid grid-cols-1 gap-px sm:grid-cols-2 lg:grid-cols-4"
+            style={{ background: "color-mix(in oklab, var(--border) 100%, transparent)" }}
+          >
+            {stats.map((stat) => (
+              <div key={stat.label} className="px-8 py-10" style={{ background: "var(--bg-elev)" }}>
+                <div
+                  className="diq-ghostNum text-[36px] leading-none [font-variant-numeric:tabular-nums]"
+                  style={{ fontFamily: "var(--font-display)", fontWeight: 300 }}
+                >
+                  {String(stat.value).padStart(2, "0")}
+                </div>
+                <div className="mt-3 text-[11px] tracking-[0.22em] uppercase text-muted-foreground">
+                  {stat.label}
+                </div>
               </div>
-              <div className="mt-3 text-[11px] tracking-[0.22em] uppercase text-muted-foreground">{stat.label}</div>
-            </div>
-          ))}
-        </Container>
-      </section>
+            ))}
+          </Container>
+        </section>
+      ) : null}
 
       <section id="culture" className="diq-sectionY" style={{ background: "var(--diq_ink)" }}>
-        <Container>
-          <Eyebrow>{page.cultureEyebrow}</Eyebrow>
-          <h2
-            className="mt-6 text-foreground"
-            style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 300,
-              fontSize: "clamp(2rem, 4vw, 3.2rem)",
-              lineHeight: 1.1,
-            }}
-          >
-            {page.cultureHeadline}
-          </h2>
-          <p className="mt-6 max-w-[62ch] text-[15px] leading-8 text-muted-foreground">
-            {page.cultureBody}
-          </p>
+        <Container className="grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16">
+          <div>
+            <Eyebrow>{page.cultureEyebrow}</Eyebrow>
+            <h2
+              className="mt-6 text-foreground"
+              style={{
+                fontFamily: "var(--font-display)",
+                fontWeight: 300,
+                fontSize: "clamp(2rem, 4vw, 3.2rem)",
+                lineHeight: 1.1,
+              }}
+            >
+              {page.cultureHeadline}
+            </h2>
+            <p className="mt-6 max-w-[62ch] text-[15px] leading-8 text-muted-foreground">
+              {page.cultureBody}
+            </p>
+          </div>
           {benefits.length > 0 ? (
-            <ul id="benefits" className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-2">
+            <ul id="benefits" className="grid grid-cols-1 gap-3 self-start sm:grid-cols-2 lg:grid-cols-1">
               {benefits.map((item) => (
                 <li
                   key={item}
-                  className="flex items-start gap-3 border px-5 py-4 text-[13px] leading-7 text-muted-foreground"
-                  style={{
-                    borderColor: "color-mix(in oklab, var(--border) 80%, transparent)",
-                    background: "var(--bg-elev)",
-                  }}
+                  className="diq-career-benefit text-[13px] leading-7 text-muted-foreground"
                 >
-                  <span aria-hidden className="text-primary">→</span>
+                  <span aria-hidden className="mt-[2px] text-primary">
+                    →
+                  </span>
                   <span>{item}</span>
                 </li>
               ))}
@@ -195,28 +215,37 @@ export default async function CareersPage() {
         </Container>
       </section>
 
-      <section className="diq-sectionY border-t" style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
+      <section
+        id="how"
+        className="diq-sectionY border-t"
+        style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}
+      >
         <Container>
           <Eyebrow>How we hire</Eyebrow>
-          <div className="mt-12 grid grid-cols-1 gap-px sm:grid-cols-2 lg:grid-cols-4" style={{ background: "color-mix(in oklab, var(--border) 100%, transparent)" }}>
+          <div className="diq-career-process mt-12">
             {hireSteps.map((step) => (
-              <div key={step.num} className="p-8" style={{ background: "var(--bg-elev)" }}>
-                <div className="text-[10px] tracking-[0.22em] uppercase text-primary">{step.label}</div>
-                <div
-                  className="diq-ghostNum mt-4 text-[36px] leading-none"
-                  style={{ fontFamily: "var(--font-display)", fontWeight: 300 }}
-                >
-                  {step.num}
+              <div key={step.num} className="diq-career-processStep">
+                <div className="diq-career-processNum">{step.num}</div>
+                <div className="mt-5 text-[10px] tracking-[0.22em] uppercase text-primary">
+                  {step.label}
                 </div>
-                <div className="mt-4 text-[13px] tracking-[0.06em] text-foreground">{step.title}</div>
-                <p className="mt-3 text-[12px] leading-7 text-muted-foreground">{step.body}</p>
+                <div className="mt-3 text-[13px] tracking-[0.04em] text-foreground">
+                  {step.title}
+                </div>
+                <p className="mt-3 max-w-[34ch] text-[12px] leading-7 text-muted-foreground">
+                  {step.body}
+                </p>
               </div>
             ))}
           </div>
         </Container>
       </section>
 
-      <section className="diq-sectionY border-t" style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
+      <section
+        id="roles"
+        className="diq-sectionY border-t scroll-mt-28"
+        style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}
+      >
         <Container>
           <Eyebrow>Open roles</Eyebrow>
           {openings.length === 0 ? (
@@ -224,67 +253,44 @@ export default async function CareersPage() {
               No open roles right now. You can still read how we work and how to apply below.
             </p>
           ) : (
-            <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-2">
-              {openings.map((opening) => (
-                <Link
-                  key={opening.id}
-                  href={`/careers/${opening.slug}`}
-                  className="group block border p-8 no-underline transition-colors"
-                  style={{
-                    borderColor: "color-mix(in oklab, var(--border) 80%, transparent)",
-                    background: "var(--bg-elev)",
-                  }}
-                >
-                  <div className="text-[10px] tracking-[0.22em] uppercase text-primary">
-                    {opening.department} · {opening.type}
-                  </div>
-                  <h3
-                    className="mt-4 text-foreground group-hover:text-primary"
-                    style={{
-                      fontFamily: "var(--font-display)",
-                      fontWeight: 500,
-                      fontSize: "clamp(1.35rem, 2.4vw, 1.75rem)",
-                      lineHeight: 1.2,
-                    }}
-                  >
-                    {opening.title}
-                  </h3>
-                  <p className="mt-3 text-[13px] text-muted-foreground">{opening.location}</p>
-                  <div className="mt-6 text-[11px] tracking-[0.22em] uppercase text-primary">
-                    View role →
-                  </div>
-                </Link>
-              ))}
-            </div>
+            <CareerRolesFilter roles={openings} />
           )}
         </Container>
       </section>
 
       <section
         id="apply"
-        className="border-t"
-        style={{
-          background: "var(--bg-elev)",
-          borderTopColor: "color-mix(in oklab, var(--border) 80%, transparent)",
-        }}
+        className="diq-sectionY border-t"
+        style={{ borderTopColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}
       >
-        <Container className="py-20 text-center">
-          <Eyebrow center>{page.applyEyebrow}</Eyebrow>
-          <h2
-            className="mx-auto mt-8 max-w-3xl text-foreground"
-            style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 300,
-              fontStyle: "italic",
-              fontSize: "clamp(1.4rem, 3vw, 2.2rem)",
-              lineHeight: 1.25,
-            }}
-          >
-            {page.applyHeadline}
-          </h2>
-          <p className="mx-auto mt-6 max-w-[62ch] text-[15px] leading-8 text-muted-foreground">
-            {page.applyBody}
-          </p>
+        <Container>
+          <div className="diq-career-ctaFrame text-center">
+            <div className="relative">
+              <Eyebrow center>{page.applyEyebrow}</Eyebrow>
+              <h2
+                className="mx-auto mt-8 max-w-3xl text-foreground"
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontWeight: 300,
+                  fontStyle: "italic",
+                  fontSize: "clamp(1.4rem, 3vw, 2.2rem)",
+                  lineHeight: 1.25,
+                }}
+              >
+                {page.applyHeadline}
+              </h2>
+              <p className="mx-auto mt-6 max-w-[62ch] text-[15px] leading-8 text-muted-foreground">
+                {page.applyBody}
+              </p>
+              <div className="mt-9 flex justify-center">
+                <Button asChild variant="primary">
+                  <a href={applyHref}>
+                    {openings.length > 0 ? "Apply now" : "View open roles"}
+                  </a>
+                </Button>
+              </div>
+            </div>
+          </div>
         </Container>
       </section>
     </div>

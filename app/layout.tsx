@@ -26,9 +26,7 @@ export const metadata: Metadata = {
   title: "DiQualia — Marketing Intelligence & Research",
   description:
     "DiQualia is a marketing intelligence and research unit for niche B2B companies — research-first strategy, buyer mapping, and precision pipeline growth.",
-  icons: {
-    icon: [{ url: "/favicon.png", type: "image/png" }],
-  },
+  // Icons resolve from the app/ file conventions: icon.svg (primary), favicon.ico, apple-icon.png.
   openGraph: {
     title: "DiQualia — Marketing Intelligence & Research",
     description:
