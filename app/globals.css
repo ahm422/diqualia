@@ -1095,6 +1095,50 @@ html.dark .diq-proseMuted {
   color: var(--foreground);
   font-weight: 600;
 }
+.diq-markdown u {
+  text-underline-offset: 3px;
+}
+.diq-markdown s,
+.diq-markdown del {
+  color: var(--text-muted);
+}
+.diq-markdown table {
+  width: 100%;
+  margin: 1.5em 0;
+  border-collapse: collapse;
+  font-size: 0.92em;
+}
+.diq-markdown th,
+.diq-markdown td {
+  padding: 0.5em 0.75em;
+  border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
+  text-align: left;
+  vertical-align: top;
+}
+.diq-markdown th {
+  font-weight: 600;
+  color: var(--foreground);
+  background: color-mix(in oklab, var(--gold) 8%, transparent);
+}
+
+/* Admin rich-text editor (RichTextEditor.tsx) */
+.diq-rte .tiptap {
+  outline: none;
+}
+.diq-rte .tiptap p.is-editor-empty:first-child::before,
+.diq-rte .tiptap .is-empty[data-placeholder]::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  color: var(--diq_mid);
+  pointer-events: none;
+}
+.diq-rte .tiptap .selectedCell {
+  background: color-mix(in oklab, var(--gold) 14%, transparent);
+}
+.diq-rte .tiptap img.ProseMirror-selectednode {
+  outline: 2px solid var(--gold);
+}
 
 /* ============================
    Homepage

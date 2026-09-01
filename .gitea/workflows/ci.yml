@@ -42,6 +42,7 @@ jobs:
       - name: Unit test scripts
         run: |
           npm run test:cnic
+          npm run test:markdown
           npm run test:career-apply
           npm run test:cleanup-drafts
           npm run test:apply-check
@@ -57,6 +58,10 @@ jobs:
       # from the same env, so no repo secret is required.
       ADMIN_EMAIL: ci-admin@example.com
       ADMIN_PASSWORD: ci-${{ github.run_id }}-${{ github.run_attempt }}
+      # Must be present at build time so next.config.ts image `remotePatterns` matches
+      # production. next.config.ts also has a static `**.r2.dev` fallback, but keep this
+      # in sync with wrangler.jsonc `vars.R2_PUBLIC_URL` so the CI build mirrors deploy.
+      R2_PUBLIC_URL: https://pub-your-r2-bucket-id.r2.dev
     steps:
       - uses: actions/checkout@v4
 

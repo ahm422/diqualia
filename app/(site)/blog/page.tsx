@@ -8,7 +8,7 @@ import { getDb } from "@/lib/cloudflare-env";
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: "Insights — DiQualia",
+  title: "Blog — DiQualia",
   description:
     "Research notes, points of view, and field observations from the DiQualia practice.",
 };
@@ -58,7 +58,7 @@ export default async function BlogIndexPage() {
           }}
         />
         <Container className="relative pb-16 pt-20 md:pb-20 md:pt-28">
-          <Eyebrow>Insights</Eyebrow>
+          <Eyebrow>Blog</Eyebrow>
           <h1
             className="mt-8 text-foreground"
             style={{
@@ -84,7 +84,7 @@ export default async function BlogIndexPage() {
       <Container as="section" className="py-20">
         {posts.length === 0 ? (
           <p className="text-[15px] leading-8" style={{ color: "var(--text-faint)" }}>
-            No published insights yet. Check back soon.
+            No published posts yet. Check back soon.
           </p>
         ) : (
           <ul className="divide-y" style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
