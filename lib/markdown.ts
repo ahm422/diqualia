@@ -18,6 +18,9 @@ const ALLOWED_TAGS = new Set([
   "code",
   "em",
   "strong",
+  "u",
+  "s",
+  "del",
   "a",
   "img",
   "table",
@@ -33,8 +36,8 @@ const ALLOWED_ATTRS: Record<string, Set<string>> = {
   img: new Set(["src", "alt", "title"]),
   code: new Set(["class"]),
   pre: new Set(["class"]),
-  th: new Set(["align"]),
-  td: new Set(["align"]),
+  th: new Set(["align", "colspan", "rowspan"]),
+  td: new Set(["align", "colspan", "rowspan"]),
 };
 
 marked.setOptions({

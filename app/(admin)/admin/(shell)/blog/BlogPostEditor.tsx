@@ -1,8 +1,9 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import {
@@ -14,8 +15,32 @@ import {
   AdminImageField,
   useAdminSave,
 } from "@/components/admin";
+import { renderMarkdown } from "@/lib/markdown";
 import { slugify } from "@/lib/slugify";
 import { useCan } from "@/app/(admin)/admin/AdminSessionProvider";
+
+// TipTap is heavy and client-only — keep it out of the shared admin bundle.
+const RichTextEditor = dynamic(
+  () => import("@/components/admin/RichTextEditor").then((m) => m.RichTextEditor),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="min-h-64 rounded border border-[var(--diq_border)] bg-[var(--diq_deep)] px-3 py-3 text-sm text-[var(--diq_mid)]">
+        Loading editor…
+      </div>
+    ),
+  },
+);
+
+/**
+ * Body is stored as sanitized HTML (TipTap output). Posts created before this
+ * editor hold Markdown — convert those to HTML once on load so they open
+ * formatted rather than showing literal syntax. The next save persists the HTML.
+ */
+function toEditorHtml(body: string): string {
+  if (!body) return "";
+  return /^\s*</.test(body) ? body : renderMarkdown(body);
+}
 
 export type BlogPostData = {
   id: string;
@@ -43,7 +68,8 @@ export function BlogPostEditor({ initial }: Props) {
   const [slug, setSlug] = useState(initial?.slug ?? "");
   const [title, setTitle] = useState(initial?.title ?? "");
   const [excerpt, setExcerpt] = useState(initial?.excerpt ?? "");
-  const [body, setBody] = useState(initial?.body ?? "");
+  const initialBody = useMemo(() => toEditorHtml(initial?.body ?? ""), [initial?.body]);
+  const [body, setBody] = useState(initialBody);
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(
     initial?.coverImageUrl ?? null,
   );
@@ -164,12 +190,11 @@ export function BlogPostEditor({ initial }: Props) {
           />
         </AdminField>
 
-        <AdminField label="Body (Markdown)">
-          <AdminTextarea
+        <AdminField label="Body">
+          <RichTextEditor
             value={body}
             onChange={setBody}
-            rows={16}
-            placeholder="Write the post in Markdown…"
+            placeholder="Write the post…"
           />
         </AdminField>
 

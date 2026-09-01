@@ -12,6 +12,11 @@
   //
   // Vars vs secrets (production):
   //   vars (wrangler.jsonc):     R2_PUBLIC_URL, NODE_ENV
+  //   NOTE: R2_PUBLIC_URL is a *runtime* var and is NOT visible to `next build`.
+  //   next.config.ts carries a static `**.r2.dev` image remotePattern fallback; if a
+  //   custom asset domain is ever used, also export R2_PUBLIC_URL in the build env
+  //   (CI: .gitea/workflows/ci.yml; deploy: prefix `npm run deploy`). Keep this value
+  //   and .env.example in sync.
   //   wrangler secret (required): JWT_SECRET, ADMIN_EMAIL
   //   bindings:                   EMAIL (send_email) — contact form via Cloudflare Email Service
   //                               from: noreply@diqualia.com (domain must be email-sending enabled)

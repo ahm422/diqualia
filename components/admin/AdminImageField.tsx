@@ -4,6 +4,8 @@ import Image from "next/image";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 
+import { uploadAdminImage } from "./uploadAdminImage";
+
 export function AdminImageField({
   label,
   currentUrl,
@@ -38,24 +40,13 @@ export function AdminImageField({
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
-    const fd = new FormData();
-    fd.append("file", file);
     try {
-      const res = await fetch("/api/admin/upload", {
-        method: "POST",
-        credentials: "include",
-        body: fd,
-      });
-      const data = (await res.json()) as { url?: string; key?: string; error?: string };
-      if (res.ok && data.url && data.key) {
-        setStorageKey(data.key);
-        onUpload(data.url, data.key);
-        toast.success("Image uploaded");
-      } else {
-        toast.error(data.error ?? "Upload failed");
-      }
-    } catch {
-      toast.error("Upload failed");
+      const { url, key } = await uploadAdminImage(file);
+      setStorageKey(key);
+      onUpload(url, key);
+      toast.success("Image uploaded");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Upload failed");
     } finally {
       setUploading(false);
       if (fileRef.current) fileRef.current.value = "";
