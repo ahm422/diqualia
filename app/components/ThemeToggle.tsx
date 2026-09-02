@@ -18,7 +18,9 @@ function getSystemTheme(): Theme {
 }
 
 function applyThemeToHtml(theme: Theme) {
-  document.documentElement.classList.toggle(DARK_CLASS, theme === "dark");
+  const d = document.documentElement;
+  d.classList.toggle(DARK_CLASS, theme === "dark");
+  d.style.colorScheme = theme === "dark" ? "dark" : "light";
 }
 
 function subscribeTheme(onStoreChange: () => void) {
@@ -54,7 +56,11 @@ export function ThemeToggle() {
   }, [mode, mounted]);
 
   useEffect(() => {
-    applyThemeToHtml(effectiveTheme);
+    // Derive from live state, not the render-time `effectiveTheme` (whose server
+    // snapshot is always "light") so we never clobber the pre-paint inline script
+    // for a `system` + dark user on first mount.
+    const resolved: Theme = mode === "system" ? getSystemTheme() : mode;
+    applyThemeToHtml(resolved);
 
     const mq = window.matchMedia?.("(prefers-color-scheme: dark)");
     if (!mq) return;
@@ -66,7 +72,7 @@ export function ThemeToggle() {
 
     mq.addEventListener?.("change", handler);
     return () => mq.removeEventListener?.("change", handler);
-  }, [effectiveTheme, mode]);
+  }, [mode]);
 
   function toggle() {
     const next: Theme = effectiveTheme === "dark" ? "light" : "dark";
