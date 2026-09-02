@@ -1040,6 +1040,7 @@ html.dark .diq-proseMuted {
 .diq-markdown a {
   color: var(--gold);
   text-decoration: underline;
+  text-decoration-color: var(--gold);
   text-underline-offset: 3px;
 }
 .diq-markdown a:hover {
@@ -1120,6 +1121,50 @@ html.dark .diq-proseMuted {
   color: var(--foreground);
   background: color-mix(in oklab, var(--gold) 8%, transparent);
 }
+/* Editor marks: highlight + author-set cell backgrounds. */
+.diq-markdown mark {
+  background-color: color-mix(in oklab, var(--gold) 30%, transparent);
+  color: inherit;
+  padding: 0.06em 0.22em;
+  border-radius: 2px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+.diq-markdown th[style*="background"],
+.diq-markdown td[style*="background"] {
+  background-clip: padding-box;
+}
+/* --- Colour composition for links & author-set text colours -----------------
+   TipTap serialises a coloured link as `<a><span style="color:…"><strong>…`,
+   i.e. the Color mark is a *carrier* nested inside the link. These rules hold in
+   both the public render and the `.tiptap` editor (both use `.diq-markdown`).
+   Real element selectors — not `:where()` — so they clear the single-class tag
+   rules above (`.diq-markdown a`, `.diq-markdown strong`, …) on specificity. */
+
+/* 1. A formatting mark wrapped in a link keeps the link's colour instead of
+      snapping to its own theme colour. */
+.diq-markdown a :is(strong, em, u, s, del, code) {
+  color: inherit;
+}
+
+/* 2. An author-set colour carrier always wins — for its whole subtree,
+      including a nested or wrapping strong/em/s/u/code/link, and whether the
+      carrier sits inside or outside the link. `text-align` is unaffected
+      (it doesn't inherit a `color`). */
+.diq-markdown [style*="color"] :is(strong, em, u, s, del, code, a),
+.diq-markdown :is(strong, em, u, s, del, a, th, td, li, p)[style*="color"] {
+  color: inherit;
+}
+
+/* 3. The link underline follows the carrier's colour rather than staying gold:
+      drop the link's own underline and let the nested carrier paint it. */
+.diq-markdown a:has(> [style*="color"]) {
+  text-decoration: none;
+}
+.diq-markdown a > [style*="color"] {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 
 /* Admin rich-text editor (RichTextEditor.tsx) */
 .diq-rte .tiptap {
@@ -1138,6 +1183,77 @@ html.dark .diq-proseMuted {
 }
 .diq-rte .tiptap img.ProseMirror-selectednode {
   outline: 2px solid var(--gold);
+}
+/* Mirror the published <mark> treatment so the editing surface is WYSIWYG. */
+.diq-rte .tiptap mark {
+  background-color: color-mix(in oklab, var(--gold) 30%, transparent);
+  color: inherit;
+  padding: 0.06em 0.22em;
+  border-radius: 2px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+/* ============================
+   Blog: long-form article + cards + reading progress
+   ============================ */
+
+.diq-longform .diq-markdown {
+  font-size: 17px;
+  line-height: 1.75;
+  max-width: 68ch;
+  margin-inline: auto;
+}
+.diq-longform .diq-markdown :is(h2, h3) {
+  scroll-margin-top: 6rem;
+}
+.diq-longform .diq-markdown blockquote {
+  margin: 1.9em 0;
+}
+.diq-longform .diq-markdown hr {
+  margin: 3em 0;
+}
+.diq-longform .diq-markdown ul,
+.diq-longform .diq-markdown ol {
+  margin: 1.2em 0;
+}
+.diq-longform .diq-markdown figure {
+  margin: 2em 0;
+}
+.diq-longform .diq-markdown figure figcaption {
+  margin-top: 0.6em;
+  font-size: 0.85em;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.diq-blog-progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 2px;
+  transform: scaleX(0);
+  transform-origin: left;
+  background: var(--gold);
+  /* Above the fixed nav (.diq-nav z-index: 200), below the mobile sheet (240). */
+  z-index: 210;
+  pointer-events: none;
+  transition: none;
+}
+
+.diq-blog-card__img {
+  transition: transform 0.5s ease;
+}
+.diq-blog-card:hover .diq-blog-card__img,
+.diq-blog-card:focus-visible .diq-blog-card__img {
+  transform: scale(1.03);
+}
+@media (prefers-reduced-motion: reduce) {
+  .diq-blog-card,
+  .diq-blog-card__img,
+  .diq-blog-card:hover .diq-blog-card__img {
+    transition: none;
+    transform: none;
+  }
 }
 
 /* ============================

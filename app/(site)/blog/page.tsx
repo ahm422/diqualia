@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
 
 import { Container } from "@/app/components/Container";
-import { getDb } from "@/lib/cloudflare-env";
+import { toCardData } from "@/lib/blog/card";
+import { listPublishedPosts } from "@/lib/blog/queries";
+
+import { EmptyState } from "./_components/EmptyState";
+import { LoadMoreList } from "./_components/LoadMoreList";
+import { PostCard } from "./_components/PostCard";
 
 export const revalidate = 60;
 
@@ -25,21 +28,9 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
   );
 }
 
-function formatDate(value: Date | null): string {
-  if (!value) return "";
-  return value.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-}
-
 export default async function BlogIndexPage() {
-  const prisma = await getDb();
-  const posts = await prisma.blogPost.findMany({
-    where: { status: "published" },
-    orderBy: { publishedAt: "desc" },
-  });
+  const posts = await listPublishedPosts();
+  const [featured, ...rest] = posts;
 
   return (
     <div>
@@ -57,7 +48,7 @@ export default async function BlogIndexPage() {
             opacity: 0.9,
           }}
         />
-        <Container className="relative pb-16 pt-20 md:pb-20 md:pt-28">
+        <Container className="relative pb-14 pt-20 md:pb-16 md:pt-28">
           <Eyebrow>Blog</Eyebrow>
           <h1
             className="mt-8 text-foreground"
@@ -81,73 +72,21 @@ export default async function BlogIndexPage() {
         </Container>
       </section>
 
-      <Container as="section" className="py-20">
+      <Container as="section" className="py-16 md:py-20">
         {posts.length === 0 ? (
-          <p className="text-[15px] leading-8" style={{ color: "var(--text-faint)" }}>
-            No published posts yet. Check back soon.
-          </p>
+          <EmptyState />
         ) : (
-          <ul className="divide-y" style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
-            {posts.map((post) => (
-              <li
-                key={post.id}
-                className="border-b py-10 first:pt-0"
+          <div className="space-y-16">
+            <PostCard post={toCardData(featured)} variant="featured" priority />
+            {rest.length > 0 ? (
+              <div
+                className="border-t pt-16"
                 style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}
               >
-                <Link href={`/blog/${post.slug}`} className="group block">
-                  <div className="grid gap-8 md:grid-cols-[minmax(0,1fr)_220px] md:items-start">
-                    <div>
-                      {post.publishedAt ? (
-                        <time
-                          dateTime={post.publishedAt.toISOString()}
-                          className="text-[11px] tracking-[0.22em] uppercase"
-                          style={{ color: "var(--text-muted)" }}
-                        >
-                          {formatDate(post.publishedAt)}
-                        </time>
-                      ) : null}
-                      <h2
-                        className="mt-3 text-foreground transition-colors group-hover:text-primary"
-                        style={{
-                          fontFamily: "var(--font-display)",
-                          fontWeight: 300,
-                          fontSize: "clamp(1.5rem, 2.4vw, 2rem)",
-                          lineHeight: 1.2,
-                        }}
-                      >
-                        {post.title}
-                      </h2>
-                      <p className="mt-4 max-w-[68ch] text-[15px] leading-8 text-muted-foreground">
-                        {post.excerpt}
-                      </p>
-                      <span
-                        className="mt-5 inline-block text-[11px] tracking-[0.22em] uppercase"
-                        style={{ color: "var(--primary)" }}
-                      >
-                        Read →
-                      </span>
-                    </div>
-                    {post.coverImageUrl ? (
-                      <div
-                        className="relative aspect-[4/3] overflow-hidden"
-                        style={{
-                          border: "1px solid color-mix(in oklab, var(--border) 80%, transparent)",
-                        }}
-                      >
-                        <Image
-                          src={post.coverImageUrl}
-                          alt=""
-                          fill
-                          className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                          sizes="220px"
-                        />
-                      </div>
-                    ) : null}
-                  </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
+                <LoadMoreList posts={rest.map(toCardData)} pageSize={9} />
+              </div>
+            ) : null}
+          </div>
         )}
       </Container>
     </div>

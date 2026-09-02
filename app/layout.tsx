@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { DM_Mono, Jost, Playfair_Display } from "next/font/google";
 import "./globals.css";
-import { ThemeInit } from "./components/ThemeInit";
+import { ThemeReconciler } from "./components/ThemeReconciler";
+import { ThemeScript } from "./components/ThemeScript";
 
 const jost = Jost({
   variable: "--font-sans",
@@ -46,9 +47,11 @@ export default function RootLayout({
       className={`${jost.variable} ${dmMono.variable} ${playfair.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <head />
+      <head>
+        <ThemeScript />
+      </head>
       <body className="min-h-full flex flex-col">
-        <ThemeInit />
+        <ThemeReconciler />
         {children}
       </body>
     </html>
