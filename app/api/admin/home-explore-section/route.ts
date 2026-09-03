@@ -50,6 +50,8 @@ export async function PATCH(request: Request) {
     update: parsed.data,
   });
 
+  // NOTE: no public (site) page renders the Explore section yet; this revalidation
+  // is a placeholder for whichever page picks it up. Update the path when that lands.
   revalidatePage("/");
   return NextResponse.json(section);
 }

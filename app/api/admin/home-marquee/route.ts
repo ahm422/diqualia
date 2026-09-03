@@ -44,6 +44,7 @@ export async function POST(request: Request) {
     data: { text: parsed.data.text, order: nextOrder },
   });
 
+  // Ticker renders only on / (app/(site)/page.tsx #marquee) — add paths here if that changes.
   revalidatePage("/");
   return NextResponse.json(item, { status: 201 });
 }

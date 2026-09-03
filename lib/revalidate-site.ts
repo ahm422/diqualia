@@ -17,6 +17,11 @@ export function revalidatePage(path: (typeof SITE_PATHS)[number]) {
   revalidatePath(path);
 }
 
+/** Revalidate several public pages at once (e.g. content shown on both `/` and a dedicated page) */
+export function revalidatePages(...paths: (typeof SITE_PATHS)[number][]) {
+  for (const path of paths) revalidatePath(path);
+}
+
 /** Revalidate a dynamic blog post path (not in SITE_PATHS) */
 export function revalidateBlogPost(slug: string) {
   revalidatePath(`/blog/${slug}`);

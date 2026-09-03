@@ -5,7 +5,7 @@ import { z } from "zod";
 
 import { requirePermissionApi } from "@/lib/auth/require-admin-api";
 import { getDb } from "@/lib/cloudflare-env";
-import { revalidatePage } from "@/lib/revalidate-site";
+import { revalidatePages } from "@/lib/revalidate-site";
 
 const PatchSchema = z.object({
   stepLabel: z.string().min(1).max(100).optional(),
@@ -36,7 +36,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
   try {
     const step = await prisma.processStep.update({ where: { id: numId }, data: parsed.data });
-    revalidatePage("/process");
+    revalidatePages("/", "/process");
     return NextResponse.json(step);
   } catch {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -65,6 +65,6 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
     }
   }
 
-  revalidatePage("/process");
+  revalidatePages("/", "/process");
   return NextResponse.json({ ok: true });
 }

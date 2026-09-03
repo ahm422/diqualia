@@ -53,6 +53,8 @@ export async function POST(request: Request) {
     },
   });
 
+  // NOTE: no public (site) page renders Explore cards yet; this revalidation is a
+  // placeholder for whichever page picks them up. Update the path when that lands.
   revalidatePage("/");
   return NextResponse.json(card, { status: 201 });
 }

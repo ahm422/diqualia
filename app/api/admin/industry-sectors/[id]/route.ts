@@ -6,7 +6,7 @@ import { requirePermissionApi } from "@/lib/auth/require-admin-api";
 import { getDb } from "@/lib/cloudflare-env";
 import { Prisma } from "@/lib/generated/prisma/client";
 import { industrySectorPatchSchema } from "@/lib/schemas/admin/industries";
-import { revalidateIndustrySector, revalidatePage } from "@/lib/revalidate-site";
+import { revalidateIndustrySector, revalidatePages } from "@/lib/revalidate-site";
 
 function emptyToNull(value: string | null | undefined): string | null | undefined {
   if (value === undefined) return undefined;
@@ -66,7 +66,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   try {
     const sector = await prisma.industrySector.update({ where: { id: numId }, data });
 
-    revalidatePage("/industries");
+    revalidatePages("/", "/industries");
     revalidateIndustrySector(sector.slug);
     if (existing.slug !== sector.slug) {
       revalidateIndustrySector(existing.slug);
@@ -105,7 +105,7 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
     }
   }
 
-  revalidatePage("/industries");
+  revalidatePages("/", "/industries");
   revalidateIndustrySector(existing.slug);
   return NextResponse.json({ ok: true });
 }

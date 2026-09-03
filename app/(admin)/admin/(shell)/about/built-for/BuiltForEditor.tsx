@@ -1,121 +1,214 @@
 "use client";
 
 import { useState } from "react";
+import { LayoutGrid, Plus } from "lucide-react";
+import { toast } from "sonner";
 
-import { AdminSection } from "@/components/admin";
+import { AdminEditableList, AdminSection } from "@/components/admin";
 import { useCan } from "@/app/(admin)/admin/AdminSessionProvider";
 
 import type { BuiltForItem } from "../types";
 
+async function readError(res: Response): Promise<string> {
+  try {
+    const body = (await res.json()) as { error?: unknown };
+    if (typeof body?.error === "string") return body.error;
+  } catch {
+    /* fall through */
+  }
+  return "Save failed — try again";
+}
+
+const fieldLabel =
+  "mb-1 block text-[10px] font-semibold uppercase tracking-[0.16em] text-[var(--diq_mid)]";
+const fieldBox =
+  "w-full rounded-lg border border-[var(--diq_border)] bg-[var(--diq_deep)] px-3.5 py-2.5 text-sm text-foreground placeholder:text-[var(--diq_mid)] focus:border-[var(--gold)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_oklab,var(--gold)_35%,transparent)] disabled:opacity-60";
+
 export function BuiltForEditor({ initial }: { initial: BuiltForItem[] }) {
   const canCreate = useCan("content.create");
   const canDelete = useCan("content.delete");
+  const canEdit = useCan("content.edit");
+
   const [items, setItems] = useState<BuiltForItem[]>(initial);
   const [newTitle, setNewTitle] = useState("");
   const [newDesc, setNewDesc] = useState("");
   const [adding, setAdding] = useState(false);
 
-  async function patch(id: number, data: Partial<BuiltForItem>) {
-    const res = await fetch(`/api/admin/about-built-for/${id}`, {
-      method: "PATCH", credentials: "include",
+  async function saveRow(row: BuiltForItem): Promise<BuiltForItem> {
+    const res = await fetch(`/api/admin/about-built-for/${row.id}`, {
+      method: "PATCH",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
+      body: JSON.stringify({ title: row.title, description: row.description }),
     });
-    if (res.ok) {
-      const updated = (await res.json()) as BuiltForItem;
-      setItems((prev) => prev.map((i) => (i.id === id ? updated : i)));
-    }
+    if (!res.ok) throw new Error(await readError(res));
+    return (await res.json()) as BuiltForItem;
   }
 
-  async function move(id: number, dir: -1 | 1) {
-    const idx = items.findIndex((i) => i.id === id);
-    const swapIdx = idx + dir;
-    if (swapIdx < 0 || swapIdx >= items.length) return;
-    const a = items[idx]; const b = items[swapIdx];
-    await Promise.all([patch(a.id, { order: b.order }), patch(b.id, { order: a.order })]);
-    const next = [...items];
-    next[idx] = { ...a, order: b.order };
-    next[swapIdx] = { ...b, order: a.order };
-    setItems(next.sort((x, y) => x.order - y.order));
+  async function reorder(
+    rows: BuiltForItem[],
+    from: number,
+    to: number,
+  ): Promise<BuiltForItem[]> {
+    const a = rows[from];
+    const b = rows[to];
+    const results = await Promise.all([
+      fetch(`/api/admin/about-built-for/${a.id}`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ order: b.order }),
+      }),
+      fetch(`/api/admin/about-built-for/${b.id}`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ order: a.order }),
+      }),
+    ]);
+    if (results.some((r) => !r.ok)) throw new Error("Reorder failed — try again");
+    return rows
+      .map((r) => {
+        if (r.id === a.id) return { ...r, order: b.order };
+        if (r.id === b.id) return { ...r, order: a.order };
+        return r;
+      })
+      .sort((x, y) => x.order - y.order);
   }
 
-  async function del(id: number) {
-    if (!confirm("Delete this item?")) return;
-    const res = await fetch(`/api/admin/about-built-for/${id}`, { method: "DELETE", credentials: "include" });
-    if (res.ok) setItems((prev) => prev.filter((i) => i.id !== id).map((i, idx) => ({ ...i, order: idx })));
+  async function del(row: BuiltForItem): Promise<BuiltForItem[]> {
+    const res = await fetch(`/api/admin/about-built-for/${row.id}`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+    if (!res.ok) throw new Error("Delete failed — try again");
+    return items
+      .filter((i) => i.id !== row.id)
+      .map((i, idx) => ({ ...i, order: idx }));
   }
 
   async function add() {
-    if (!newTitle.trim() || !newDesc.trim()) return;
+    if (!newTitle.trim() || !newDesc.trim() || adding) return;
     setAdding(true);
-    const res = await fetch("/api/admin/about-built-for", {
-      method: "POST", credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title: newTitle, description: newDesc }),
-    });
-    if (res.ok) {
+    try {
+      const res = await fetch("/api/admin/about-built-for", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: newTitle.trim(), description: newDesc.trim() }),
+      });
+      if (!res.ok) {
+        toast.error(await readError(res));
+        return;
+      }
       const item = (await res.json()) as BuiltForItem;
       setItems((prev) => [...prev, item]);
       setNewTitle("");
       setNewDesc("");
+      toast.success("Saved");
+    } catch {
+      toast.error("Save failed — try again");
+    } finally {
+      setAdding(false);
     }
-    setAdding(false);
   }
 
   return (
-    <AdminSection title="Built For Items">
-      <div className="space-y-4">
-        {items.map((item, idx) => (
-          <div key={item.id} className="rounded border border-[var(--diq_border2)] p-4">
-            <div className="mb-2">
-              <label className="mb-1 block text-[11px] uppercase tracking-widest text-[var(--diq_mid)]">Title</label>
-              <input
-                defaultValue={item.title}
-                onBlur={(e) => { if (e.target.value !== item.title) patch(item.id, { title: e.target.value }); }}
-                className="w-full rounded border border-[var(--diq_border)] bg-[var(--diq_deep)] px-2 py-1.5 text-sm focus:outline-none"
-              />
-            </div>
-            <div className="mb-3">
-              <label className="mb-1 block text-[11px] uppercase tracking-widest text-[var(--diq_mid)]">Description</label>
-              <textarea
-                defaultValue={item.description}
-                onBlur={(e) => { if (e.target.value !== item.description) patch(item.id, { description: e.target.value }); }}
-                rows={2}
-                className="w-full resize-y rounded border border-[var(--diq_border)] bg-[var(--diq_deep)] px-2 py-1.5 text-sm focus:outline-none"
-              />
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="flex gap-1">
-                <button onClick={() => move(item.id, -1)} disabled={idx === 0} className="rounded px-1 text-[var(--diq_mid)] hover:text-foreground disabled:opacity-30 text-xs">↑</button>
-                <button onClick={() => move(item.id, 1)} disabled={idx === items.length - 1} className="rounded px-1 text-[var(--diq_mid)] hover:text-foreground disabled:opacity-30 text-xs">↓</button>
-              </div>
-              {canDelete && (
-                <button onClick={() => del(item.id)} className="ml-auto text-xs text-red-400 hover:text-red-300">Delete</button>
-              )}
-            </div>
-          </div>
-        ))}
+    <AdminSection title="Built-For Items">
+      <div className="mb-5 flex gap-3 rounded-xl border border-[color-mix(in_oklab,var(--gold)_20%,transparent)] bg-[color-mix(in_oklab,var(--gold)_7%,transparent)] px-4 py-3.5">
+        <LayoutGrid className="mt-0.5 h-4 w-4 shrink-0 text-[var(--gold)]" />
+        <p className="text-xs leading-relaxed text-[var(--diq_mid)]">
+          These are the cards in the “What we’re built for” grid on the About page. Give each
+          a short title and a one- or two-sentence description, and use the arrows to set the
+          order they appear in. Changes go live after you save.
+        </p>
       </div>
 
-      {canCreate && (
-      <div className="mt-4 border-t border-[var(--diq_border2)] pt-4">
-        <div className="text-xs uppercase tracking-widest text-[var(--diq_mid)] mb-3">Add item</div>
-        <div className="mb-2">
-          <label className="mb-1 block text-[11px] uppercase tracking-widest text-[var(--diq_mid)]">Title</label>
-          <input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} placeholder="Research Before Everything"
-            className="w-full rounded border border-[var(--diq_border)] bg-[var(--diq_deep)] px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-[var(--gold)]" />
-        </div>
-        <div className="mb-3">
-          <label className="mb-1 block text-[11px] uppercase tracking-widest text-[var(--diq_mid)]">Description</label>
-          <textarea value={newDesc} onChange={(e) => setNewDesc(e.target.value)} placeholder="Every engagement begins with…" rows={2}
-            className="w-full resize-y rounded border border-[var(--diq_border)] bg-[var(--diq_deep)] px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-[var(--gold)]" />
-        </div>
-        <button onClick={add} disabled={adding || !newTitle.trim() || !newDesc.trim()}
-          className="rounded border border-[var(--gold)] px-4 py-1.5 text-xs uppercase tracking-widest text-[var(--gold)] hover:bg-[var(--gold)] hover:text-[var(--diq_ink)] disabled:opacity-50">
-          Add Item
-        </button>
-      </div>
-      )}
+      <AdminEditableList<BuiltForItem>
+        rows={items}
+        onRowsChange={setItems}
+        keyOf={(i) => i.id}
+        canEdit={canEdit}
+        canDelete={canDelete}
+        canCreate={canCreate}
+        itemNoun="card"
+        addTitle="Add card"
+        emptyText="No built-for cards yet"
+        emptyHint="Add your first card below — it'll show in the grid on the About page."
+        emptyIcon={<LayoutGrid className="h-5 w-5" />}
+        deleteConfirm="Delete this card?"
+        onSave={saveRow}
+        onReorder={reorder}
+        onDelete={del}
+        renderFields={(draft, setField, ctx) => (
+          <div className="space-y-3">
+            <div>
+              <label className={fieldLabel}>Title</label>
+              <input
+                value={draft.title}
+                disabled={ctx.disabled}
+                onChange={(e) => setField({ title: e.target.value })}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    ctx.saveIfDirty();
+                  } else if (e.key === "Escape") {
+                    ctx.revert();
+                  }
+                }}
+                placeholder="Research Before Everything"
+                className={fieldBox}
+              />
+            </div>
+            <div>
+              <label className={fieldLabel}>Description</label>
+              <textarea
+                value={draft.description}
+                disabled={ctx.disabled}
+                onChange={(e) => setField({ description: e.target.value })}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") ctx.revert();
+                }}
+                rows={2}
+                placeholder="Every engagement begins with a deep dive into the problem space…"
+                className={`${fieldBox} resize-y`}
+              />
+            </div>
+          </div>
+        )}
+        addSlot={
+          <div className="space-y-3">
+            <div>
+              <label className={fieldLabel}>Title</label>
+              <input
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+                placeholder="Research Before Everything"
+                className={fieldBox}
+              />
+            </div>
+            <div>
+              <label className={fieldLabel}>Description</label>
+              <textarea
+                value={newDesc}
+                onChange={(e) => setNewDesc(e.target.value)}
+                rows={2}
+                placeholder="Every engagement begins with a deep dive into the problem space…"
+                className={`${fieldBox} resize-y`}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={add}
+              disabled={adding || !newTitle.trim() || !newDesc.trim()}
+              className="inline-flex h-10 items-center gap-1.5 rounded-pill bg-[var(--gold)] px-5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--diq_ink)] shadow-[0_1px_2px_rgba(0,0,0,0.12)] transition-colors hover:bg-[var(--gold-lt)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--gold)] disabled:opacity-50"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              {adding ? "Adding" : "Add card"}
+            </button>
+          </div>
+        }
+      />
     </AdminSection>
   );
 }
