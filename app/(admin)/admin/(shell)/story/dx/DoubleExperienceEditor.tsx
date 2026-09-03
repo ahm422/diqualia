@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 
 import {
   AdminSection,
@@ -9,11 +9,22 @@ import {
   AdminTextarea,
   AdminSaveButton,
   useAdminSave,
+  useScrollToSection,
 } from "@/components/admin";
 
 import type { StoryPageData } from "../types";
 
 export function DoubleExperienceEditor({ initial }: { initial: StoryPageData }) {
+  return (
+    <Suspense fallback={null}>
+      <DoubleExperienceEditorInner initial={initial} />
+    </Suspense>
+  );
+}
+
+function DoubleExperienceEditorInner({ initial }: { initial: StoryPageData }) {
+  useScrollToSection();
+
   const [dxNum1, setDxNum1] = useState(initial?.dxNum1 ?? "");
   const [dxTitle1, setDxTitle1] = useState(initial?.dxTitle1 ?? "");
   const [dxBody1, setDxBody1] = useState(initial?.dxBody1 ?? "");
@@ -25,7 +36,7 @@ export function DoubleExperienceEditor({ initial }: { initial: StoryPageData }) 
 
   return (
     <>
-      <AdminSection title="DX Card 1">
+      <AdminSection id="card1" title="DX Card 1">
         <AdminField label="Number">
           <AdminInput value={dxNum1} onChange={setDxNum1} placeholder="01" />
         </AdminField>
@@ -37,7 +48,7 @@ export function DoubleExperienceEditor({ initial }: { initial: StoryPageData }) 
         </AdminField>
       </AdminSection>
 
-      <AdminSection title="DX Card 2">
+      <AdminSection id="card2" title="DX Card 2">
         <AdminField label="Number">
           <AdminInput value={dxNum2} onChange={setDxNum2} placeholder="02" />
         </AdminField>
@@ -49,7 +60,7 @@ export function DoubleExperienceEditor({ initial }: { initial: StoryPageData }) 
         </AdminField>
       </AdminSection>
 
-      <AdminSection title="Tagline">
+      <AdminSection id="tagline" title="Tagline">
         <AdminField label="Tagline (italic, shown below both cards)">
           <AdminTextarea value={dxTagline} onChange={setDxTagline} rows={2} placeholder="Together, they produce something neither can achieve alone…" />
         </AdminField>

@@ -96,8 +96,9 @@ function renderWhereNextHeadline(headline: string) {
 
 export default async function AboutPage() {
   const prisma = await getDb();
-  const [hero, builtForItems, whereNext] = await Promise.all([
+  const [hero, builtForSection, builtForItems, whereNext] = await Promise.all([
     prisma.aboutHero.findUnique({ where: { id: 1 } }),
+    prisma.aboutBuiltForSection.findUnique({ where: { id: 1 } }),
     prisma.aboutBuiltForItem.findMany({ orderBy: { order: "asc" } }),
     prisma.aboutWhereNext.findUnique({ where: { id: 1 } }),
   ]);
@@ -136,11 +137,11 @@ export default async function AboutPage() {
       </section>
 
       <Container as="section" id="built-for" className="py-20">
-        <Eyebrow>What we&apos;re built for</Eyebrow>
+        <Eyebrow>{builtForSection?.eyebrow ?? "What we're built for"}</Eyebrow>
         <H2>
-          Intelligence that compounds —
+          {builtForSection?.headlineLine1 ?? "Intelligence that compounds —"}
           <br />
-          not tactics that expire.
+          {builtForSection?.headlineLine2 ?? "not tactics that expire."}
         </H2>
 
         <div className="mt-12 grid grid-cols-1 gap-px sm:grid-cols-2 lg:grid-cols-4" style={{ background: "color-mix(in oklab, var(--border) 100%, transparent)" }}>

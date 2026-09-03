@@ -233,7 +233,7 @@ export function BlogPostEditor({ initial }: Props) {
               type="button"
               onClick={handleDelete}
               disabled={deleting}
-              className="mt-4 rounded border border-red-400/40 px-4 py-2 text-xs uppercase tracking-widest text-red-400 hover:bg-red-400/10 disabled:opacity-50"
+              className="mt-4 rounded border border-[var(--destructive)]/40 px-4 py-2 text-xs uppercase tracking-widest text-[var(--destructive)] hover:bg-[color-mix(in_oklab,var(--destructive)_10%,transparent)] disabled:opacity-50"
             >
               {deleting ? "Deleting…" : "Delete"}
             </button>

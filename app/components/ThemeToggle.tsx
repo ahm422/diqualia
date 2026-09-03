@@ -42,7 +42,14 @@ function getStoredMode(): ThemeMode {
   return "system";
 }
 
-export function ThemeToggle() {
+export function ThemeToggle({
+  label,
+  className,
+}: {
+  /** When set, the control is a full-width labeled row (icon + text). */
+  label?: string;
+  className?: string;
+} = {}) {
   const mounted = useSyncExternalStore(
     () => () => {},
     () => true,
@@ -86,15 +93,37 @@ export function ThemeToggle() {
   }
 
   const pressed = effectiveTheme === "dark";
+  const ariaLabel = pressed ? "Switch to light theme" : "Switch to dark theme";
+  const icon = pressed ? (
+    <Moon aria-hidden size={14} className="shrink-0 text-primary" />
+  ) : (
+    <Sun aria-hidden size={14} className="shrink-0 text-primary" />
+  );
+
+  if (label) {
+    return (
+      <button
+        type="button"
+        onClick={toggle}
+        aria-pressed={pressed}
+        aria-label={ariaLabel}
+        className={className}
+      >
+        {icon}
+        {label}
+      </button>
+    );
+  }
 
   return (
     <Button
       type="button"
       onClick={toggle}
       aria-pressed={pressed}
-      aria-label={pressed ? "Switch to light theme" : "Switch to dark theme"}
+      aria-label={ariaLabel}
       variant="ghost"
       size="icon"
+      className={className}
     >
       {pressed ? <Moon aria-hidden className="text-primary" /> : <Sun aria-hidden className="text-primary" />}
       <span className="sr-only">{pressed ? "Dark theme" : "Light theme"}</span>

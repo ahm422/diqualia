@@ -90,7 +90,7 @@ export function JobOpeningsList({ initialOpenings }: { initialOpenings: JobOpeni
                     type="button"
                     onClick={() => handleDelete(opening)}
                     disabled={deletingId === opening.id}
-                    className="text-xs text-red-400 hover:text-red-300 disabled:opacity-50"
+                    className="text-xs text-[var(--destructive)] hover:opacity-80 disabled:opacity-50"
                   >
                     {deletingId === opening.id ? "Deleting…" : "Delete"}
                   </button>

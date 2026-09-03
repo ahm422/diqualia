@@ -14,7 +14,7 @@ export default async function ServicesIntroAdminPage() {
     <div>
       <AdminPageHeader
         title="Page Intro"
-        description="Services page hero (headline, body, stats) and the gold contact strip at the bottom of /services."
+        description="Hero (headline, body, stats) at the top of /services, and the gold contact strip at the bottom."
         previewHref="/services"
       />
       <IntroEditor initial={page} />

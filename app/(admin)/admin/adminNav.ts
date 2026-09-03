@@ -38,7 +38,8 @@ export const ADMIN_NAV: NavGroup[] = [
     children: [
       { href: "/admin/home/hero", label: "Hero", permission: "cms.view" },
       { href: "/admin/home/marquee", label: "Marquee", permission: "cms.view" },
-      { href: "/admin/home/explore", label: "Explore Cards", permission: "cms.view" },
+      { href: "/admin/home/explore?section=header", label: "Explore Header", permission: "cms.view" },
+      { href: "/admin/home/explore?section=cards", label: "Explore Cards", permission: "cms.view" },
       { href: "/admin/home/where-next", label: "Where Next", permission: "cms.view" },
     ],
   },
@@ -48,7 +49,8 @@ export const ADMIN_NAV: NavGroup[] = [
     icon: Info,
     children: [
       { href: "/admin/about/hero", label: "Hero", permission: "cms.view" },
-      { href: "/admin/about/built-for", label: "Built-For Items", permission: "cms.view" },
+      { href: "/admin/about/built-for?section=header", label: "Built-For Header", permission: "cms.view" },
+      { href: "/admin/about/built-for?section=items", label: "Built-For Items", permission: "cms.view" },
       { href: "/admin/about/where-next", label: "Where Next", permission: "cms.view" },
     ],
   },
@@ -57,7 +59,8 @@ export const ADMIN_NAV: NavGroup[] = [
     label: "Services",
     icon: Layers,
     children: [
-      { href: "/admin/services/intro", label: "Page Intro", permission: "cms.view" },
+      { href: "/admin/services/intro?section=hero", label: "Intro Hero", permission: "cms.view" },
+      { href: "/admin/services/intro?section=cta", label: "Intro CTA", permission: "cms.view" },
       { href: "/admin/services/sections", label: "Sections & Items", permission: "cms.view" },
     ],
   },
@@ -77,7 +80,8 @@ export const ADMIN_NAV: NavGroup[] = [
     icon: Building2,
     children: [
       { href: "/admin/industries/hero", label: "Hero", permission: "cms.view" },
-      { href: "/admin/industries/sectors", label: "Sectors", permission: "cms.view" },
+      { href: "/admin/industries/sectors?section=copy", label: "Sectors copy", permission: "cms.view" },
+      { href: "/admin/industries/sectors?section=tags", label: "Sector tags", permission: "cms.view" },
       { href: "/admin/industries/where-next", label: "Where Next", permission: "cms.view" },
     ],
   },
@@ -87,7 +91,9 @@ export const ADMIN_NAV: NavGroup[] = [
     icon: BookOpen,
     children: [
       { href: "/admin/story/hero", label: "Hero", permission: "cms.view" },
-      { href: "/admin/story/dx", label: "Double Experience", permission: "cms.view" },
+      { href: "/admin/story/dx?section=card1", label: "DX Card 1", permission: "cms.view" },
+      { href: "/admin/story/dx?section=card2", label: "DX Card 2", permission: "cms.view" },
+      { href: "/admin/story/dx?section=tagline", label: "DX Tagline", permission: "cms.view" },
       { href: "/admin/story/manifesto", label: "Manifesto", permission: "cms.view" },
     ],
   },

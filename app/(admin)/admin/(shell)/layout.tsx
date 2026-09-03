@@ -25,7 +25,7 @@ export default async function ShellLayout({ children }: { children: React.ReactN
           <Suspense fallback={<div className="h-14 shrink-0 border-b border-[var(--diq_border)] min-[961px]:hidden" />}>
             <AdminMobileHeader />
           </Suspense>
-          <main className="min-h-0 flex-1 overflow-y-auto p-4 min-[961px]:p-8">{children}</main>
+          <main className="min-h-0 flex-1 overflow-y-auto bg-[var(--diq_ink)] p-4 min-[961px]:p-8">{children}</main>
         </div>
         <AdminToaster />
       </div>

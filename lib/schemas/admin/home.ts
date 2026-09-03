@@ -53,6 +53,7 @@ export const homeExploreCardPostSchema = z.object({
   href:  urlStr,
   title: shortStr,
   body:  longStr,
+  sectionLabel: shortStr.optional(),
 });
 export type HomeExploreCardPost = z.infer<typeof homeExploreCardPostSchema>;
 

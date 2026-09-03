@@ -9,7 +9,8 @@ const DARK_CLASS = "dark";
  * Post-hydration reconciliation only — the initial paint is handled by the
  * render-blocking inline script in <head> (see ThemeScript.tsx). This keeps the
  * theme in sync with live OS `prefers-color-scheme` changes while the user is in
- * "system" mode, on every route group (admin/portal have no ThemeToggle).
+ * "system" mode. Explicit light/dark choices (including the admin ThemeToggle)
+ * are stored in localStorage and win over OS preference.
  */
 export function ThemeReconciler() {
   useEffect(() => {

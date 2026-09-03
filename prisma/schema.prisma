@@ -217,6 +217,15 @@ model AboutHero {
   @@map("about_hero")
 }
 
+model AboutBuiltForSection {
+  id            Int    @id @default(1)
+  eyebrow       String
+  headlineLine1 String @map("headline_line1")
+  headlineLine2 String @map("headline_line2")
+
+  @@map("about_built_for_section")
+}
+
 model AboutBuiltForItem {
   id          Int    @id @default(autoincrement())
   title       String

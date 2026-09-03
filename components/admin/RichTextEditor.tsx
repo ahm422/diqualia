@@ -788,7 +788,7 @@ export function RichTextEditor({
     () =>
       `diq-rte overflow-hidden rounded border bg-[var(--diq_deep)] focus-within:ring-1 ${
         error
-          ? "border-red-400 focus-within:ring-red-400"
+          ? "border-[var(--destructive)] focus-within:ring-[var(--destructive)]"
           : "border-[var(--diq_border)] focus-within:ring-[var(--gold)]"
       }`,
     [error],
@@ -800,7 +800,7 @@ export function RichTextEditor({
         {editor && <Toolbar editor={editor} features={resolvedFeatures} />}
         <EditorContent editor={editor} />
       </div>
-      {error && <p className="mt-1 text-xs text-red-400">{error}</p>}
+      {error && <p className="mt-1 text-xs text-[var(--destructive)]">{error}</p>}
     </div>
   );
 }

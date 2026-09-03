@@ -120,7 +120,7 @@ export function StepsEditor({ initial }: { initial: ProcessStepData[] }) {
                 <button onClick={() => move(step.id, 1)} disabled={idx === steps.length - 1} className="rounded px-1 text-[var(--diq_mid)] hover:text-foreground disabled:opacity-30 text-xs">↓</button>
               </div>
               {canDelete && (
-                <button onClick={() => del(step.id)} className="ml-auto text-xs text-red-400 hover:text-red-300">Delete</button>
+                <button onClick={() => del(step.id)} className="ml-auto text-xs text-[var(--destructive)] hover:opacity-80">Delete</button>
               )}
             </div>
           </div>

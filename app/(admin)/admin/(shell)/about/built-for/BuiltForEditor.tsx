@@ -1,13 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { LayoutGrid, Plus } from "lucide-react";
 import { toast } from "sonner";
 
-import { AdminEditableList, AdminSection } from "@/components/admin";
+import {
+  AdminEditableList,
+  AdminSection,
+  AdminField,
+  AdminInput,
+  AdminSaveButton,
+  useAdminSave,
+  useScrollToSection,
+} from "@/components/admin";
 import { useCan } from "@/app/(admin)/admin/AdminSessionProvider";
 
-import type { BuiltForItem } from "../types";
+import type { BuiltForItem, BuiltForSection } from "../types";
 
 async function readError(res: Response): Promise<string> {
   try {
@@ -24,7 +32,73 @@ const fieldLabel =
 const fieldBox =
   "w-full rounded-lg border border-[var(--diq_border)] bg-[var(--diq_deep)] px-3.5 py-2.5 text-sm text-foreground placeholder:text-[var(--diq_mid)] focus:border-[var(--gold)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_oklab,var(--gold)_35%,transparent)] disabled:opacity-60";
 
-export function BuiltForEditor({ initial }: { initial: BuiltForItem[] }) {
+export function BuiltForEditor({
+  initialSection,
+  initial,
+}: {
+  initialSection: BuiltForSection;
+  initial: BuiltForItem[];
+}) {
+  return (
+    <Suspense fallback={null}>
+      <BuiltForEditorInner initialSection={initialSection} initial={initial} />
+    </Suspense>
+  );
+}
+
+function BuiltForEditorInner({
+  initialSection,
+  initial,
+}: {
+  initialSection: BuiltForSection;
+  initial: BuiltForItem[];
+}) {
+  useScrollToSection();
+
+  return (
+    <div>
+      <BuiltForSectionHeader initial={initialSection} />
+      <BuiltForItemsSection initial={initial} />
+    </div>
+  );
+}
+
+function BuiltForSectionHeader({ initial }: { initial: BuiltForSection }) {
+  const [eyebrow, setEyebrow] = useState(initial?.eyebrow ?? "");
+  const [line1, setLine1] = useState(initial?.headlineLine1 ?? "");
+  const [line2, setLine2] = useState(initial?.headlineLine2 ?? "");
+  const { save, saving } = useAdminSave("/api/admin/about-built-for-section");
+
+  return (
+    <AdminSection id="header" title="Section header">
+      <AdminField label="Eyebrow">
+        <AdminInput value={eyebrow} onChange={setEyebrow} placeholder="What we're built for" />
+      </AdminField>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <AdminField label="Headline Line 1">
+          <AdminInput
+            value={line1}
+            onChange={setLine1}
+            placeholder="Intelligence that compounds —"
+          />
+        </AdminField>
+        <AdminField label="Headline Line 2">
+          <AdminInput
+            value={line2}
+            onChange={setLine2}
+            placeholder="not tactics that expire."
+          />
+        </AdminField>
+      </div>
+      <AdminSaveButton
+        onClick={() => save({ eyebrow, headlineLine1: line1, headlineLine2: line2 })}
+        saving={saving}
+      />
+    </AdminSection>
+  );
+}
+
+function BuiltForItemsSection({ initial }: { initial: BuiltForItem[] }) {
   const canCreate = useCan("content.create");
   const canDelete = useCan("content.delete");
   const canEdit = useCan("content.edit");
@@ -114,13 +188,14 @@ export function BuiltForEditor({ initial }: { initial: BuiltForItem[] }) {
   }
 
   return (
-    <AdminSection title="Built-For Items">
+    <AdminSection id="items" title="Built-For Items">
       <div className="mb-5 flex gap-3 rounded-xl border border-[color-mix(in_oklab,var(--gold)_20%,transparent)] bg-[color-mix(in_oklab,var(--gold)_7%,transparent)] px-4 py-3.5">
         <LayoutGrid className="mt-0.5 h-4 w-4 shrink-0 text-[var(--gold)]" />
         <p className="text-xs leading-relaxed text-[var(--diq_mid)]">
-          These are the cards in the “What we’re built for” grid on the About page. Give each
-          a short title and a one- or two-sentence description, and use the arrows to set the
-          order they appear in. Changes go live after you save.
+          These cards appear in the “What we’re built for” grid on{" "}
+          <span className="font-mono text-[var(--gold)]">/about#built-for</span> and as the
+          principles grid on the homepage. Give each a short title and a one- or two-sentence
+          description, and use the arrows to set the order. Changes go live after you save.
         </p>
       </div>
 
@@ -134,7 +209,7 @@ export function BuiltForEditor({ initial }: { initial: BuiltForItem[] }) {
         itemNoun="card"
         addTitle="Add card"
         emptyText="No built-for cards yet"
-        emptyHint="Add your first card below — it'll show in the grid on the About page."
+        emptyHint="Add your first card below — it'll show in the grid on the About page and the homepage principles."
         emptyIcon={<LayoutGrid className="h-5 w-5" />}
         deleteConfirm="Delete this card?"
         onSave={saveRow}

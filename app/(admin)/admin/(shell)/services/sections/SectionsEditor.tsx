@@ -161,7 +161,7 @@ function SectionPanel({ section, idx, total, isOpen, onToggle, onPatch, onMove, 
           <button onClick={() => onMove(-1)} disabled={idx === 0} className="rounded px-1 text-[var(--diq_mid)] hover:text-foreground disabled:opacity-30 text-xs">↑</button>
           <button onClick={() => onMove(1)} disabled={idx === total - 1} className="rounded px-1 text-[var(--diq_mid)] hover:text-foreground disabled:opacity-30 text-xs">↓</button>
           {canDelete && (
-            <button onClick={onDelete} className="ml-2 text-xs text-red-400 hover:text-red-300">Delete</button>
+            <button onClick={onDelete} className="ml-2 text-xs text-[var(--destructive)] hover:opacity-80">Delete</button>
           )}
         </div>
       </div>
@@ -336,7 +336,7 @@ function ItemsEditor({ section, onItemsChange }: { section: ServiceSection; onIt
               <button onClick={() => moveItem(item.id, -1)} disabled={idx === 0} className="text-[var(--diq_mid)] hover:text-foreground disabled:opacity-30 text-xs">↑</button>
               <button onClick={() => moveItem(item.id, 1)} disabled={idx === items.length - 1} className="text-[var(--diq_mid)] hover:text-foreground disabled:opacity-30 text-xs">↓</button>
               {canDelete && (
-                <button onClick={() => deleteItem(item.id)} className="ml-auto text-xs text-red-400 hover:text-red-300">Delete</button>
+                <button onClick={() => deleteItem(item.id)} className="ml-auto text-xs text-[var(--destructive)] hover:opacity-80">Delete</button>
               )}
             </div>
           </div>

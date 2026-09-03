@@ -31,7 +31,7 @@ export default async function JobApplicationsAdminPage({
     <div>
       <AdminPageHeader
         title="Applications"
-        description="Inbox for /careers apply submissions"
+        description="Inbox for /careers apply submissions."
       />
       <Suspense fallback={<p className="text-sm text-[var(--diq_mid)]">Loading…</p>}>
         <ApplicationsTable

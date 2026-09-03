@@ -122,7 +122,7 @@ export function BlogPostsList({ initialPosts }: { initialPosts: BlogPostData[] }
                       type="button"
                       onClick={() => handleDelete(post)}
                       disabled={deletingId === post.id}
-                      className="text-xs text-red-400 hover:text-red-300 disabled:opacity-50"
+                      className="text-xs text-[var(--destructive)] hover:opacity-80 disabled:opacity-50"
                     >
                       {deletingId === post.id ? "…" : "Delete"}
                     </button>

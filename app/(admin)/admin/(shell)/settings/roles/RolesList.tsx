@@ -111,14 +111,14 @@ export function RolesList({ initialRoles }: { initialRoles: RoleRow[] }) {
                       type="button"
                       onClick={() => handleDelete(role)}
                       disabled={deletingId === role.id}
-                      className="text-xs text-red-400 hover:text-red-300 disabled:opacity-50"
+                      className="text-xs text-[var(--destructive)] hover:opacity-80 disabled:opacity-50"
                     >
                       {deletingId === role.id ? "…" : "Delete"}
                     </button>
                   )}
                 </div>
                 {errorById[role.id] ? (
-                  <p className="mt-1 text-xs text-red-400" role="alert">
+                  <p className="mt-1 text-xs text-[var(--destructive)]" role="alert">
                     {errorById[role.id]}
                   </p>
                 ) : null}
