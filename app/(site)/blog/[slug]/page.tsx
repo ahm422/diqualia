@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 
 import { Container } from "@/app/components/Container";
 import { Markdown } from "@/app/components/Markdown";
+import { StructuredData } from "@/app/components/StructuredData";
 import { toCardData } from "@/lib/blog/card";
 import { formatBlogDate } from "@/lib/blog/format";
 import {
@@ -15,6 +16,7 @@ import {
   type PublishedPost,
 } from "@/lib/blog/queries";
 import { formatReadingTime, readingTimeMinutes } from "@/lib/blog/reading-time";
+import { buildBlogPostingSchema } from "@/lib/structured-data";
 
 import { PostCard } from "../_components/PostCard";
 import { ReadingProgress } from "../_components/ReadingProgress";
@@ -29,16 +31,30 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params;
   const post = await getPublishedPost(slug);
   if (!post) {
-    return { title: "Insights — DiQualia" };
+    return { title: "Insights" };
   }
 
+  const canonical = `/blog/${post.slug}`;
+  const images = post.coverImageUrl ? [{ url: post.coverImageUrl }] : undefined;
+
   return {
-    title: `${post.title} — DiQualia`,
+    title: post.title,
     description: post.excerpt,
+    alternates: { canonical },
     openGraph: {
+      type: "article",
+      url: canonical,
       title: post.title,
       description: post.excerpt,
-      ...(post.coverImageUrl ? { images: [{ url: post.coverImageUrl }] } : {}),
+      publishedTime: (post.publishedAt ?? post.updatedAt).toISOString(),
+      modifiedTime: post.updatedAt.toISOString(),
+      ...(images ? { images } : {}),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.excerpt,
+      ...(images ? { images } : {}),
     },
   };
 }
@@ -86,6 +102,7 @@ export default async function BlogPostPage({ params }: PageProps) {
 
   return (
     <article>
+      <StructuredData data={buildBlogPostingSchema(post)} />
       <ReadingProgress />
 
       <header
