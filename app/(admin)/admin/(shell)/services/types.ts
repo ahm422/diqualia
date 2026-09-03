@@ -37,5 +37,8 @@ export type ServiceSection = {
   body: string;
   cardTitle: string | null;
   cardBody: string | null;
+  overviewHtml: string | null;
+  ctaLabel: string | null;
+  ctaHref: string | null;
   items: ServiceItem[];
 };

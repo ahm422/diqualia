@@ -141,10 +141,10 @@ export default async function BlogPostPage({ params }: PageProps) {
       </header>
 
       {post.coverImageUrl ? (
-        <Container className="pt-10">
-          <figure className="mx-auto w-full max-w-4xl">
+        <Container size="narrow" className="pt-6 md:pt-8">
+          <figure className="mx-auto w-full">
             <div
-              className="relative aspect-[16/10] max-h-[72vh] w-full overflow-hidden"
+              className="relative aspect-[16/9] w-full overflow-hidden rounded"
               style={{ border: "1px solid color-mix(in oklab, var(--border) 80%, transparent)" }}
             >
               <Image
@@ -152,7 +152,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                 alt=""
                 fill
                 className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 896px"
+                sizes="(max-width: 768px) 100vw, 768px"
                 priority
               />
             </div>

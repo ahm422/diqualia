@@ -66,9 +66,7 @@ export async function POST(request: Request) {
   });
 
   revalidatePage("/careers");
-  if (opening.visible) {
-    revalidateJobOpening(opening.slug);
-  }
+  revalidateJobOpening(opening.slug);
 
   return NextResponse.json(opening, { status: 201 });
 }

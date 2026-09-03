@@ -72,6 +72,9 @@ export default async function ServicesPage() {
     body: section.body,
     cardTitle: section.cardTitle,
     cardBody: section.cardBody,
+    overviewHtml: section.overviewHtml,
+    ctaLabel: section.ctaLabel,
+    ctaHref: section.ctaHref,
     order: section.order,
     displayNum: (i + 1).toString().padStart(2, "0"),
     items: section.items.map((item) => ({

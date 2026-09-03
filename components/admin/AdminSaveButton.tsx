@@ -3,18 +3,21 @@
 import { Button } from "@/components/ui/button";
 
 import { useCan } from "@/app/(admin)/admin/AdminSessionProvider";
+import type { PermissionKey } from "@/lib/auth/session";
 
 export function AdminSaveButton({
   onClick,
   saving,
   requirePermission = true,
+  permission = "content.edit",
 }: {
   onClick: () => void;
   saving: boolean;
   requirePermission?: boolean;
+  permission?: PermissionKey;
 }) {
-  const canEdit = useCan("content.edit");
-  if (requirePermission && !canEdit) return null;
+  const allowed = useCan(permission);
+  if (requirePermission && !allowed) return null;
 
   return (
     <div className="mt-4">

@@ -1,4 +1,8 @@
+import Link from "next/link";
+
 import { Container } from "@/app/components/Container";
+import { Button } from "@/components/ui/button";
+import { sanitizeHtml } from "@/lib/markdown";
 import type { ServiceItemData } from "./group-items";
 import { groupItems } from "./group-items";
 
@@ -10,9 +14,36 @@ export type ServiceSectionData = {
   body: string;
   cardTitle: string | null;
   cardBody: string | null;
+  overviewHtml: string | null;
+  ctaLabel: string | null;
+  ctaHref: string | null;
   order: number;
   items: ServiceItemData[];
 };
+
+/**
+ * Section intro. When `overviewHtml` is set it renders sanitised rich text
+ * (headings/lists/tables/images) in place of the plain `body` paragraph, plus an
+ * optional CTA button when `ctaHref` is set.
+ */
+function Overview({ section, className }: { section: ServiceSectionData; className?: string }) {
+  if (!section.overviewHtml) {
+    return <p className={className}>{section.body}</p>;
+  }
+  return (
+    <div>
+      <div
+        className="diq-markdown diq-longform"
+        dangerouslySetInnerHTML={{ __html: sanitizeHtml(section.overviewHtml) }}
+      />
+      {section.ctaHref ? (
+        <Button asChild variant="primary" className="mt-6">
+          <Link href={section.ctaHref}>{section.ctaLabel ?? "Contact Us"}</Link>
+        </Button>
+      ) : null}
+    </div>
+  );
+}
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
@@ -39,7 +70,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   );
 }
 
-function SectionHeader({ displayNum, eyebrow, title, body }: { displayNum: string; eyebrow: string; title: string; body: string }) {
+function SectionHeader({ displayNum, section }: { displayNum: string; section: ServiceSectionData }) {
   return (
     <div className="grid grid-cols-1 gap-12 md:grid-cols-[220px_1fr] md:gap-16">
       <div
@@ -49,9 +80,11 @@ function SectionHeader({ displayNum, eyebrow, title, body }: { displayNum: strin
         {displayNum}
       </div>
       <div>
-        <Eyebrow>{eyebrow}</Eyebrow>
-        <SectionTitle>{title}</SectionTitle>
-        <p className="diq-proseMuted mt-6 text-[15px] leading-8">{body}</p>
+        <Eyebrow>{section.eyebrow}</Eyebrow>
+        <SectionTitle>{section.title}</SectionTitle>
+        <div className="mt-6">
+          <Overview section={section} className="diq-proseMuted text-[15px] leading-8" />
+        </div>
       </div>
     </div>
   );
@@ -173,7 +206,7 @@ export function ServiceSectionView({
   if (embedded) {
     return (
       <div className="pb-4">
-        <p className="diq-proseMuted max-w-[72ch] text-[15px] leading-8">{section.body}</p>
+        <Overview section={section} className="diq-proseMuted max-w-[72ch] text-[15px] leading-8" />
         {layouts}
       </div>
     );
@@ -188,7 +221,7 @@ export function ServiceSectionView({
       style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)", ...bgStyle }}
     >
       <Container className="py-20">
-        <SectionHeader displayNum={displayNum} eyebrow={section.eyebrow} title={section.title} body={section.body} />
+        <SectionHeader displayNum={displayNum} section={section} />
         {layouts}
       </Container>
     </section>

@@ -1088,9 +1088,11 @@ html.dark .diq-proseMuted {
   border-top: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
 }
 .diq-markdown img {
+  display: block;
   max-width: 100%;
   height: auto;
-  margin: 1.5em 0;
+  margin: 1.5em auto;
+  border-radius: 6px;
 }
 .diq-markdown strong {
   color: var(--foreground);
@@ -1220,6 +1222,12 @@ html.dark .diq-proseMuted {
 }
 .diq-longform .diq-markdown figure {
   margin: 2em 0;
+}
+/* Keep in-body images a modest band so article copy stays the focus. */
+.diq-longform .diq-markdown :is(img, figure img) {
+  max-height: 460px;
+  width: auto;
+  margin-inline: auto;
 }
 .diq-longform .diq-markdown figure figcaption {
   margin-top: 0.6em;
