@@ -6,7 +6,7 @@ import { requirePermissionApi } from "@/lib/auth/require-admin-api";
 import { hasPermission } from "@/lib/auth/session";
 import { getDb } from "@/lib/cloudflare-env";
 import { blogPostCreateSchema } from "@/lib/schemas/admin/blog";
-import { revalidateBlogPost, revalidatePage } from "@/lib/revalidate-site";
+import { revalidateBlogPost, revalidatePage, revalidateSitemap } from "@/lib/revalidate-site";
 
 export async function GET() {
   const prisma = await getDb();
@@ -60,6 +60,7 @@ export async function POST(request: Request) {
   });
 
   revalidatePage("/blog");
+  revalidateSitemap();
   if (status === "published") {
     revalidateBlogPost(post.slug);
   }

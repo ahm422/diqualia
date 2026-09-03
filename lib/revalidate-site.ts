@@ -43,3 +43,12 @@ export function revalidateSiteLayout() {
     revalidatePath(path, "layout");
   }
 }
+
+/**
+ * Revalidate the generated sitemap. `app/sitemap.ts` is a cached Route Handler,
+ * so call this whenever a published/visible blog post, industry sector, or job
+ * opening is created, updated, or removed.
+ */
+export function revalidateSitemap() {
+  revalidatePath("/sitemap.xml");
+}
