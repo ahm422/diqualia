@@ -14,6 +14,9 @@ const PatchSchema = z.object({
   body: z.string().min(1).max(2000).optional(),
   cardTitle: z.string().min(1).max(500).nullable().optional(),
   cardBody: z.string().min(1).max(2000).nullable().optional(),
+  overviewHtml: z.string().min(1).max(100000).nullable().optional(),
+  ctaLabel: z.string().min(1).max(100).nullable().optional(),
+  ctaHref: z.string().min(1).max(500).nullable().optional(),
   order: z.number().int().min(0).optional(),
 });
 

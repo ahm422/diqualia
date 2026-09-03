@@ -281,6 +281,9 @@ model ServiceSection {
   body      String
   cardTitle String?       @map("card_title")
   cardBody  String?       @map("card_body")
+  overviewHtml String?    @map("overview_html")
+  ctaLabel  String?       @map("cta_label")
+  ctaHref   String?       @map("cta_href")
   items     ServiceItem[]
 
   @@map("service_sections")

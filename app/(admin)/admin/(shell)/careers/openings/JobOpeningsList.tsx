@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Pencil } from "lucide-react";
 import { toast } from "sonner";
 
 import { useCan } from "@/app/(admin)/admin/AdminSessionProvider";
@@ -12,6 +13,9 @@ export function JobOpeningsList({ initialOpenings }: { initialOpenings: JobOpeni
   const router = useRouter();
   const canCreate = useCan("content.create");
   const canDelete = useCan("content.delete");
+  const canEditContent = useCan("content.edit");
+  const canManageOpenings = useCan("careers.openings.manage");
+  const canEdit = canEditContent || canManageOpenings;
   const [openings, setOpenings] = useState(initialOpenings);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
@@ -84,17 +88,28 @@ export function JobOpeningsList({ initialOpenings }: { initialOpenings: JobOpeni
               <td className="px-4 py-3 text-[var(--diq_mid)]">{opening.department}</td>
               <td className="px-4 py-3 text-[var(--diq_mid)]">{opening.visible ? "Yes" : "No"}</td>
               <td className="px-4 py-3 text-[var(--diq_mid)]">{opening.order}</td>
-              <td className="px-4 py-3 text-right">
-                {canDelete && (
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(opening)}
-                    disabled={deletingId === opening.id}
-                    className="text-xs text-[var(--destructive)] hover:opacity-80 disabled:opacity-50"
-                  >
-                    {deletingId === opening.id ? "Deleting…" : "Delete"}
-                  </button>
-                )}
+              <td className="px-4 py-3">
+                <div className="flex items-center justify-end gap-4">
+                  {canEdit && (
+                    <Link
+                      href={`/admin/careers/openings/${opening.id}`}
+                      className="inline-flex items-center gap-1.5 text-xs text-[var(--diq_mid)] hover:text-[var(--gold)]"
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                      Edit
+                    </Link>
+                  )}
+                  {canDelete && (
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(opening)}
+                      disabled={deletingId === opening.id}
+                      className="text-xs text-[var(--destructive)] hover:opacity-80 disabled:opacity-50"
+                    >
+                      {deletingId === opening.id ? "Deleting…" : "Delete"}
+                    </button>
+                  )}
+                </div>
               </td>
             </tr>
           ))}

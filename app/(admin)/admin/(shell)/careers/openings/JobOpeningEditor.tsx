@@ -295,9 +295,9 @@ export function JobOpeningEditor({ initial }: Props) {
         </label>
         <div className="flex flex-wrap items-center gap-3 pt-2">
           {isNew ? (
-            <AdminSaveButton onClick={handleCreate} saving={creating} />
+            <AdminSaveButton onClick={handleCreate} saving={creating} permission="careers.openings.manage" />
           ) : (
-            <AdminSaveButton onClick={handleSave} saving={saving} />
+            <AdminSaveButton onClick={handleSave} saving={saving} permission="careers.openings.manage" />
           )}
           {!isNew && canDelete && (
             <Button
