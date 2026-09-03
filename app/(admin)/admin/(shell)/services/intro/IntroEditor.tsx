@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 
 import {
   AdminSection,
@@ -9,11 +9,22 @@ import {
   AdminTextarea,
   AdminSaveButton,
   useAdminSave,
+  useScrollToSection,
 } from "@/components/admin";
 
 import type { ServicesPageData } from "../types";
 
 export function IntroEditor({ initial }: { initial: ServicesPageData }) {
+  return (
+    <Suspense fallback={null}>
+      <IntroEditorInner initial={initial} />
+    </Suspense>
+  );
+}
+
+function IntroEditorInner({ initial }: { initial: ServicesPageData }) {
+  useScrollToSection();
+
   return (
     <div>
       <HeroBlock initial={initial} />
@@ -40,7 +51,7 @@ function HeroBlock({ initial }: { initial: ServicesPageData }) {
   const { save, saving } = useAdminSave("/api/admin/services-page");
 
   return (
-    <AdminSection title="Hero">
+    <AdminSection id="hero" title="Hero">
       <AdminField label="Eyebrow"><AdminInput value={f.eyebrow} onChange={set("eyebrow")} placeholder="Our Intelligence Services" /></AdminField>
       <AdminField label="Headline"><AdminInput value={f.headline} onChange={set("headline")} placeholder="What We Do for You." /></AdminField>
       <AdminField label="Body"><AdminTextarea value={f.body} onChange={set("body")} rows={3} /></AdminField>
@@ -76,7 +87,7 @@ function CtaBlock({ initial }: { initial: ServicesPageData }) {
   const { save, saving } = useAdminSave("/api/admin/services-page");
 
   return (
-    <AdminSection title="CTA Strip">
+    <AdminSection id="cta" title="CTA Strip">
       <AdminField label="Eyebrow"><AdminInput value={f.ctaEyebrow} onChange={set("ctaEyebrow")} placeholder="Begin With Intelligence" /></AdminField>
       <AdminField label="Headline"><AdminInput value={f.ctaHeadline} onChange={set("ctaHeadline")} placeholder="Ready to Start?" /></AdminField>
       <AdminField label="Body"><AdminTextarea value={f.ctaBody} onChange={set("ctaBody")} rows={2} /></AdminField>

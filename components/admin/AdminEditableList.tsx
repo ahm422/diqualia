@@ -139,7 +139,7 @@ export function AdminEditableList<Row>({
                   "rounded-xl border transition-[border-color,background-color,box-shadow] duration-200",
                   dirty
                     ? "border-[color-mix(in_oklab,var(--gold)_38%,transparent)] bg-[color-mix(in_oklab,var(--gold)_9%,var(--diq_panel))] shadow-[inset_3px_0_0_var(--gold)]"
-                    : "border-[var(--diq_border)] bg-[var(--diq_panel)] shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:border-[color-mix(in_oklab,var(--gold)_30%,transparent)]",
+                    : "border-[var(--diq_border)] bg-[var(--diq_panel)] shadow-[0_1px_2px_color-mix(in_oklab,var(--ink)_12%,transparent)] hover:border-[color-mix(in_oklab,var(--gold)_30%,transparent)]",
                 ].join(" ")}
               >
                 <div className="flex items-start gap-3 p-3.5 sm:gap-4 sm:p-4">

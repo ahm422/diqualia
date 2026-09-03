@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 
 import {
   AdminSection,
@@ -9,6 +9,7 @@ import {
   AdminTextarea,
   AdminSaveButton,
   useAdminSave,
+  useScrollToSection,
 } from "@/components/admin";
 import { slugify } from "@/lib/slugify";
 import { useCan } from "@/app/(admin)/admin/AdminSessionProvider";
@@ -28,6 +29,21 @@ export function SectorsEditor({
   initialPage: IndustriesPageData;
   initialSectors: IndustrySector[];
 }) {
+  return (
+    <Suspense fallback={null}>
+      <SectorsEditorInner initialPage={initialPage} initialSectors={initialSectors} />
+    </Suspense>
+  );
+}
+
+function SectorsEditorInner({
+  initialPage,
+  initialSectors,
+}: {
+  initialPage: IndustriesPageData;
+  initialSectors: IndustrySector[];
+}) {
+  useScrollToSection();
   const [sectorsLabel, setSectorsLabel] = useState(initialPage?.sectorsLabel ?? "");
   const [sectorsDescription, setSectorsDescription] = useState(initialPage?.sectorsDescription ?? "");
   const [sidebarLabel, setSidebarLabel] = useState(initialPage?.sidebarLabel ?? "");
@@ -95,7 +111,7 @@ export function SectorsEditor({
 
   return (
     <div>
-      <AdminSection title="Sectors copy">
+      <AdminSection id="copy" title="Sectors copy">
         <div className="grid gap-4 sm:grid-cols-2">
           <AdminField label="Sectors Label"><AdminInput value={sectorsLabel} onChange={setSectorsLabel} placeholder="Sectors we actively research" /></AdminField>
           <AdminField label="Sidebar Label"><AdminInput value={sidebarLabel} onChange={setSidebarLabel} placeholder="Active research" /></AdminField>
@@ -105,7 +121,7 @@ export function SectorsEditor({
         <AdminSaveButton onClick={() => saveCopy({ sectorsLabel, sectorsDescription, sidebarLabel, sidebarCopy })} saving={copyStatus} />
       </AdminSection>
 
-      <AdminSection title="Sector tags">
+      <AdminSection id="tags" title="Sector tags">
         <div className="space-y-2">
           {sectors.map((sector, idx) => (
             <div key={sector.id} className="rounded border border-[var(--diq_border2)]">
@@ -137,7 +153,7 @@ export function SectorsEditor({
                   {expandedId === sector.id ? "Close" : "Edit page"}
                 </button>
                 {canDelete && (
-                  <button type="button" onClick={() => del(sector.id)} className="text-xs text-red-400 hover:text-red-300 shrink-0">Delete</button>
+                  <button type="button" onClick={() => del(sector.id)} className="text-xs text-[var(--destructive)] hover:opacity-80 shrink-0">Delete</button>
                 )}
               </div>
               {expandedId === sector.id && (
@@ -301,7 +317,7 @@ function SectorPagePanel({
                   if (!confirm("Delete this point?")) return;
                   setWhyPoints((prev) => prev.filter((_, i) => i !== idx));
                 }}
-                className="text-xs text-red-400 hover:text-red-300 shrink-0"
+                className="text-xs text-[var(--destructive)] hover:opacity-80 shrink-0"
               >
                 Delete
               </button>
@@ -342,7 +358,7 @@ function SectorPagePanel({
                   if (!confirm("Delete this ref?")) return;
                   setCaseStudyRefs((prev) => prev.filter((_, i) => i !== idx));
                 }}
-                className="text-xs text-red-400 hover:text-red-300 shrink-0"
+                className="text-xs text-[var(--destructive)] hover:opacity-80 shrink-0"
               >
                 Delete
               </button>

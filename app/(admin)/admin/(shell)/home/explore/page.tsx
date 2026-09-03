@@ -16,9 +16,9 @@ export default async function HomeExploreAdminPage() {
   return (
     <div>
       <AdminPageHeader
-        title="Explore Cards"
-        description="Explore heading and cards stored in the CMS. They are not currently rendered on the homepage — the live site shows About, services, process, and industries instead."
-        previewHref="/"
+        title="Explore"
+        description="The Explore heading and link cards on the homepage (/#explore)."
+        previewHref="/#explore"
       />
       <ExploreEditor initialSection={exploreSection} initialCards={exploreCards} />
     </div>

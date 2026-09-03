@@ -14,7 +14,7 @@ export default async function StoryDxAdminPage() {
     <div>
       <AdminPageHeader
         title="Double Experience"
-        description="The two Double Experience cards and tagline on the Story page."
+        description="The two Double Experience cards and tagline on /story#dx."
         previewHref="/story#dx"
       />
       <DoubleExperienceEditor initial={storyPage} />

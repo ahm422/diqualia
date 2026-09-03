@@ -160,6 +160,23 @@ export async function seedCms(prisma: PrismaClient): Promise<void> {
   });
   console.log("AboutHero ready");
 
+  // ─── AboutBuiltForSection ─────────────────────────────────────────────────
+  await prisma.aboutBuiltForSection.upsert({
+    where: { id: 1 },
+    create: {
+      id: 1,
+      eyebrow: "What we're built for",
+      headlineLine1: "Intelligence that compounds —",
+      headlineLine2: "not tactics that expire.",
+    },
+    update: {
+      eyebrow: "What we're built for",
+      headlineLine1: "Intelligence that compounds —",
+      headlineLine2: "not tactics that expire.",
+    },
+  });
+  console.log("AboutBuiltForSection ready");
+
   // ─── AboutBuiltForItem ────────────────────────────────────────────────────
   await prisma.aboutBuiltForItem.deleteMany();
   await prisma.aboutBuiltForItem.createMany({

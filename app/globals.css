@@ -1169,6 +1169,7 @@ html.dark .diq-proseMuted {
 /* Admin rich-text editor (RichTextEditor.tsx) */
 .diq-rte .tiptap {
   outline: none;
+  color: var(--diq_ivory);
 }
 .diq-rte .tiptap p.is-editor-empty:first-child::before,
 .diq-rte .tiptap .is-empty[data-placeholder]::before {

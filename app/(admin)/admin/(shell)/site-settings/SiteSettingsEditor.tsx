@@ -190,7 +190,7 @@ function NavSection({ initial }: { initial: NavItem[] }) {
                 </td>
                 <td className="py-2">
                   {canDelete && (
-                    <button onClick={() => del(item.id)} className="text-xs text-red-400 hover:text-red-300">Delete</button>
+                    <button onClick={() => del(item.id)} className="text-xs text-[var(--destructive)] hover:opacity-80">Delete</button>
                   )}
                 </td>
               </tr>
@@ -381,7 +381,7 @@ function FooterNavSection({ initial }: { initial: FooterNavItem[] }) {
                   </td>
                   <td className="py-2">
                     {canDelete && (
-                      <button onClick={() => del(item.id)} className="text-xs text-red-400 hover:text-red-300">Delete</button>
+                      <button onClick={() => del(item.id)} className="text-xs text-[var(--destructive)] hover:opacity-80">Delete</button>
                     )}
                   </td>
                 </tr>

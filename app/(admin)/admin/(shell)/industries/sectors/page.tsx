@@ -18,7 +18,7 @@ export default async function IndustriesSectorsAdminPage() {
     <div>
       <AdminPageHeader
         title="Sectors"
-        description="Sectors copy and tags on /industries. Each visible sector also has its own landing page at /industries/[slug]."
+        description="Sectors copy and tags on /industries#sectors. Each visible sector also has its own landing page at /industries/[slug]."
         previewHref="/industries#sectors"
       />
       <SectorsEditor

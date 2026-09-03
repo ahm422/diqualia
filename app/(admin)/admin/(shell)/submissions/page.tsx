@@ -18,7 +18,7 @@ export default async function SubmissionsPage() {
     <div>
       <AdminPageHeader
         title="Submissions"
-        description="Form submissions from the contact page"
+        description="Inbox for contact-form submissions from /contact."
       />
       <Suspense fallback={<p className="text-sm text-[var(--diq_mid)]">Loading…</p>}>
         <SubmissionsTable initialLeads={leads} />

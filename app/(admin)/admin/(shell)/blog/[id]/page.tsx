@@ -22,7 +22,12 @@ export default async function EditBlogPostPage({
     <div>
       <AdminPageHeader
         title="Edit post"
-        description={post.slug}
+        description={
+          post.status === "published"
+            ? `Live at /blog/${post.slug}`
+            : `Draft at slug “${post.slug}” — not shown on /blog until published.`
+        }
+        previewHref={post.status === "published" ? `/blog/${post.slug}` : "/blog"}
       />
       <BlogPostEditor initial={post} />
     </div>

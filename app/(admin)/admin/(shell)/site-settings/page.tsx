@@ -18,7 +18,11 @@ export default async function SiteSettingsPage() {
 
   return (
     <div>
-      <AdminPageHeader title="Site Settings" description="Logo, navigation, CTA button, and footer" />
+      <AdminPageHeader
+        title="Site Settings"
+        description="Logo, site name, header navigation, CTA button, and footer shown on every public page."
+        previewHref="/"
+      />
       <SiteSettingsEditor
         initialSiteSettings={siteSettings}
         initialNavItems={navItems}

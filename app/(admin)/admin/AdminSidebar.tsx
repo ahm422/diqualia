@@ -6,6 +6,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ChevronDown, ExternalLink, Menu } from "lucide-react";
 
 import { BrandLogo } from "@/app/components/BrandLogo";
+import { ThemeToggle } from "@/app/components/ThemeToggle";
 import {
   Sheet,
   SheetContent,
@@ -62,6 +63,9 @@ export function AdminMobileHeader() {
           <BrandLogo variant="white" width={110} decorative />
         </span>
       </Link>
+      <div className="ml-auto">
+        <ThemeToggle />
+      </div>
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent
           side="left"
@@ -129,6 +133,10 @@ function AdminNavBody({
       </nav>
 
       <div className="border-t border-[var(--diq_border)] px-3 py-3">
+        <ThemeToggle
+          label="Theme"
+          className={`flex min-h-11 w-full items-center gap-2 rounded px-3 py-2 text-left text-sm text-[var(--muted-foreground)] transition-colors hover:bg-[var(--diq_panel)] hover:text-[var(--foreground)] ${FOCUS}`}
+        />
         <a
           href="/"
           target="_blank"

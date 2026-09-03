@@ -69,7 +69,7 @@ function StringListField({
           <button
             type="button"
             onClick={() => onChange(items.filter((_, i) => i !== idx))}
-            className="shrink-0 text-xs text-red-400 hover:text-red-300"
+            className="shrink-0 text-xs text-[var(--destructive)] hover:opacity-80"
           >
             Delete
           </button>

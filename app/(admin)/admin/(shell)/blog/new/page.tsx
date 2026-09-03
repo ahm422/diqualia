@@ -10,7 +10,7 @@ export default async function NewBlogPostPage() {
     <div>
       <AdminPageHeader
         title="New post"
-        description="Create a draft or publish immediately"
+        description="Create a draft or publish immediately. Published posts appear on /blog."
       />
       <BlogPostEditor />
     </div>

@@ -23,7 +23,15 @@ export default async function EditJobOpeningPage({
 
   return (
     <div>
-      <AdminPageHeader title="Edit opening" description={opening.slug} />
+      <AdminPageHeader
+        title="Edit opening"
+        description={
+          opening.visible
+            ? `Live at /careers/${opening.slug}`
+            : `Hidden — /careers/${opening.slug} 404s until visible.`
+        }
+        previewHref={opening.visible ? `/careers/${opening.slug}` : "/careers"}
+      />
       <JobOpeningEditor initial={opening} />
     </div>
   );
