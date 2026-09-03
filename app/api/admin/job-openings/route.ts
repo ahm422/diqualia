@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 import { requirePermissionApi } from "@/lib/auth/require-admin-api";
 import { getDb } from "@/lib/cloudflare-env";
 import { Prisma } from "@/lib/generated/prisma/client";
-import { revalidateJobOpening, revalidatePage } from "@/lib/revalidate-site";
+import { revalidateJobOpening, revalidatePage, revalidateSitemap } from "@/lib/revalidate-site";
 import { jobOpeningCreateSchema } from "@/lib/schemas/admin/career";
 import { uniqueSlug } from "@/lib/slugify";
 
@@ -66,6 +66,7 @@ export async function POST(request: Request) {
   });
 
   revalidatePage("/careers");
+  revalidateSitemap();
   revalidateJobOpening(opening.slug);
 
   return NextResponse.json(opening, { status: 201 });

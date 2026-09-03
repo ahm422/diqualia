@@ -11,9 +11,16 @@ export const revalidate = 60;
 import { ServicesAccordion } from "./ServicesAccordion";
 
 export const metadata: Metadata = {
-  title: "Services — DiQualia",
+  title: "Services",
   description:
     "Six core intelligence services — built on deep research, designed to move B2B pipeline from invisible to inevitable.",
+  alternates: { canonical: "/services" },
+  openGraph: {
+    title: "Services — DiQualia",
+    description:
+      "Six core intelligence services — built on deep research, designed to move B2B pipeline from invisible to inevitable.",
+    url: "/services",
+  },
 };
 
 function Eyebrow({ children }: { children: React.ReactNode }) {

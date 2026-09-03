@@ -6,7 +6,7 @@ import { requirePermissionApi } from "@/lib/auth/require-admin-api";
 import { hasPermission } from "@/lib/auth/session";
 import { getDb } from "@/lib/cloudflare-env";
 import { blogPostPatchSchema } from "@/lib/schemas/admin/blog";
-import { revalidateBlogPost, revalidatePage } from "@/lib/revalidate-site";
+import { revalidateBlogPost, revalidatePage, revalidateSitemap } from "@/lib/revalidate-site";
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -78,6 +78,7 @@ export async function PATCH(
     const post = await prisma.blogPost.update({ where: { id }, data });
 
     revalidatePage("/blog");
+    revalidateSitemap();
     revalidateBlogPost(post.slug);
     if (existing.slug !== post.slug) {
       revalidateBlogPost(existing.slug);
@@ -114,6 +115,7 @@ export async function DELETE(
   }
 
   revalidatePage("/blog");
+  revalidateSitemap();
   revalidateBlogPost(existing.slug);
 
   return NextResponse.json({ ok: true });

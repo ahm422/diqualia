@@ -3,7 +3,9 @@ import type { Metadata } from "next";
 import { Container } from "@/app/components/Container";
 
 export const metadata: Metadata = {
-  title: "Privacy — DiQualia",
+  title: "Privacy",
+  description: "Privacy information for the DiQualia marketing site, including how job-application data is retained and deleted.",
+  alternates: { canonical: "/privacy" },
 };
 
 export default function PrivacyPage() {

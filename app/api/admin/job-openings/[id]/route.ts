@@ -5,7 +5,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { requirePermissionApi } from "@/lib/auth/require-admin-api";
 import { getDb } from "@/lib/cloudflare-env";
 import { Prisma } from "@/lib/generated/prisma/client";
-import { revalidateJobOpening, revalidatePage } from "@/lib/revalidate-site";
+import { revalidateJobOpening, revalidatePage, revalidateSitemap } from "@/lib/revalidate-site";
 import { jobOpeningPatchSchema } from "@/lib/schemas/admin/career";
 
 function parseId(id: string): number | null {
@@ -77,6 +77,7 @@ export async function PATCH(
     });
 
     revalidatePage("/careers");
+    revalidateSitemap();
     revalidateJobOpening(opening.slug);
     if (existing.slug !== opening.slug) {
       revalidateJobOpening(existing.slug);
@@ -110,6 +111,7 @@ export async function DELETE(
   }
 
   revalidatePage("/careers");
+  revalidateSitemap();
   revalidateJobOpening(existing.slug);
 
   return NextResponse.json({ ok: true });

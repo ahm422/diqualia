@@ -45,11 +45,17 @@ async function loadCareers() {
 export async function generateMetadata(): Promise<Metadata> {
   const { page } = await loadCareers();
   if (!page) {
-    return { title: "Careers — DiQualia" };
+    return { title: "Careers", alternates: { canonical: "/careers" } };
   }
   return {
-    title: `${page.eyebrow || "Careers"} — DiQualia`,
+    title: page.eyebrow || "Careers",
     description: page.body,
+    alternates: { canonical: "/careers" },
+    openGraph: {
+      title: `${page.eyebrow || "Careers"} — DiQualia`,
+      description: page.body,
+      url: "/careers",
+    },
   };
 }
 

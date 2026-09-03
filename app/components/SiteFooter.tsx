@@ -21,7 +21,7 @@ export async function SiteFooter() {
         <div className="diq-fBrand">
           <Link href="/" aria-label={`${siteSettings?.siteName ?? "DiQualia"} home`} className="diq-fLogo">
             <span className="diq-logo diq-logoLight">
-              <BrandLogo variant="black" width={132} decorative src={logoUrl} />
+              <BrandLogo variant="black" width={132} src={logoUrl} />
             </span>
             <span className="diq-logo diq-logoDark">
               <BrandLogo variant="white" width={132} decorative src={logoUrl} />

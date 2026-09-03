@@ -1236,6 +1236,32 @@ html.dark .diq-proseMuted {
   text-align: center;
 }
 
+/* Blog post article — column owns the measure; images fill it. */
+.diq-article.diq-longform .diq-markdown {
+  max-width: none;
+  margin-inline: 0;
+  font-size: clamp(1.0625rem, 0.25vw + 1rem, 1.1875rem);
+  line-height: 1.8;
+}
+.diq-article.diq-longform .diq-markdown :is(img, figure img) {
+  width: 100%;
+  max-height: 22rem;
+  height: auto;
+  object-fit: cover;
+  margin-inline: 0;
+}
+
+.diq-postAdjacent {
+  border-color: color-mix(in oklab, var(--border) 80%, transparent);
+  background: color-mix(in oklab, var(--card) 70%, transparent);
+  transition: border-color 0.25s ease, background-color 0.25s ease;
+}
+.diq-postAdjacent:hover,
+.diq-postAdjacent:focus-visible {
+  border-color: color-mix(in oklab, var(--gold) 45%, transparent);
+  background: var(--card);
+}
+
 .diq-blog-progress {
   position: fixed;
   inset: 0 0 auto 0;
@@ -1249,17 +1275,43 @@ html.dark .diq-proseMuted {
   transition: none;
 }
 
-.diq-blog-card__img {
-  transition: transform 0.5s ease;
+/* Full-width editorial rows: image beside copy, alternating side on desktop. */
+.diq-blog-row {
+  grid-template-columns: minmax(0, 1fr);
 }
+@media (min-width: 1024px) {
+  .diq-blog-row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .diq-blog-row[data-feature] {
+    grid-template-columns: minmax(0, 1.18fr) minmax(0, 1fr);
+  }
+}
+
+.diq-blog-row__media {
+  background: color-mix(in oklab, var(--gold) 4%, var(--card));
+  transition: border-color 0.25s ease;
+}
+.diq-blog-row:hover .diq-blog-row__media {
+  border-color: color-mix(in oklab, var(--gold) 45%, transparent);
+}
+
+.diq-blog-card__img {
+  transition: transform 0.55s ease;
+}
+.diq-blog-row:hover .diq-blog-card__img,
+.diq-blog-row:focus-visible .diq-blog-card__img,
 .diq-blog-card:hover .diq-blog-card__img,
 .diq-blog-card:focus-visible .diq-blog-card__img {
-  transform: scale(1.03);
+  transform: scale(1.04);
 }
+
 @media (prefers-reduced-motion: reduce) {
-  .diq-blog-card,
+  .diq-blog-row__media,
   .diq-blog-card__img,
-  .diq-blog-card:hover .diq-blog-card__img {
+  .diq-blog-row:hover .diq-blog-card__img,
+  .diq-blog-card:hover .diq-blog-card__img,
+  .diq-postAdjacent img {
     transition: none;
     transform: none;
   }
@@ -1900,3 +1952,5 @@ a.diq-homeCard:focus-visible {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+

@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 import { requirePermissionApi } from "@/lib/auth/require-admin-api";
 import { getDb } from "@/lib/cloudflare-env";
 import { industrySectorPostSchema } from "@/lib/schemas/admin/industries";
-import { revalidateIndustrySector, revalidatePages } from "@/lib/revalidate-site";
+import { revalidateIndustrySector, revalidatePages, revalidateSitemap } from "@/lib/revalidate-site";
 import { uniqueSlug } from "@/lib/slugify";
 
 export async function GET() {
@@ -47,6 +47,7 @@ export async function POST(request: Request) {
   });
 
   revalidatePages("/", "/industries");
+  revalidateSitemap();
   revalidateIndustrySector(sector.slug);
   return NextResponse.json(sector, { status: 201 });
 }

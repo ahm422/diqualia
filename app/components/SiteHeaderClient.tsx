@@ -83,10 +83,10 @@ export function SiteHeaderClient({ navItems, mobileNavItems, cta, logoUrl, siteN
           <div className="diq-navRow">
             <Link href="/" aria-label={`${siteName} home`} className="diq-navLogo">
               <span className="diq-logo diq-logoLight">
-                <BrandLogo variant="black" width={132} decorative src={logoUrl} />
+                <BrandLogo variant="black" width={132} src={logoUrl} priority />
               </span>
               <span className="diq-logo diq-logoDark">
-                <BrandLogo variant="white" width={132} decorative src={logoUrl} />
+                <BrandLogo variant="white" width={132} decorative src={logoUrl} priority />
               </span>
             </Link>
 

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cache } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -38,12 +39,12 @@ function parseCaseStudyRefs(value: unknown): CaseStudyRef[] {
   );
 }
 
-async function getVisibleSector(slug: string) {
+const getVisibleSector = cache(async (slug: string) => {
   const prisma = await getDb();
   return prisma.industrySector.findFirst({
     where: { slug, visible: true },
   });
-}
+});
 
 function excerpt(text: string | null | undefined, max = 160): string | undefined {
   if (!text) return undefined;
@@ -56,20 +57,23 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params;
   const sector = await getVisibleSector(slug);
   if (!sector) {
-    return { title: "Industries — DiQualia" };
+    return { title: "Industries" };
   }
 
   const titleBase = sector.headline?.trim() || sector.name;
   const description =
     excerpt(sector.body) ??
     `DiQualia research practice for ${sector.name}.`;
+  const canonical = `/industries/${sector.slug}`;
 
   return {
-    title: `${sector.name} — DiQualia`,
+    title: sector.name,
     description,
+    alternates: { canonical },
     openGraph: {
       title: titleBase,
       description,
+      url: canonical,
       ...(sector.heroImageUrl ? { images: [{ url: sector.heroImageUrl }] } : {}),
     },
   };
@@ -104,7 +108,7 @@ export default async function IndustrySectorPage({ params }: PageProps) {
           <div className="absolute inset-0">
             <Image
               src={sector.heroImageUrl}
-              alt=""
+              alt={sector.headline?.trim() || sector.name}
               fill
               priority
               className="object-cover"
