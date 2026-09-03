@@ -9,9 +9,16 @@ import { getDb } from "@/lib/cloudflare-env";
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: "Industries — DiQualia",
+  title: "Industries",
   description:
     "DiQualia operates across niche B2B sectors with dedicated research practices built for each industry we enter.",
+  alternates: { canonical: "/industries" },
+  openGraph: {
+    title: "Industries — DiQualia",
+    description:
+      "DiQualia operates across niche B2B sectors with dedicated research practices built for each industry we enter.",
+    url: "/industries",
+  },
 };
 
 function Eyebrow({ children }: { children: React.ReactNode }) {

@@ -166,7 +166,7 @@ export default async function BlogPostPage({ params }: PageProps) {
             >
               <Image
                 src={post.coverImageUrl}
-                alt=""
+                alt={post.title}
                 fill
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, 768px"

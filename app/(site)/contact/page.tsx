@@ -10,9 +10,16 @@ import { getDb } from "@/lib/cloudflare-env";
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: "Contact — DiQualia",
+  title: "Contact",
   description:
     "Start with intelligence. Book a no-cost discovery call to map your market, buyers, and the fastest path to precision pipeline growth.",
+  alternates: { canonical: "/contact" },
+  openGraph: {
+    title: "Contact — DiQualia",
+    description:
+      "Start with intelligence. Book a no-cost discovery call to map your market, buyers, and the fastest path to precision pipeline growth.",
+    url: "/contact",
+  },
 };
 
 function Eyebrow({ children, center }: { children: React.ReactNode; center?: boolean }) {

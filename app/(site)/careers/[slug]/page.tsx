@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cache } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -22,7 +23,7 @@ function asStringList(value: unknown): string[] {
     : [];
 }
 
-async function loadRole(slug: string) {
+const loadRole = cache(async (slug: string) => {
   try {
     const prisma = await getDb();
     const [opening, careerPage, related] = await Promise.all([
@@ -47,17 +48,25 @@ async function loadRole(slug: string) {
     console.error("[careers] loadRole failed:", err);
     return { opening: null, careerPage: null, related: [] };
   }
-}
+});
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const { opening } = await loadRole(slug);
   if (!opening) {
-    return { title: "Careers — DiQualia" };
+    return { title: "Careers" };
   }
+  const description = `${opening.department} · ${opening.location} · ${opening.type}`;
+  const canonical = `/careers/${opening.slug}`;
   return {
-    title: `${opening.title} — Careers — DiQualia`,
-    description: `${opening.department} · ${opening.location} · ${opening.type}`,
+    title: `${opening.title} — Careers`,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      title: `${opening.title} — Careers — DiQualia`,
+      description,
+      url: canonical,
+    },
   };
 }
 

@@ -10,12 +10,15 @@ export function BrandLogo({
   className,
   width = 140,
   src: customSrc,
+  priority = false,
 }: {
   variant: BrandLogoVariant;
   decorative?: boolean;
   className?: string;
   width?: number;
   src?: string | null;
+  /** Set only for an above-the-fold instance (e.g. the header). Off by default. */
+  priority?: boolean;
 }) {
   const src =
     customSrc ??
@@ -24,11 +27,11 @@ export function BrandLogo({
   return (
     <Image
       src={src}
-      alt={decorative ? "" : "Diqualia"}
+      alt={decorative ? "" : "DiQualia"}
       aria-hidden={decorative ? true : undefined}
       width={width}
       height={Math.round((width * 156.5) / 500)}
-      priority
+      priority={priority}
       className={className}
       style={{ height: "auto", width }}
     />
