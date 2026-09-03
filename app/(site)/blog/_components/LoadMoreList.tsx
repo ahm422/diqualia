@@ -8,7 +8,7 @@ import { PostCard } from "./PostCard";
 
 export function LoadMoreList({
   posts,
-  pageSize = 9,
+  pageSize = 8,
 }: {
   posts: BlogCardData[];
   pageSize?: number;
@@ -19,11 +19,28 @@ export function LoadMoreList({
 
   return (
     <div>
-      <div className="grid gap-x-8 gap-y-12 sm:grid-cols-2">
-        {visible.map((post) => (
-          <PostCard key={post.slug} post={post} variant="grid" />
+      <div className="flex flex-col">
+        {visible.map((post, i) => (
+          <div
+            key={post.slug}
+            className={i > 0 ? "mt-12 border-t pt-12 md:mt-16 md:pt-16" : ""}
+            style={
+              i > 0
+                ? { borderColor: "color-mix(in oklab, var(--border) 70%, transparent)" }
+                : undefined
+            }
+          >
+            <PostCard
+              post={post}
+              variant="row"
+              feature={i === 0}
+              imgRight={i % 2 === 1}
+              priority={i === 0}
+            />
+          </div>
         ))}
       </div>
+
       {hasMore ? (
         <div className="mt-14 flex justify-center">
           <button

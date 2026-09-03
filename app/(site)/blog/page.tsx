@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { Container } from "@/app/components/Container";
 import { toCardData } from "@/lib/blog/card";
@@ -6,7 +7,6 @@ import { listPublishedPosts } from "@/lib/blog/queries";
 
 import { EmptyState } from "./_components/EmptyState";
 import { LoadMoreList } from "./_components/LoadMoreList";
-import { PostCard } from "./_components/PostCard";
 
 export const revalidate = 60;
 
@@ -30,7 +30,6 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 
 export default async function BlogIndexPage() {
   const posts = await listPublishedPosts();
-  const [featured, ...rest] = posts;
 
   return (
     <div>
@@ -48,47 +47,83 @@ export default async function BlogIndexPage() {
             opacity: 0.9,
           }}
         />
-        <Container className="relative pb-14 pt-20 md:pb-16 md:pt-28">
-          <Eyebrow>Blog</Eyebrow>
-          <h1
-            className="mt-8 text-foreground"
-            style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 300,
-              lineHeight: 1.02,
-              fontSize: "clamp(2.6rem, 6vw, 4.8rem)",
-            }}
-          >
-            Field notes
-            <br />
-            <em className="text-primary" style={{ fontStyle: "italic" }}>
-              from the practice.
-            </em>
-          </h1>
-          <p className="mt-8 max-w-[62ch] text-[15px] leading-8 text-muted-foreground">
-            Research observations, delivery lessons, and points of view — published when
-            they are ready.
-          </p>
+        <Container className="relative flex flex-col gap-8 pb-12 pt-20 md:flex-row md:items-end md:justify-between md:pb-14 md:pt-28">
+          <div>
+            <Eyebrow>Blog</Eyebrow>
+            <h1
+              className="mt-8 text-foreground"
+              style={{
+                fontFamily: "var(--font-display)",
+                fontWeight: 300,
+                lineHeight: 1.02,
+                fontSize: "clamp(2.6rem, 6vw, 4.8rem)",
+              }}
+            >
+              Field notes
+              <br />
+              <em className="text-primary" style={{ fontStyle: "italic" }}>
+                from the practice.
+              </em>
+            </h1>
+          </div>
+          <div className="md:max-w-[42ch] md:text-right">
+            <p className="text-[15px] leading-8 text-muted-foreground">
+              Research observations, delivery lessons, and points of view — published
+              when they are ready.
+            </p>
+            {posts.length > 0 ? (
+              <p
+                className="mt-6 text-[11px] tracking-[0.22em] uppercase"
+                style={{ color: "var(--text-muted)" }}
+              >
+                {posts.length} {posts.length === 1 ? "article" : "articles"}
+              </p>
+            ) : null}
+          </div>
         </Container>
       </section>
 
-      <Container as="section" className="py-16 md:py-20">
+      <Container as="section" className="pb-16 pt-14 md:pb-20 md:pt-20">
         {posts.length === 0 ? (
           <EmptyState />
         ) : (
-          <div className="space-y-16">
-            <PostCard post={toCardData(featured)} variant="featured" priority />
-            {rest.length > 0 ? (
-              <div
-                className="border-t pt-16"
-                style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}
-              >
-                <LoadMoreList posts={rest.map(toCardData)} pageSize={9} />
-              </div>
-            ) : null}
-          </div>
+          <LoadMoreList posts={posts.map(toCardData)} pageSize={8} />
         )}
       </Container>
+
+      <section
+        className="border-t"
+        style={{
+          borderColor: "color-mix(in oklab, var(--border) 80%, transparent)",
+          background:
+            "radial-gradient(ellipse 60% 120% at 100% 0%, color-mix(in oklab, var(--gold) 8%, transparent), transparent 60%)",
+        }}
+      >
+        <Container className="flex flex-col items-start gap-5 py-14 sm:flex-row sm:items-center sm:justify-between md:py-20">
+          <p
+            className="text-foreground"
+            style={{
+              fontFamily: "var(--font-display)",
+              fontWeight: 300,
+              fontSize: "clamp(1.4rem, 2.4vw, 2rem)",
+              lineHeight: 1.25,
+            }}
+          >
+            Looking for a point of view on your market?
+          </p>
+          <Link
+            href="/contact"
+            className="inline-flex shrink-0 items-center gap-2 rounded border px-7 py-3.5 text-[11px] tracking-[0.22em] uppercase transition-colors hover:border-[var(--gold)] hover:text-primary"
+            style={{
+              borderColor: "color-mix(in oklab, var(--border) 80%, transparent)",
+              color: "var(--text-muted)",
+            }}
+          >
+            Talk to us
+            <span aria-hidden>→</span>
+          </Link>
+        </Container>
+      </section>
     </div>
   );
 }

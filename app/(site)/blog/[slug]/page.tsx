@@ -66,22 +66,43 @@ function AdjacentLink({
   post: PublishedPost;
   direction: "older" | "newer";
 }) {
+  const isNewer = direction === "newer";
   return (
     <Link
       href={`/blog/${post.slug}`}
-      className={`group block ${direction === "newer" ? "text-right" : ""}`}
+      className={`diq-postAdjacent group flex h-full items-center gap-5 border p-5 md:p-7 ${
+        isNewer ? "sm:flex-row-reverse sm:text-right" : ""
+      }`}
     >
-      <span
-        className="text-[11px] tracking-[0.22em] uppercase"
-        style={{ color: "var(--text-muted)" }}
-      >
-        {direction === "newer" ? "Newer →" : "← Older"}
-      </span>
-      <span
-        className="mt-2 block text-foreground transition-colors group-hover:text-primary"
-        style={{ fontFamily: "var(--font-display)", fontWeight: 300, fontSize: "1.15rem", lineHeight: 1.25 }}
-      >
-        {post.title}
+      {post.coverImageUrl ? (
+        <span className="relative hidden h-16 w-24 shrink-0 overflow-hidden sm:block md:h-20 md:w-32">
+          <Image
+            src={post.coverImageUrl}
+            alt=""
+            fill
+            sizes="128px"
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        </span>
+      ) : null}
+      <span className="min-w-0 flex-1">
+        <span
+          className="block text-[11px] tracking-[0.22em] uppercase"
+          style={{ color: "var(--text-muted)" }}
+        >
+          {isNewer ? "Newer →" : "← Older"}
+        </span>
+        <span
+          className="mt-2 block text-foreground transition-colors group-hover:text-primary"
+          style={{
+            fontFamily: "var(--font-display)",
+            fontWeight: 300,
+            fontSize: "clamp(1.1rem, 1.8vw, 1.35rem)",
+            lineHeight: 1.3,
+          }}
+        >
+          {post.title}
+        </span>
       </span>
     </Link>
   );
@@ -96,9 +117,10 @@ export default async function BlogPostPage({ params }: PageProps) {
   const { older, newer } = getAdjacentPosts(all, slug);
   const related = getRelatedPosts(all, slug, 3);
   const minutes = readingTimeMinutes(post.body);
-  const meta = [formatBlogDate(post.publishedAt), formatReadingTime(minutes)]
-    .filter(Boolean)
-    .join(" · ");
+  const publishedLabel = formatBlogDate(post.publishedAt);
+  const readingLabel = formatReadingTime(minutes);
+  const publishedIso = post.publishedAt?.toISOString();
+  const meta = [publishedLabel, readingLabel].filter(Boolean).join(" · ");
 
   return (
     <article>
@@ -117,7 +139,7 @@ export default async function BlogPostPage({ params }: PageProps) {
               "radial-gradient(ellipse 70% 50% at 80% 0%, color-mix(in oklab, var(--gold) 10%, transparent), transparent 50%)",
           }}
         />
-        <Container size="narrow" className="relative pb-12 pt-20 md:pt-28">
+        <Container className="relative pb-10 pt-20 md:pb-12 md:pt-28">
           <Link
             href="/blog"
             className="text-[11px] tracking-[0.22em] uppercase transition-colors hover:text-primary"
@@ -130,94 +152,149 @@ export default async function BlogPostPage({ params }: PageProps) {
               className="mt-8 text-[11px] tracking-[0.22em] uppercase"
               style={{ color: "var(--gold)" }}
             >
-              {post.publishedAt ? (
-                <time dateTime={post.publishedAt.toISOString()}>{meta}</time>
-              ) : (
-                meta
-              )}
+              {publishedIso ? <time dateTime={publishedIso}>{meta}</time> : meta}
             </p>
           ) : null}
           <h1
-            className="mt-4 text-foreground"
+            className="mt-4 max-w-[22ch] text-foreground"
             style={{
               fontFamily: "var(--font-display)",
               fontWeight: 300,
               lineHeight: 1.1,
-              fontSize: "clamp(2.2rem, 5vw, 3.6rem)",
+              fontSize: "clamp(2.2rem, 5vw, 3.8rem)",
             }}
           >
             {post.title}
           </h1>
-          <p
-            className="mt-6 max-w-[60ch] text-[1.15rem] leading-8 text-muted-foreground"
-            style={{ fontFamily: "var(--font-display)" }}
-          >
-            {post.excerpt}
-          </p>
+          {post.excerpt ? (
+            <p
+              className="mt-5 max-w-[54ch] text-[1.05rem] leading-8 text-muted-foreground md:text-[1.15rem]"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              {post.excerpt}
+            </p>
+          ) : null}
         </Container>
       </header>
 
-      {post.coverImageUrl ? (
-        <Container size="narrow" className="pt-6 md:pt-8">
-          <figure className="mx-auto w-full">
-            <div
-              className="relative aspect-[16/9] w-full overflow-hidden rounded"
-              style={{ border: "1px solid color-mix(in oklab, var(--border) 80%, transparent)" }}
+      <Container className="py-8 md:py-12 lg:py-14">
+        <div className="max-w-[46rem]">
+          {post.coverImageUrl ? (
+            <figure
+              className="relative mb-8 aspect-[16/9] w-full overflow-hidden rounded-lg border md:mb-10"
+              style={{
+                borderColor: "color-mix(in oklab, var(--border) 75%, transparent)",
+                background: "color-mix(in oklab, var(--gold) 6%, var(--card))",
+              }}
             >
               <Image
                 src={post.coverImageUrl}
                 alt={post.title}
                 fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 768px"
                 priority
+                sizes="(max-width: 768px) 100vw, 736px"
+                className="object-cover"
               />
-            </div>
-            {/* <figcaption> slot — add when the model carries a caption field. */}
-          </figure>
-        </Container>
-      ) : null}
-
-      <Container size="narrow" className="py-14 md:py-20">
-        <div className="diq-longform">
-          <Markdown source={post.body} />
+            </figure>
+          ) : null}
+          <div className="diq-longform diq-article">
+            <Markdown source={post.body} />
+          </div>
         </div>
 
-        {(older || newer) && (
+        {older || newer ? (
           <nav
-            className="mt-16 grid gap-8 border-t pt-10 sm:grid-cols-2"
+            className="mt-14 grid gap-4 border-t pt-10 sm:grid-cols-2 md:mt-16"
             style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}
             aria-label="More posts"
           >
-            <div>{older ? <AdjacentLink post={older} direction="older" /> : null}</div>
-            <div>{newer ? <AdjacentLink post={newer} direction="newer" /> : null}</div>
+            {older ? <AdjacentLink post={older} direction="older" /> : <div className="hidden sm:block" />}
+            {newer ? <AdjacentLink post={newer} direction="newer" /> : null}
           </nav>
-        )}
+        ) : null}
       </Container>
 
       {related.length > 0 ? (
-        <Container
-          as="section"
-          className="border-t py-16 md:py-20"
-          style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}
+        <section
+          className="border-t"
+          style={{
+            borderColor: "color-mix(in oklab, var(--border) 80%, transparent)",
+            background:
+              "radial-gradient(ellipse 50% 80% at 0% 0%, color-mix(in oklab, var(--gold) 8%, transparent), transparent 60%)",
+          }}
         >
-          <h2
-            className="text-foreground"
+          <Container className="py-14 md:py-20">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <h2
+                className="text-foreground"
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontWeight: 300,
+                  fontSize: "clamp(1.5rem, 2.6vw, 2.1rem)",
+                }}
+              >
+                More field notes
+              </h2>
+              <Link
+                href="/blog"
+                className="text-[11px] tracking-[0.22em] uppercase transition-colors hover:text-primary"
+                style={{ color: "var(--text-muted)" }}
+              >
+                View all insights →
+              </Link>
+            </div>
+            {related.length === 1 ? (
+              <div className="mt-10">
+                <PostCard post={toCardData(related[0])} variant="row" />
+              </div>
+            ) : (
+              <div
+                className={`mt-10 grid gap-x-8 gap-y-12 ${
+                  related.length === 2 ? "sm:grid-cols-2" : "sm:grid-cols-2 xl:grid-cols-3"
+                }`}
+              >
+                {related.map((p) => (
+                  <PostCard key={p.slug} post={toCardData(p)} variant="related" />
+                ))}
+              </div>
+            )}
+          </Container>
+        </section>
+      ) : null}
+
+      <section
+        className="border-t"
+        style={{
+          borderColor: "color-mix(in oklab, var(--border) 80%, transparent)",
+          background:
+            "radial-gradient(ellipse 60% 120% at 100% 0%, color-mix(in oklab, var(--gold) 8%, transparent), transparent 60%)",
+        }}
+      >
+        <Container className="flex flex-col items-start gap-5 py-14 sm:flex-row sm:items-center sm:justify-between md:py-20">
+          <p
+            className="max-w-[28ch] text-foreground sm:max-w-none"
             style={{
               fontFamily: "var(--font-display)",
               fontWeight: 300,
-              fontSize: "clamp(1.5rem, 2.4vw, 2rem)",
+              fontSize: "clamp(1.4rem, 2.4vw, 2rem)",
+              lineHeight: 1.25,
             }}
           >
-            More field notes
-          </h2>
-          <div className="mt-10 grid gap-x-8 gap-y-12 sm:grid-cols-3">
-            {related.map((p) => (
-              <PostCard key={p.slug} post={toCardData(p)} variant="related" />
-            ))}
-          </div>
+            Looking for a point of view on your market?
+          </p>
+          <Link
+            href="/contact"
+            className="inline-flex shrink-0 items-center gap-2 rounded border px-7 py-3.5 text-[11px] tracking-[0.22em] uppercase transition-colors hover:border-[var(--gold)] hover:text-primary"
+            style={{
+              borderColor: "color-mix(in oklab, var(--border) 80%, transparent)",
+              color: "var(--text-muted)",
+            }}
+          >
+            Talk to us
+            <span aria-hidden>→</span>
+          </Link>
         </Container>
-      ) : null}
+      </section>
     </article>
   );
 }
