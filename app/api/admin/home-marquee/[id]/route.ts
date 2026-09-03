@@ -33,6 +33,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
   try {
     const item = await prisma.homeMarqueeItem.update({ where: { id: numId }, data: parsed.data });
+    // Ticker renders only on / (app/(site)/page.tsx #marquee) — add paths here if that changes.
     revalidatePage("/");
     return NextResponse.json(item);
   } catch {
@@ -62,6 +63,7 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
     }
   }
 
+  // Ticker renders only on / (app/(site)/page.tsx #marquee) — add paths here if that changes.
   revalidatePage("/");
   return NextResponse.json({ ok: true });
 }

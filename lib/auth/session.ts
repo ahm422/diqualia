@@ -34,8 +34,32 @@ export function isPermissionKey(value: string): value is PermissionKey {
   return (PERMISSION_KEYS as readonly string[]).includes(value);
 }
 
+/**
+ * Equivalence map: asking for KEY is also satisfied if the session holds ANY key
+ * in the array. The legacy `content.*` keys and the newer `cms.*` keys are two
+ * names for the same capability, so the mapping is bidirectional — a role that
+ * only holds `cms.edit` passes the legacy `content.edit` gate, and an older
+ * custom role that only holds `content.edit` passes the `cms.edit`-guarded API
+ * routes.
+ *
+ * NOTE: `content.publish` is intentionally NOT aliased to `cms.edit` — blog
+ * publishing requires `content.publish` in addition to `cms.edit` (see
+ * lib/auth/permission-catalog.ts).
+ */
+const PERMISSION_ALIASES: Partial<Record<string, string[]>> = {
+  "content.create": ["cms.edit"],
+  "content.edit": ["cms.edit"],
+  "content.delete": ["cms.edit"],
+  "content.view": ["cms.view", "cms.edit"], // defensive: no such key today
+  "cms.edit": ["content.edit", "content.create", "content.delete"],
+  "cms.view": ["cms.edit", "content.edit", "content.view"],
+};
+
 export function hasPermission(session: AdminSession, key: PermissionKey): boolean {
-  return session.permissions.includes(key);
+  const held = session.permissions as readonly string[];
+  if (held.includes(key)) return true;
+  const aliases = PERMISSION_ALIASES[key];
+  return aliases?.some((k) => held.includes(k)) ?? false;
 }
 
 const BASE_OPTS = {

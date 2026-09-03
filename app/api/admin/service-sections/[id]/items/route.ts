@@ -5,7 +5,7 @@ import { z } from "zod";
 
 import { requirePermissionApi } from "@/lib/auth/require-admin-api";
 import { getDb } from "@/lib/cloudflare-env";
-import { revalidatePage } from "@/lib/revalidate-site";
+import { revalidatePages } from "@/lib/revalidate-site";
 
 const PostSchema = z.object({
   title: z.string().min(1).max(200),
@@ -67,6 +67,6 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     },
   });
 
-  revalidatePage("/services");
+  revalidatePages("/", "/services");
   return NextResponse.json(item, { status: 201 });
 }

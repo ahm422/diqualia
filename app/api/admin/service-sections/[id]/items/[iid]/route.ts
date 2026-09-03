@@ -5,7 +5,7 @@ import { z } from "zod";
 
 import { requirePermissionApi } from "@/lib/auth/require-admin-api";
 import { getDb } from "@/lib/cloudflare-env";
-import { revalidatePage } from "@/lib/revalidate-site";
+import { revalidatePages } from "@/lib/revalidate-site";
 
 const PatchSchema = z.object({
   groupLabel: z.string().min(1).max(200).nullable().optional(),
@@ -41,7 +41,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       where: { id: itemId, sectionId },
       data: parsed.data,
     });
-    revalidatePage("/services");
+    revalidatePages("/", "/services");
     return NextResponse.json(item);
   } catch {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -76,6 +76,6 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
     }
   }
 
-  revalidatePage("/services");
+  revalidatePages("/", "/services");
   return NextResponse.json({ ok: true });
 }

@@ -5,7 +5,7 @@ import { z } from "zod";
 
 import { requirePermissionApi } from "@/lib/auth/require-admin-api";
 import { getDb } from "@/lib/cloudflare-env";
-import { revalidatePage } from "@/lib/revalidate-site";
+import { revalidatePages } from "@/lib/revalidate-site";
 
 const PostSchema = z.object({
   tabId: z.string().min(1).max(50),
@@ -66,6 +66,6 @@ export async function POST(request: Request) {
     include: { items: true },
   });
 
-  revalidatePage("/services");
+  revalidatePages("/", "/services");
   return NextResponse.json(section, { status: 201 });
 }

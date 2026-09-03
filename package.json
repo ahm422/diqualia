@@ -28,6 +28,7 @@
     "cf:e2e:rbac": "tsx scripts/e2e-rbac.ts",
     "cf:e2e:portal": "tsx scripts/e2e-portal.ts",
     "email:test": "tsx scripts/send-test-email.ts",
+    "test:auth-session": "tsx --test lib/auth/session.test.ts",
     "test:cnic": "tsx --test lib/cnic.test.ts",
     "test:markdown": "tsx --test lib/markdown.test.ts",
     "test:career-apply": "tsx --test lib/schemas/public/career-apply.test.ts",

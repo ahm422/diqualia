@@ -37,6 +37,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
   try {
     const card = await prisma.homeExploreCard.update({ where: { id: numId }, data: parsed.data });
+    // NOTE: no public (site) page renders Explore cards yet; placeholder path.
     revalidatePage("/");
     return NextResponse.json(card);
   } catch {
