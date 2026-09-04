@@ -18,11 +18,11 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * One service rendered fully inline — a calm "Service Overview" block: ghost
- * number, eyebrow, title, overview prose, then "What You Receive" / feature
- * items / grouped deliverable cards as plain bordered blocks. Server-rendered,
- * no interaction. Keeps `id={section.tabId}` + scroll-margin so `/services#s3`
- * style deep links still land with the sticky-nav offset.
+ * One service rendered fully inline as flat editorial copy: ghost number,
+ * eyebrow, big title, overview prose, then every sub-topic as a big heading
+ * followed by a plain paragraph. No cards, no bullets, no grids — just type.
+ * Server-rendered, no interaction. Keeps `id={section.tabId}` + scroll-margin
+ * so `/services#s3` style deep links still land with the sticky-nav offset.
  */
 export function ServiceSection({
   section,
@@ -31,15 +31,30 @@ export function ServiceSection({
   section: ServiceSectionData;
   displayNum: string;
 }) {
-  // Same filters the previous S01 layout used.
   const featureItems = section.items.filter(
     (i) => i.groupLabel === null && i.body !== null,
   );
   const receiveItems = section.items.filter(
     (i) => i.groupLabel === "What You Receive" && i.body === null,
   );
-  // Same grouping the previous S02 layout used.
   const groupedCards = groupItems(section.items);
+
+  // Every sub-topic flattened to { kicker?, title, body } — feature items and
+  // grouped deliverable blocks read the same way now.
+  const topics = [
+    ...featureItems.map((i) => ({
+      key: `f-${i.id}`,
+      kicker: null as string | null,
+      title: i.title,
+      body: i.body ?? "",
+    })),
+    ...groupedCards.map((c) => ({
+      key: `g-${c.groupLabel}`,
+      kicker: c.groupLabel,
+      title: c.title,
+      body: c.body,
+    })),
+  ];
 
   return (
     <section
@@ -92,75 +107,43 @@ export function ServiceSection({
             ) : null}
 
             {receiveItems.length > 0 ? (
-              <div className="mt-10 border-t pt-6" style={{ borderColor: HAIRLINE }}>
+              <div
+                className="mt-12 max-w-[72ch] border-t pt-6"
+                style={{ borderColor: HAIRLINE }}
+              >
                 <div className="diq-kicker text-[11px] tracking-[0.22em] uppercase">
                   What You Receive
                 </div>
-                <ul className="diq-proseMuted mt-4 grid gap-3 text-[13px] sm:grid-cols-2">
-                  {receiveItems.map((item) => (
-                    <li key={item.id} className="flex items-start gap-3">
-                      <span aria-hidden className="text-primary">
-                        →
-                      </span>
-                      <span>{item.title}</span>
-                    </li>
-                  ))}
-                </ul>
+                <p className="diq-proseMuted mt-3 text-[15px] leading-8">
+                  {receiveItems.map((item) => item.title).join(" · ")}
+                </p>
               </div>
             ) : null}
 
-            {featureItems.length > 0 ? (
-              <div className="mt-8 grid gap-4 sm:grid-cols-2">
-                {featureItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className="border-l-2 p-5"
-                    style={{
-                      borderLeftColor: HAIRLINE,
-                      background: "color-mix(in oklab, var(--gold) 6%, transparent)",
-                    }}
-                  >
-                    <div className="text-[13px] tracking-[0.06em] text-foreground">
-                      {item.title}
-                    </div>
-                    <p className="diq-proseMuted mt-2 text-[12px] leading-7">{item.body}</p>
-                  </div>
-                ))}
-              </div>
-            ) : null}
-
-            {groupedCards.length > 0 ? (
-              <div className="mt-8 grid gap-6 md:grid-cols-2">
-                {groupedCards.map((card) => (
-                  <div
-                    key={card.groupLabel}
-                    className="border p-6"
-                    style={{ borderColor: HAIRLINE }}
-                  >
-                    <div className="diq-kicker text-[11px] tracking-[0.22em] uppercase">
-                      {card.groupLabel}
-                    </div>
-                    <div
-                      className="mt-3 text-[18px] text-foreground"
-                      style={{ fontFamily: "var(--font-display)", fontWeight: 400, lineHeight: 1.2 }}
+            {topics.length > 0 ? (
+              <div className="mt-12 max-w-[72ch] space-y-10">
+                {topics.map((topic) => (
+                  <div key={topic.key}>
+                    {topic.kicker ? (
+                      <div className="diq-kicker text-[11px] tracking-[0.22em] uppercase">
+                        {topic.kicker}
+                      </div>
+                    ) : null}
+                    <h3
+                      className={`${topic.kicker ? "mt-2" : ""} text-foreground`}
+                      style={{
+                        fontFamily: "var(--font-display)",
+                        fontWeight: 400,
+                        fontSize: "clamp(1.25rem, 2.2vw, 1.65rem)",
+                        lineHeight: 1.2,
+                      }}
                     >
-                      {card.title}
-                    </div>
-                    <p className="diq-proseMuted mt-3 text-[13px] leading-7">{card.body}</p>
-                    {card.deliverables.length > 0 ? (
-                      <ul
-                        className="diq-proseMuted mt-4 space-y-2 border-t pt-4 text-[12px]"
-                        style={{ borderColor: HAIRLINE }}
-                      >
-                        {card.deliverables.map((d) => (
-                          <li key={d} className="flex items-start gap-3">
-                            <span aria-hidden className="text-primary">
-                              →
-                            </span>
-                            <span>{d}</span>
-                          </li>
-                        ))}
-                      </ul>
+                      {topic.title}
+                    </h3>
+                    {topic.body ? (
+                      <p className="diq-proseMuted mt-3 text-[15px] leading-8">
+                        {topic.body}
+                      </p>
                     ) : null}
                   </div>
                 ))}
