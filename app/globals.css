@@ -15,9 +15,9 @@
   /* Fluid layout primitives — no max-width cap; gutters are the only side inset */
   --diq-max: none;
   --diq-gutter: clamp(1.25rem, 4vw, 5rem);
-  /* Standard media band for blog content — cover + in-body images share this
-     width so the reading column can run full-bleed without the images ballooning. */
-  --diq-blog-media: 760px;
+  /* Upper bound for blog imagery (cover + in-body). Kept below the reading
+     measure so pictures stay a supporting element, never a banner. */
+  --diq-blog-media: 640px;
   /* Named exception — nav/footer collapse. Tailwind breakpoints are min-width;
      var() cannot be used in @media, so queries stay at 960px and must not be mapped to lg (1024). */
   --breakpoint-nav: 960px;
@@ -1136,7 +1136,8 @@ html.dark .diq-proseMuted {
   text-align: center;
 }
 
-/* Blog post article — the reading column owns the measure; deliberate rhythm. */
+/* Blog post article — copy fills the column; imagery floats to the side so
+   text flows around it rather than being split by a full-width picture. */
 .diq-article.diq-longform .diq-markdown {
   max-width: none;
   margin-inline: 0;
@@ -1146,8 +1147,17 @@ html.dark .diq-proseMuted {
 .diq-article.diq-longform .diq-markdown > * {
   overflow-wrap: break-word;
 }
+.diq-article.diq-longform .diq-markdown::after {
+  content: "";
+  display: block;
+  clear: both;
+}
 .diq-article.diq-longform .diq-markdown p {
-  margin: 1.4em 0;
+  margin: 1.5em 0;
+}
+/* Only full-width blocks clear floats; headings/paragraphs wrap around them. */
+.diq-article.diq-longform .diq-markdown :is(hr, pre, table, blockquote) {
+  clear: both;
 }
 .diq-article.diq-longform .diq-markdown :is(h2, h3) {
   scroll-margin-top: calc(var(--diq-stickyTop) + 1.5rem);
@@ -1170,7 +1180,7 @@ html.dark .diq-proseMuted {
   font-size: clamp(1.25rem, 2vw, 1.5rem);
 }
 .diq-article.diq-longform .diq-markdown blockquote {
-  margin: 2em 0;
+  margin: 2.5em 0;
   padding: 0.2em 0 0.2em 1.5rem;
   border-left: 3px solid color-mix(in oklab, var(--gold) 60%, transparent);
   font-size: 1.15em;
@@ -1181,7 +1191,7 @@ html.dark .diq-proseMuted {
   margin: 0.5em 0;
 }
 .diq-article.diq-longform .diq-markdown :is(ul, ol) {
-  margin: 1.5em 0;
+  margin: 2em 0;
   padding-left: 1.4em;
 }
 .diq-article.diq-longform .diq-markdown li {
@@ -1196,23 +1206,56 @@ html.dark .diq-proseMuted {
   margin: 3em 0;
   border-top: 1px solid color-mix(in oklab, var(--gold) 45%, transparent);
 }
-.diq-article.diq-longform .diq-markdown figure {
-  margin: 2.5em 0;
-}
 .diq-article.diq-longform .diq-markdown figcaption {
   margin-top: 0.7em;
   font-size: 0.85em;
   color: var(--text-muted);
   text-align: left;
 }
-.diq-article.diq-longform .diq-markdown :is(img, figure img) {
-  width: 100%;
-  max-width: var(--diq-blog-media);
-  max-height: 24rem;
+/* Side-floated media so body copy wraps around it instead of a full-width
+   picture splitting the article. Three shapes reach here:
+   - a bare <img> (TipTap editor output — a direct child of .diq-markdown)
+   - <p><img></p>  (legacy Markdown posts — marked wraps lone images)
+   - <figure>      (reserved for captioned media) */
+.diq-article.diq-longform .diq-markdown > img,
+.diq-article.diq-longform .diq-markdown p:has(> img),
+.diq-article.diq-longform .diq-markdown figure {
+  float: right;
+  width: min(42%, 360px);
+  margin: 0.4em 0 1.25rem 2rem;
+}
+/* Alternate sides for consecutive bare images. */
+.diq-article.diq-longform .diq-markdown > img:nth-of-type(even) {
+  float: left;
+  margin: 0.4em 2rem 1.25rem 0;
+}
+.diq-article.diq-longform .diq-markdown img {
+  max-width: 100%;
   height: auto;
-  object-fit: cover;
-  margin-inline: 0;
   border-radius: 8px;
+}
+.diq-article.diq-longform .diq-markdown > img {
+  max-height: 28rem;
+}
+.diq-article.diq-longform .diq-markdown p:has(> img) img,
+.diq-article.diq-longform .diq-markdown figure img {
+  display: block;
+  width: 100%;
+  max-height: none;
+  object-fit: contain;
+  margin: 0;
+}
+/* Small screens: no float — image stacks full-width, as before. */
+@media (max-width: 639px) {
+  .diq-article.diq-longform .diq-markdown > img,
+  .diq-article.diq-longform .diq-markdown > img:nth-of-type(even),
+  .diq-article.diq-longform .diq-markdown p:has(> img),
+  .diq-article.diq-longform .diq-markdown figure {
+    float: none;
+    width: 100%;
+    max-width: 100%;
+    margin: 1.75em auto;
+  }
 }
 .diq-article.diq-longform .diq-markdown pre {
   max-width: 100%;
@@ -1254,30 +1297,18 @@ html.dark .diq-proseMuted {
   transition: none;
 }
 
-/* Compact editorial index rows: quiet number, small fixed thumbnail, copy.
-   Same layout for every row — image never alternates sides, never full-bleed. */
+/* Compact editorial index rows: small fixed thumbnail + copy, uniform height.
+   Same layout at every breakpoint — image never alternates sides, never large. */
 .diq-blog-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  column-gap: 2rem;
-  row-gap: 1rem;
+  grid-template-columns: 96px minmax(0, 1fr);
+  column-gap: 1rem;
   align-items: start;
 }
-.diq-blog-row__num {
-  display: none;
-  font-family: var(--font-display), ui-serif, serif;
-  font-weight: 300;
-  font-size: 0.8125rem;
-  letter-spacing: 0.2em;
-  line-height: 1;
-  padding-top: 0.4rem;
-}
-@media (min-width: 1024px) {
+@media (min-width: 640px) {
   .diq-blog-row {
-    grid-template-columns: 2.5rem 260px minmax(0, 1fr);
-  }
-  .diq-blog-row__num {
-    display: block;
+    grid-template-columns: 116px minmax(0, 1fr);
+    column-gap: 1.5rem;
   }
 }
 .diq-blog-row:focus-visible {
@@ -1301,7 +1332,7 @@ html.dark .diq-proseMuted {
 .diq-blog-row:focus-visible .diq-blog-card__img,
 .diq-blog-card:hover .diq-blog-card__img,
 .diq-blog-card:focus-visible .diq-blog-card__img {
-  transform: scale(1.04);
+  transform: scale(1.03);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -75,12 +75,12 @@ function AdjacentLink({
       }`}
     >
       {post.coverImageUrl ? (
-        <span className="relative hidden h-16 w-24 shrink-0 overflow-hidden sm:block md:h-20 md:w-32">
+        <span className="relative hidden h-14 w-20 shrink-0 overflow-hidden rounded sm:block md:h-16 md:w-24">
           <Image
             src={post.coverImageUrl}
             alt=""
             fill
-            sizes="128px"
+            sizes="96px"
             className="object-cover transition-transform duration-500 group-hover:scale-105"
           />
         </span>
@@ -139,7 +139,7 @@ export default async function BlogPostPage({ params }: PageProps) {
               "radial-gradient(ellipse 70% 50% at 80% 0%, color-mix(in oklab, var(--gold) 10%, transparent), transparent 50%)",
           }}
         />
-        <Container className="relative pb-10 pt-20 md:pb-12 md:pt-28">
+        <Container className="relative pb-10 pt-16 md:pb-12 md:pt-20">
           <Link
             href="/blog"
             className="text-[11px] tracking-[0.22em] uppercase transition-colors hover:text-primary"
@@ -168,11 +168,30 @@ export default async function BlogPostPage({ params }: PageProps) {
           </h1>
           {post.excerpt ? (
             <p
-              className="mt-5 max-w-[54ch] text-[1.05rem] leading-8 text-muted-foreground md:text-[1.15rem]"
+              className="mt-5 max-w-[60ch] text-[1.05rem] leading-8 text-muted-foreground md:text-[1.15rem]"
               style={{ fontFamily: "var(--font-display)" }}
             >
               {post.excerpt}
             </p>
+          ) : null}
+          {post.coverImageUrl ? (
+            <figure
+              className="relative mt-8 aspect-[16/9] max-h-[460px] w-full overflow-hidden rounded-lg border md:mt-10"
+              style={{
+                borderColor: "color-mix(in oklab, var(--border) 75%, transparent)",
+                background: "color-mix(in oklab, var(--gold) 6%, var(--card))",
+              }}
+            >
+              <Image
+                src={post.coverImageUrl}
+                alt={post.title}
+                fill
+                priority
+                sizes="(max-width: 1024px) 100vw, 1100px"
+                className="object-cover"
+              />
+              {/* No caption source in the model; <figure> is kept for future use. */}
+            </figure>
           ) : null}
         </Container>
       </header>
@@ -185,72 +204,9 @@ export default async function BlogPostPage({ params }: PageProps) {
           style={{ background: "color-mix(in oklab, var(--gold) 55%, transparent)" }}
         />
 
-        <div className="lg:grid lg:grid-cols-[minmax(0,14rem)_minmax(0,1fr)] lg:gap-x-14">
-          {/* Left rail — sticky meta + back link. Collapses below lg. */}
-          <aside className="hidden lg:block">
-            <div
-              className="sticky self-start"
-              style={{ top: "calc(var(--diq-stickyTop) + 1.5rem)" }}
-            >
-              {meta ? (
-                <dl
-                  className="space-y-3 text-[11px] tracking-[0.22em] uppercase"
-                  style={{ color: "var(--text-muted)" }}
-                >
-                  {publishedLabel ? (
-                    <div>
-                      <dt className="sr-only">Published</dt>
-                      <dd>
-                        {publishedIso ? (
-                          <time dateTime={publishedIso}>{publishedLabel}</time>
-                        ) : (
-                          publishedLabel
-                        )}
-                      </dd>
-                    </div>
-                  ) : null}
-                  <div>
-                    <dt className="sr-only">Reading time</dt>
-                    <dd>{readingLabel}</dd>
-                  </div>
-                </dl>
-              ) : null}
-              <Link
-                href="/blog"
-                className="mt-6 inline-flex items-center gap-2 text-[11px] tracking-[0.22em] uppercase transition-colors hover:text-primary"
-                style={{ color: "var(--text-muted)" }}
-              >
-                <span aria-hidden>←</span>
-                Back to all notes
-              </Link>
-            </div>
-          </aside>
-
-          {/* Prose column — spans the full width; text stays left-aligned. */}
-          <div className="min-w-0">
-            {post.coverImageUrl ? (
-              <figure
-                className="relative mb-8 aspect-[16/9] w-full max-w-[var(--diq-blog-media)] overflow-hidden rounded-lg border md:mb-10"
-                style={{
-                  borderColor: "color-mix(in oklab, var(--border) 75%, transparent)",
-                  background: "color-mix(in oklab, var(--gold) 6%, var(--card))",
-                }}
-              >
-                <Image
-                  src={post.coverImageUrl}
-                  alt={post.title}
-                  fill
-                  priority
-                  sizes="(max-width: 1024px) 100vw, 760px"
-                  className="object-cover"
-                />
-                {/* No caption source in the model; <figure> is kept for future use. */}
-              </figure>
-            ) : null}
-            <div className="diq-longform diq-article">
-              <Markdown source={post.body} />
-            </div>
-          </div>
+        {/* Reading body — copy fills the width; in-body media floats to the side. */}
+        <div className="diq-longform diq-article min-w-0">
+          <Markdown source={post.body} />
         </div>
 
         {older || newer ? (

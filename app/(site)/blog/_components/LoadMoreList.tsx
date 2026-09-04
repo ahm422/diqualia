@@ -122,7 +122,7 @@ export function LoadMoreList({
 
   return (
     <div>
-      <div className="mb-10 flex items-center justify-between md:mb-12">
+      <div className="mb-6 flex items-center justify-between md:mb-8">
         <p
           className="text-[11px] tracking-[0.22em] uppercase"
           style={{ color: "var(--text-muted)" }}
@@ -135,24 +135,24 @@ export function LoadMoreList({
       {view === "card" ? (
         <div className="grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
           {visible.map((post, i) => (
-            <PostCard key={post.slug} post={post} variant="grid" index={i} priority={i < 3} />
+            <PostCard key={post.slug} post={post} variant="grid" priority={i < 3} />
           ))}
         </div>
       ) : (
         <div className="flex flex-col">
-          {visible.map((post, i) => (
-            <div
-              key={post.slug}
-              className={i > 0 ? "mt-10 border-t pt-10 md:mt-12 md:pt-12" : ""}
-              style={
-                i > 0
-                  ? { borderColor: "color-mix(in oklab, var(--border) 70%, transparent)" }
-                  : undefined
-              }
-            >
-              <PostCard post={post} variant="row" index={i} feature={i === 0} priority={i === 0} />
-            </div>
-          ))}
+          {visible.map((post, i) =>
+            i === 0 ? (
+              <PostCard key={post.slug} post={post} variant="feature" priority />
+            ) : (
+              <div
+                key={post.slug}
+                className="mt-6 border-t pt-6 md:mt-8 md:pt-8"
+                style={{ borderColor: "color-mix(in oklab, var(--border) 70%, transparent)" }}
+              >
+                <PostCard post={post} variant="row" />
+              </div>
+            ),
+          )}
         </div>
       )}
 
