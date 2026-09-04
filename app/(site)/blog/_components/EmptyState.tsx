@@ -1,7 +1,7 @@
 export function EmptyState() {
   return (
     <div
-      className="relative overflow-hidden rounded border px-8 py-20 text-center"
+      className="relative overflow-hidden rounded border px-8 py-14 text-center"
       style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}
     >
       <div
@@ -9,9 +9,7 @@ export function EmptyState() {
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse 60% 60% at 50% 0%, color-mix(in oklab, var(--gold) 10%, transparent), transparent 60%), linear-gradient(color-mix(in oklab, var(--gold) 4%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in oklab, var(--gold) 4%, transparent) 1px, transparent 1px)",
-          backgroundSize: "auto, 56px 56px, 56px 56px",
-          opacity: 0.8,
+            "radial-gradient(ellipse 60% 60% at 50% 0%, color-mix(in oklab, var(--gold) 7%, transparent), transparent 60%)",
         }}
       />
       <div className="relative">

@@ -42,40 +42,33 @@ export default async function BlogIndexPage() {
           className="pointer-events-none absolute inset-0"
           style={{
             background:
-              "radial-gradient(ellipse 80% 60% at 20% 0%, color-mix(in oklab, var(--gold) 12%, transparent), transparent 55%), linear-gradient(color-mix(in oklab, var(--gold) 5%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in oklab, var(--gold) 5%, transparent) 1px, transparent 1px)",
-            backgroundSize: "auto, 72px 72px, 72px 72px",
-            opacity: 0.9,
+              "radial-gradient(ellipse 70% 60% at 15% 0%, color-mix(in oklab, var(--gold) 8%, transparent), transparent 60%)",
           }}
         />
-        <Container className="relative flex flex-col gap-8 pb-12 pt-20 md:flex-row md:items-end md:justify-between md:pb-14 md:pt-28">
-          <div>
-            <Eyebrow>Blog</Eyebrow>
-            <h1
-              className="mt-8 text-foreground"
-              style={{
-                fontFamily: "var(--font-display)",
-                fontWeight: 300,
-                lineHeight: 1.02,
-                fontSize: "clamp(2.6rem, 6vw, 4.8rem)",
-              }}
-            >
-              Field notes
-              <br />
-              <em className="text-primary" style={{ fontStyle: "italic" }}>
-                from the practice.
-              </em>
-            </h1>
-          </div>
-          <div className="md:max-w-[42ch] md:text-right">
-            <p className="text-[15px] leading-8 text-muted-foreground">
-              Research observations, delivery lessons, and points of view — published
-              when they are ready.
-            </p>
-          </div>
+        <Container className="relative flex flex-col gap-4 pb-8 pt-14 md:pb-10 md:pt-20">
+          <Eyebrow>Blog</Eyebrow>
+          <h1
+            className="text-foreground"
+            style={{
+              fontFamily: "var(--font-display)",
+              fontWeight: 300,
+              lineHeight: 1.05,
+              fontSize: "clamp(2.2rem, 4.5vw, 3.4rem)",
+            }}
+          >
+            Field notes{" "}
+            <em className="text-primary" style={{ fontStyle: "italic" }}>
+              from the practice.
+            </em>
+          </h1>
+          <p className="max-w-[52ch] text-[15px] leading-8 text-muted-foreground">
+            Research observations, delivery lessons, and points of view — published
+            when they are ready.
+          </p>
         </Container>
       </section>
 
-      <Container as="section" className="pb-16 pt-14 md:pb-20 md:pt-20">
+      <Container as="section" className="pb-16 pt-10 md:pb-20 md:pt-12">
         {posts.length === 0 ? (
           <EmptyState />
         ) : (

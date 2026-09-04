@@ -1,11 +1,13 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { useCan } from "@/app/(admin)/admin/AdminSessionProvider";
+import { formatReadingTime, readingTimeMinutes } from "@/lib/blog/reading-time";
 import type { BlogPostData } from "./BlogPostEditor";
 
 function formatDate(value: string | Date | null | undefined): string {
@@ -66,12 +68,13 @@ export function BlogPostsList({ initialPosts }: { initialPosts: BlogPostData[] }
 
   return (
     <div className="overflow-x-auto rounded border border-[var(--diq_border)]">
-      <table className="w-full min-w-[640px] text-left text-sm">
+      <table className="w-full min-w-[720px] text-left text-sm">
         <thead>
           <tr className="border-b border-[var(--diq_border)] text-[11px] uppercase tracking-widest text-[var(--diq_mid)]">
+            <th className="px-4 py-3 font-normal" />
             <th className="px-4 py-3 font-normal">Title</th>
-            <th className="px-4 py-3 font-normal">Slug</th>
             <th className="px-4 py-3 font-normal">Status</th>
+            <th className="px-4 py-3 font-normal">Read</th>
             <th className="px-4 py-3 font-normal">Updated</th>
             <th className="px-4 py-3 font-normal">Published</th>
             <th className="px-4 py-3 font-normal" />
@@ -83,13 +86,26 @@ export function BlogPostsList({ initialPosts }: { initialPosts: BlogPostData[] }
               key={post.id}
               className="border-b border-[var(--diq_border)] last:border-0 hover:bg-[var(--diq_panel)]"
             >
+              <td className="py-3 pl-4 pr-0">
+                <div className="relative h-11 w-16 shrink-0 overflow-hidden rounded border border-[var(--diq_border)] bg-[var(--diq_deep)]">
+                  {post.coverImageUrl ? (
+                    <Image
+                      src={post.coverImageUrl}
+                      alt=""
+                      fill
+                      sizes="64px"
+                      className="object-cover"
+                    />
+                  ) : null}
+                </div>
+              </td>
               <td className="px-4 py-3 text-foreground">
                 <Link href={`/admin/blog/${post.id}`} className="hover:text-[var(--gold)]">
                   {post.title}
                 </Link>
-              </td>
-              <td className="px-4 py-3 font-mono text-xs text-[var(--diq_mid)]">
-                {post.slug}
+                <span className="mt-0.5 block font-mono text-[11px] text-[var(--diq_mid)]">
+                  {post.slug}
+                </span>
               </td>
               <td className="px-4 py-3">
                 <span
@@ -102,6 +118,9 @@ export function BlogPostsList({ initialPosts }: { initialPosts: BlogPostData[] }
                 >
                   {post.status}
                 </span>
+              </td>
+              <td className="px-4 py-3 text-[var(--diq_mid)]">
+                {formatReadingTime(readingTimeMinutes(post.body))}
               </td>
               <td className="px-4 py-3 text-[var(--diq_mid)]">
                 {formatDate(post.updatedAt)}
