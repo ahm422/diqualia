@@ -5,7 +5,7 @@ import { formatBlogDate } from "@/lib/blog/format";
 import type { BlogCardData } from "@/lib/blog/card";
 import { formatReadingTime } from "@/lib/blog/reading-time";
 
-type PostCardVariant = "feature" | "row" | "related" | "grid";
+type PostCardVariant = "row" | "related" | "grid";
 
 function CoverPlaceholder({ title }: { title: string }) {
   const letter = title.trim().charAt(0).toUpperCase() || "D";
@@ -76,61 +76,6 @@ export function PostCard({
   const href = `/blog/${post.slug}`;
   const borderStyle = { borderColor: "color-mix(in oklab, var(--border) 75%, transparent)" };
 
-  // Featured post — one wide horizontal card. Image is a supporting column,
-  // capped so the title/excerpt stay dominant. Stacks on mobile.
-  if (variant === "feature") {
-    return (
-      <Link
-        href={href}
-        className="diq-blog-card group grid gap-5 sm:grid-cols-[minmax(0,420px)_minmax(0,1fr)] sm:items-center sm:gap-8"
-      >
-        <div
-          className="diq-blog-row__media relative aspect-[16/9] w-full max-h-[220px] overflow-hidden rounded-md border sm:max-h-none"
-          style={borderStyle}
-        >
-          {post.coverImageUrl ? (
-            <Image
-              src={post.coverImageUrl}
-              alt=""
-              fill
-              priority={priority}
-              sizes="(max-width: 640px) 100vw, 420px"
-              className="diq-blog-card__img object-cover"
-            />
-          ) : (
-            <CoverPlaceholder title={post.title} />
-          )}
-        </div>
-        <div className="flex flex-col gap-3">
-          <span
-            className="text-[11px] tracking-[0.3em] uppercase"
-            style={{ color: "var(--primary)" }}
-          >
-            Latest
-          </span>
-          <Meta post={post} />
-          <h3
-            className="text-foreground transition-colors group-hover:text-primary"
-            style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 300,
-              lineHeight: 1.2,
-              fontSize: "clamp(1.6rem, 2.6vw, 2.1rem)",
-            }}
-          >
-            {post.title}
-          </h3>
-          {post.excerpt ? (
-            <p className="line-clamp-2 max-w-[60ch] text-[14px] leading-7 text-muted-foreground">
-              {post.excerpt}
-            </p>
-          ) : null}
-          <ReadMore />
-        </div>
-      </Link>
-    );
-  }
-
   if (variant === "related" || variant === "grid") {
     return (
       <Link href={href} className="diq-blog-card group flex h-full flex-col">
@@ -177,8 +122,8 @@ export function PostCard({
     );
   }
 
-  // Compact editorial index row: [ small thumbnail ] [ meta / title / excerpt ].
-  // Uniform height — the thumbnail never exceeds the text block.
+  // Editorial index row: [ thumbnail ] [ meta / title / excerpt ].
+  // Every row shares one fixed thumbnail size for a consistent index.
   return (
     <Link href={href} className="diq-blog-row group focus:outline-none">
       <div
@@ -191,7 +136,7 @@ export function PostCard({
             alt=""
             fill
             priority={priority}
-            sizes="116px"
+            sizes="(max-width: 640px) 140px, 240px"
             className="diq-blog-card__img object-cover"
           />
         ) : (
@@ -213,7 +158,7 @@ export function PostCard({
           {post.title}
         </h3>
         {post.excerpt ? (
-          <p className="mt-1.5 line-clamp-1 text-[13.5px] leading-7 text-muted-foreground">
+          <p className="mt-2 line-clamp-2 text-[13.5px] leading-7 text-muted-foreground">
             {post.excerpt}
           </p>
         ) : null}
