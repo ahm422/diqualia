@@ -629,6 +629,45 @@ html.dark .diq-logoDark {
   margin-top: 2px;
 }
 
+.diq-fContact {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 16px;
+  font-style: normal;
+}
+
+.diq-fContact a {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: clamp(10px, 2.2vw, 11px);
+  letter-spacing: clamp(0.5px, 0.3vw, 1px);
+  color: var(--diq_mid);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.diq-fSocial {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.diq-fSocial a {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: clamp(10px, 2.2vw, 11px);
+  letter-spacing: clamp(2px, 0.55vw, 3px);
+  text-transform: uppercase;
+  color: var(--diq_mid);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.diq-fContact a:hover,
+.diq-fSocial a:hover {
+  color: var(--gold);
+}
+
 .diq-fLinks {
   display: flex;
   gap: 28px;

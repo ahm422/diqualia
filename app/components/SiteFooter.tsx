@@ -1,6 +1,12 @@
 import Link from "next/link";
 
 import { getDb } from "@/lib/cloudflare-env";
+import {
+  CONTACT_ADDRESS,
+  CONTACT_EMAIL,
+  CONTACT_PHONE,
+  SOCIAL_PROFILES,
+} from "@/lib/site-config";
 
 import { BrandLogo } from "./BrandLogo";
 import { Container } from "./Container";
@@ -29,6 +35,22 @@ export async function SiteFooter() {
           </Link>
           {settings?.tagline1 && <div className="diq-fTag">{settings.tagline1}</div>}
           {settings?.tagline2 && <div className="diq-fSub">{settings.tagline2}</div>}
+
+          <address className="diq-fContact">
+            <a href={`tel:${CONTACT_PHONE.tel}`}>{CONTACT_PHONE.display}</a>
+            <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+            <a href={CONTACT_ADDRESS.mapUrl} target="_blank" rel="noreferrer">
+              {CONTACT_ADDRESS.display}
+            </a>
+          </address>
+
+          <div className="diq-fSocial">
+            {SOCIAL_PROFILES.map((profile) => (
+              <a key={profile.url} href={profile.url} target="_blank" rel="noreferrer">
+                {profile.label}
+              </a>
+            ))}
+          </div>
         </div>
 
         <nav className="diq-fLinks" aria-label="Footer">
