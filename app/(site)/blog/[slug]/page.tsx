@@ -156,12 +156,12 @@ export default async function BlogPostPage({ params }: PageProps) {
             </p>
           ) : null}
           <h1
-            className="mt-4 max-w-[22ch] text-foreground"
+            className="mt-4 max-w-[24ch] text-foreground"
             style={{
               fontFamily: "var(--font-display)",
               fontWeight: 300,
-              lineHeight: 1.1,
-              fontSize: "clamp(2.2rem, 5vw, 3.8rem)",
+              lineHeight: 1.08,
+              fontSize: "clamp(2.4rem, 5.2vw, 4rem)",
             }}
           >
             {post.title}
@@ -177,28 +177,79 @@ export default async function BlogPostPage({ params }: PageProps) {
         </Container>
       </header>
 
-      <Container className="py-8 md:py-12 lg:py-14">
-        <div className="max-w-[46rem]">
-          {post.coverImageUrl ? (
-            <figure
-              className="relative mb-8 aspect-[16/9] w-full overflow-hidden rounded-lg border md:mb-10"
-              style={{
-                borderColor: "color-mix(in oklab, var(--border) 75%, transparent)",
-                background: "color-mix(in oklab, var(--gold) 6%, var(--card))",
-              }}
+      <Container className="py-10 md:py-14 lg:py-16">
+        {/* Thin gold rule separating the header from the reading body. */}
+        <div
+          aria-hidden
+          className="mb-10 h-px w-20 md:mb-14"
+          style={{ background: "color-mix(in oklab, var(--gold) 55%, transparent)" }}
+        />
+
+        <div className="lg:grid lg:grid-cols-[minmax(0,14rem)_minmax(0,1fr)] lg:gap-x-14">
+          {/* Left rail — sticky meta + back link. Collapses below lg. */}
+          <aside className="hidden lg:block">
+            <div
+              className="sticky self-start"
+              style={{ top: "calc(var(--diq-stickyTop) + 1.5rem)" }}
             >
-              <Image
-                src={post.coverImageUrl}
-                alt={post.title}
-                fill
-                priority
-                sizes="(max-width: 768px) 100vw, 736px"
-                className="object-cover"
-              />
-            </figure>
-          ) : null}
-          <div className="diq-longform diq-article">
-            <Markdown source={post.body} />
+              {meta ? (
+                <dl
+                  className="space-y-3 text-[11px] tracking-[0.22em] uppercase"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  {publishedLabel ? (
+                    <div>
+                      <dt className="sr-only">Published</dt>
+                      <dd>
+                        {publishedIso ? (
+                          <time dateTime={publishedIso}>{publishedLabel}</time>
+                        ) : (
+                          publishedLabel
+                        )}
+                      </dd>
+                    </div>
+                  ) : null}
+                  <div>
+                    <dt className="sr-only">Reading time</dt>
+                    <dd>{readingLabel}</dd>
+                  </div>
+                </dl>
+              ) : null}
+              <Link
+                href="/blog"
+                className="mt-6 inline-flex items-center gap-2 text-[11px] tracking-[0.22em] uppercase transition-colors hover:text-primary"
+                style={{ color: "var(--text-muted)" }}
+              >
+                <span aria-hidden>←</span>
+                Back to all notes
+              </Link>
+            </div>
+          </aside>
+
+          {/* Prose column — spans the full width; text stays left-aligned. */}
+          <div className="min-w-0">
+            {post.coverImageUrl ? (
+              <figure
+                className="relative mb-8 aspect-[16/9] w-full max-w-[var(--diq-blog-media)] overflow-hidden rounded-lg border md:mb-10"
+                style={{
+                  borderColor: "color-mix(in oklab, var(--border) 75%, transparent)",
+                  background: "color-mix(in oklab, var(--gold) 6%, var(--card))",
+                }}
+              >
+                <Image
+                  src={post.coverImageUrl}
+                  alt={post.title}
+                  fill
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 760px"
+                  className="object-cover"
+                />
+                {/* No caption source in the model; <figure> is kept for future use. */}
+              </figure>
+            ) : null}
+            <div className="diq-longform diq-article">
+              <Markdown source={post.body} />
+            </div>
           </div>
         </div>
 
@@ -244,8 +295,8 @@ export default async function BlogPostPage({ params }: PageProps) {
               </Link>
             </div>
             {related.length === 1 ? (
-              <div className="mt-10">
-                <PostCard post={toCardData(related[0])} variant="row" />
+              <div className="mt-10 sm:max-w-md">
+                <PostCard post={toCardData(related[0])} variant="related" />
               </div>
             ) : (
               <div

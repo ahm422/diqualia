@@ -71,14 +71,6 @@ export default async function BlogIndexPage() {
               Research observations, delivery lessons, and points of view — published
               when they are ready.
             </p>
-            {posts.length > 0 ? (
-              <p
-                className="mt-6 text-[11px] tracking-[0.22em] uppercase"
-                style={{ color: "var(--text-muted)" }}
-              >
-                {posts.length} {posts.length === 1 ? "article" : "articles"}
-              </p>
-            ) : null}
           </div>
         </Container>
       </section>
