@@ -15,6 +15,9 @@
   /* Fluid layout primitives — no max-width cap; gutters are the only side inset */
   --diq-max: none;
   --diq-gutter: clamp(1.25rem, 4vw, 5rem);
+  /* Standard media band for blog content — cover + in-body images share this
+     width so the reading column can run full-bleed without the images ballooning. */
+  --diq-blog-media: 760px;
   /* Named exception — nav/footer collapse. Tailwind breakpoints are min-width;
      var() cannot be used in @media, so queries stay at 960px and must not be mapped to lg (1024). */
   --breakpoint-nav: 960px;
@@ -821,109 +824,6 @@ html.dark .diq-proseMuted {
   color: color-mix(in oklab, var(--paper) 88%, var(--mist));
 }
 
-.diq-serviceTabsProgressTrack {
-  height: 2px;
-  width: 100%;
-  background: color-mix(in oklab, var(--border) 80%, transparent);
-}
-.diq-serviceTabsProgress {
-  height: 2px;
-  background: var(--primary);
-  transition: width 0.35s ease;
-}
-@media (prefers-reduced-motion: reduce) {
-  .diq-serviceTabsProgress {
-    transition: none;
-  }
-}
-
-.diq-serviceTabsTrack {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: stretch;
-  position: relative;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  -webkit-overflow-scrolling: touch;
-}
-.diq-serviceTabsTrack::-webkit-scrollbar {
-  display: none;
-}
-.diq-serviceTabsTrack::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 1px;
-  background: color-mix(in oklab, var(--border) 90%, transparent);
-  pointer-events: none;
-}
-.diq-serviceTab {
-  flex: 1 1 0;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
-  padding: 14px 10px 12px;
-  background: transparent;
-  border: none;
-  border-radius: 0;
-  color: var(--muted-foreground);
-  text-align: left;
-  cursor: pointer;
-  position: relative;
-  letter-spacing: 0.1em;
-}
-.diq-serviceTabNum {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  color: color-mix(in oklab, var(--primary) 70%, var(--muted-foreground));
-}
-.diq-serviceTabLabel {
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.diq-serviceTab:hover {
-  color: var(--foreground);
-  opacity: 1;
-}
-.diq-serviceTab:hover .diq-serviceTabNum {
-  color: var(--primary);
-}
-.diq-serviceTab[aria-selected="true"] {
-  color: var(--primary);
-}
-.diq-serviceTab[aria-selected="true"] .diq-serviceTabNum {
-  color: var(--primary);
-}
-.diq-serviceTab[aria-selected="true"]::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 2px;
-  background: var(--primary);
-  z-index: 1;
-}
-.diq-serviceTabsArrow:hover {
-  border-color: var(--primary);
-  color: var(--primary);
-}
-.diq-serviceTab:focus-visible,
-.diq-serviceTabsArrow:focus-visible {
-  outline: 2px solid color-mix(in oklab, var(--gold) 70%, #ffffff);
-  outline-offset: 3px;
-}
-
 .diq-sectionY {
   padding-top: var(--diq-sectionY);
   padding-bottom: var(--diq-sectionY);
@@ -1236,19 +1136,98 @@ html.dark .diq-proseMuted {
   text-align: center;
 }
 
-/* Blog post article — column owns the measure; images fill it. */
+/* Blog post article — the reading column owns the measure; deliberate rhythm. */
 .diq-article.diq-longform .diq-markdown {
   max-width: none;
   margin-inline: 0;
   font-size: clamp(1.0625rem, 0.25vw + 1rem, 1.1875rem);
   line-height: 1.8;
 }
+.diq-article.diq-longform .diq-markdown > * {
+  overflow-wrap: break-word;
+}
+.diq-article.diq-longform .diq-markdown p {
+  margin: 1.4em 0;
+}
+.diq-article.diq-longform .diq-markdown :is(h2, h3) {
+  scroll-margin-top: calc(var(--diq-stickyTop) + 1.5rem);
+}
+.diq-article.diq-longform .diq-markdown h2 {
+  margin: 2.4em 0 0.7em;
+  font-size: clamp(1.6rem, 2.6vw, 2.1rem);
+  letter-spacing: -0.01em;
+}
+.diq-article.diq-longform .diq-markdown h2::after {
+  content: "";
+  display: block;
+  width: 2.5rem;
+  height: 1px;
+  margin-top: 0.5rem;
+  background: color-mix(in oklab, var(--gold) 50%, transparent);
+}
+.diq-article.diq-longform .diq-markdown h3 {
+  margin: 2em 0 0.5em;
+  font-size: clamp(1.25rem, 2vw, 1.5rem);
+}
+.diq-article.diq-longform .diq-markdown blockquote {
+  margin: 2em 0;
+  padding: 0.2em 0 0.2em 1.5rem;
+  border-left: 3px solid color-mix(in oklab, var(--gold) 60%, transparent);
+  font-size: 1.15em;
+  line-height: 1.6;
+  color: var(--foreground);
+}
+.diq-article.diq-longform .diq-markdown blockquote p {
+  margin: 0.5em 0;
+}
+.diq-article.diq-longform .diq-markdown :is(ul, ol) {
+  margin: 1.5em 0;
+  padding-left: 1.4em;
+}
+.diq-article.diq-longform .diq-markdown li {
+  margin: 0.5em 0;
+  padding-left: 0.25em;
+}
+.diq-article.diq-longform .diq-markdown li::marker {
+  color: var(--gold);
+}
+.diq-article.diq-longform .diq-markdown hr {
+  width: 4rem;
+  margin: 3em 0;
+  border-top: 1px solid color-mix(in oklab, var(--gold) 45%, transparent);
+}
+.diq-article.diq-longform .diq-markdown figure {
+  margin: 2.5em 0;
+}
+.diq-article.diq-longform .diq-markdown figcaption {
+  margin-top: 0.7em;
+  font-size: 0.85em;
+  color: var(--text-muted);
+  text-align: left;
+}
 .diq-article.diq-longform .diq-markdown :is(img, figure img) {
   width: 100%;
-  max-height: 22rem;
+  max-width: var(--diq-blog-media);
+  max-height: 24rem;
   height: auto;
   object-fit: cover;
   margin-inline: 0;
+  border-radius: 8px;
+}
+.diq-article.diq-longform .diq-markdown pre {
+  max-width: 100%;
+  margin: 2em 0;
+  border-radius: 8px;
+  background: color-mix(in oklab, var(--gold) 4%, var(--bg-elev));
+}
+/* Wide content scrolls inside its own track instead of pushing the page. */
+.diq-article.diq-longform .diq-markdown pre {
+  overflow-x: auto;
+}
+.diq-article.diq-longform .diq-markdown table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 .diq-postAdjacent {
@@ -1275,17 +1254,36 @@ html.dark .diq-proseMuted {
   transition: none;
 }
 
-/* Full-width editorial rows: image beside copy, alternating side on desktop. */
+/* Compact editorial index rows: quiet number, small fixed thumbnail, copy.
+   Same layout for every row — image never alternates sides, never full-bleed. */
 .diq-blog-row {
+  display: grid;
   grid-template-columns: minmax(0, 1fr);
+  column-gap: 2rem;
+  row-gap: 1rem;
+  align-items: start;
+}
+.diq-blog-row__num {
+  display: none;
+  font-family: var(--font-display), ui-serif, serif;
+  font-weight: 300;
+  font-size: 0.8125rem;
+  letter-spacing: 0.2em;
+  line-height: 1;
+  padding-top: 0.4rem;
 }
 @media (min-width: 1024px) {
   .diq-blog-row {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: 2.5rem 260px minmax(0, 1fr);
   }
-  .diq-blog-row[data-feature] {
-    grid-template-columns: minmax(0, 1.18fr) minmax(0, 1fr);
+  .diq-blog-row__num {
+    display: block;
   }
+}
+.diq-blog-row:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--gold) 70%, transparent);
+  outline-offset: 4px;
+  border-radius: 4px;
 }
 
 .diq-blog-row__media {

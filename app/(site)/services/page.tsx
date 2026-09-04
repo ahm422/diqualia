@@ -6,9 +6,9 @@ import { Container } from "@/app/components/Container";
 import { Button } from "@/components/ui/button";
 import { getDb } from "@/lib/cloudflare-env";
 
-export const revalidate = 60;
+import { ServiceSection } from "./ServiceSection";
 
-import { ServicesAccordion } from "./ServicesAccordion";
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "Services",
@@ -71,7 +71,7 @@ export default async function ServicesPage() {
 
   if (!page) notFound();
 
-  const accordionSections = sections.map((section, i) => ({
+  const serviceSections = sections.map((section, i) => ({
     id: section.id,
     tabId: section.tabId,
     eyebrow: section.eyebrow,
@@ -160,7 +160,37 @@ export default async function ServicesPage() {
         </Container>
       </section>
 
-      <ServicesAccordion sections={accordionSections} />
+      {/* SERVICES — every service rendered fully inline, server-rendered. */}
+      <section
+        id="sections"
+        className="border-b"
+        style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}
+      >
+        <Container className="pt-12 md:pt-16">
+          <Eyebrow>The Six Services</Eyebrow>
+          <nav
+            aria-label="Services"
+            className="mt-6 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-x-8 sm:gap-y-3"
+          >
+            {serviceSections.map((s) => (
+              <a
+                key={s.tabId}
+                href={`#${s.tabId}`}
+                className="group inline-flex items-baseline gap-2 text-[13px] text-muted-foreground transition-colors hover:text-primary"
+              >
+                <span className="diq-ghostNum text-[11px] tracking-[0.22em]">{s.displayNum}</span>
+                <span className="border-b border-transparent group-hover:border-current">
+                  {s.title}
+                </span>
+              </a>
+            ))}
+          </nav>
+        </Container>
+      </section>
+
+      {serviceSections.map((section) => (
+        <ServiceSection key={section.tabId} section={section} displayNum={section.displayNum} />
+      ))}
 
       {/* INTELLIGENCE PROCESS STRIP */}
       <section className="border-b" style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
