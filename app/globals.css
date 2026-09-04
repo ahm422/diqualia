@@ -1336,18 +1336,18 @@ html.dark .diq-proseMuted {
   transition: none;
 }
 
-/* Compact editorial index rows: small fixed thumbnail + copy, uniform height.
-   Same layout at every breakpoint — image never alternates sides, never large. */
+/* Editorial index rows: one fixed thumbnail size + copy, uniform height.
+   Same layout at every breakpoint — image never alternates sides. */
 .diq-blog-row {
   display: grid;
-  grid-template-columns: 96px minmax(0, 1fr);
+  grid-template-columns: 140px minmax(0, 1fr);
   column-gap: 1rem;
   align-items: start;
 }
 @media (min-width: 640px) {
   .diq-blog-row {
-    grid-template-columns: 116px minmax(0, 1fr);
-    column-gap: 1.5rem;
+    grid-template-columns: 240px minmax(0, 1fr);
+    column-gap: 1.75rem;
   }
 }
 .diq-blog-row:focus-visible {

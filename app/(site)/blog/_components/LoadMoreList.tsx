@@ -22,15 +22,15 @@ function subscribeView(onChange: () => void) {
 
 function readStoredView(): BlogView {
   try {
-    return window.localStorage.getItem(VIEW_STORAGE_KEY) === "card" ? "card" : "list";
+    return window.localStorage.getItem(VIEW_STORAGE_KEY) === "list" ? "list" : "card";
   } catch {
-    return "list";
+    return "card";
   }
 }
 
 /** SSR-safe localStorage-backed view preference (no setState-in-effect). */
 function useBlogView(): [BlogView, (next: BlogView) => void] {
-  const view = useSyncExternalStore(subscribeView, readStoredView, () => "list" as BlogView);
+  const view = useSyncExternalStore(subscribeView, readStoredView, () => "card" as BlogView);
 
   function setView(next: BlogView) {
     try {
@@ -140,19 +140,23 @@ export function LoadMoreList({
         </div>
       ) : (
         <div className="flex flex-col">
-          {visible.map((post, i) =>
-            i === 0 ? (
-              <PostCard key={post.slug} post={post} variant="feature" priority />
-            ) : (
-              <div
-                key={post.slug}
-                className="mt-6 border-t pt-6 md:mt-8 md:pt-8"
-                style={{ borderColor: "color-mix(in oklab, var(--border) 70%, transparent)" }}
-              >
-                <PostCard post={post} variant="row" />
-              </div>
-            ),
-          )}
+          {visible.map((post, i) => (
+            <div
+              key={post.slug}
+              className={
+                i === 0
+                  ? ""
+                  : "mt-6 border-t pt-6 md:mt-8 md:pt-8"
+              }
+              style={
+                i === 0
+                  ? undefined
+                  : { borderColor: "color-mix(in oklab, var(--border) 70%, transparent)" }
+              }
+            >
+              <PostCard post={post} variant="row" priority={i === 0} />
+            </div>
+          ))}
         </div>
       )}
 

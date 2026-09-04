@@ -147,52 +147,64 @@ export default async function BlogPostPage({ params }: PageProps) {
           >
             ← Insights
           </Link>
-          {meta ? (
-            <p
-              className="mt-8 text-[11px] tracking-[0.22em] uppercase"
-              style={{ color: "var(--gold)" }}
-            >
-              {publishedIso ? <time dateTime={publishedIso}>{meta}</time> : meta}
-            </p>
-          ) : null}
-          <h1
-            className="mt-4 max-w-[24ch] text-foreground"
-            style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 300,
-              lineHeight: 1.08,
-              fontSize: "clamp(2.4rem, 5.2vw, 4rem)",
-            }}
+          {/* Title block and cover sit side by side; the cover is a supporting
+             column (never full-bleed) and stacks under the copy on small screens. */}
+          <div
+            className={`mt-8 md:mt-10 ${
+              post.coverImageUrl
+                ? "grid gap-8 md:gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,440px)] lg:items-center"
+                : ""
+            }`}
           >
-            {post.title}
-          </h1>
-          {post.excerpt ? (
-            <p
-              className="mt-5 max-w-[60ch] text-[1.05rem] leading-8 text-muted-foreground md:text-[1.15rem]"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              {post.excerpt}
-            </p>
-          ) : null}
-          {post.coverImageUrl ? (
-            <figure
-              className="relative mt-8 aspect-[16/9] max-h-[460px] w-full overflow-hidden rounded-lg border md:mt-10"
-              style={{
-                borderColor: "color-mix(in oklab, var(--border) 75%, transparent)",
-                background: "color-mix(in oklab, var(--gold) 6%, var(--card))",
-              }}
-            >
-              <Image
-                src={post.coverImageUrl}
-                alt={post.title}
-                fill
-                priority
-                sizes="(max-width: 1024px) 100vw, 1100px"
-                className="object-cover"
-              />
-              {/* No caption source in the model; <figure> is kept for future use. */}
-            </figure>
-          ) : null}
+            <div className="min-w-0">
+              {meta ? (
+                <p
+                  className="text-[11px] tracking-[0.22em] uppercase"
+                  style={{ color: "var(--gold)" }}
+                >
+                  {publishedIso ? <time dateTime={publishedIso}>{meta}</time> : meta}
+                </p>
+              ) : null}
+              <h1
+                className="mt-4 max-w-[24ch] text-foreground"
+                style={{
+                  fontFamily: "var(--font-display)",
+                  fontWeight: 300,
+                  lineHeight: 1.08,
+                  fontSize: "clamp(2.4rem, 5.2vw, 4rem)",
+                }}
+              >
+                {post.title}
+              </h1>
+              {post.excerpt ? (
+                <p
+                  className="mt-5 max-w-[60ch] text-[1.05rem] leading-8 text-muted-foreground md:text-[1.15rem]"
+                  style={{ fontFamily: "var(--font-display)" }}
+                >
+                  {post.excerpt}
+                </p>
+              ) : null}
+            </div>
+            {post.coverImageUrl ? (
+              <figure
+                className="relative aspect-[16/9] w-full overflow-hidden rounded-lg border lg:aspect-[4/3]"
+                style={{
+                  borderColor: "color-mix(in oklab, var(--border) 75%, transparent)",
+                  background: "color-mix(in oklab, var(--gold) 6%, var(--card))",
+                }}
+              >
+                <Image
+                  src={post.coverImageUrl}
+                  alt={post.title}
+                  fill
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 440px"
+                  className="object-cover"
+                />
+                {/* No caption source in the model; <figure> is kept for future use. */}
+              </figure>
+            ) : null}
+          </div>
         </Container>
       </header>
 
