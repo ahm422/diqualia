@@ -6,6 +6,12 @@ import { ContactLeadForm } from "@/app/components/ContactLeadForm";
 import { Button } from "@/components/ui/button";
 import { CONTACT_AFTER_SUBMIT_STEPS } from "@/lib/contact-copy";
 import { getDb } from "@/lib/cloudflare-env";
+import {
+  CONTACT_ADDRESS,
+  CONTACT_EMAIL,
+  CONTACT_PHONE,
+  SOCIAL_PROFILES,
+} from "@/lib/site-config";
 
 export const revalidate = 60;
 
@@ -105,6 +111,57 @@ export default async function ContactPage() {
                 <p className="mt-5 text-[12px] leading-7 text-muted-foreground">
                   {page.emailCopy}
                 </p>
+              </div>
+
+              <div className="mt-10 border p-10" style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)", background: "var(--bg-elev)" }}>
+                <div className="text-[10px] tracking-[0.22em] uppercase text-primary">Direct lines</div>
+                <dl className="mt-6 space-y-5 text-[13px] leading-7 text-muted-foreground">
+                  <div>
+                    <dt className="text-[10px] tracking-[0.2em] uppercase text-primary">Phone</dt>
+                    <dd className="mt-1">
+                      <a href={`tel:${CONTACT_PHONE.tel}`} className="text-foreground no-underline hover:text-primary">
+                        {CONTACT_PHONE.display}
+                      </a>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-[10px] tracking-[0.2em] uppercase text-primary">Email</dt>
+                    <dd className="mt-1">
+                      <a href={`mailto:${CONTACT_EMAIL}`} className="text-foreground no-underline hover:text-primary">
+                        {CONTACT_EMAIL}
+                      </a>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-[10px] tracking-[0.2em] uppercase text-primary">Office</dt>
+                    <dd className="mt-1">
+                      <a
+                        href={CONTACT_ADDRESS.mapUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="not-italic text-foreground no-underline hover:text-primary"
+                      >
+                        {CONTACT_ADDRESS.display}
+                      </a>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-[10px] tracking-[0.2em] uppercase text-primary">Social</dt>
+                    <dd className="mt-2 flex flex-wrap gap-x-5 gap-y-2">
+                      {SOCIAL_PROFILES.map((profile) => (
+                        <a
+                          key={profile.url}
+                          href={profile.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-[11px] tracking-[0.18em] uppercase text-foreground no-underline hover:text-primary"
+                        >
+                          {profile.label}
+                        </a>
+                      ))}
+                    </dd>
+                  </div>
+                </dl>
               </div>
 
               <div className="mt-10">

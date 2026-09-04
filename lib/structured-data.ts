@@ -6,7 +6,16 @@
  * and reused anywhere.
  */
 
-import { SITE_DESCRIPTION, SITE_NAME, SITE_URL, SOCIAL_LINKS, absoluteUrl } from "@/lib/site-config";
+import {
+  CONTACT_ADDRESS,
+  CONTACT_EMAIL,
+  CONTACT_PHONE,
+  SITE_DESCRIPTION,
+  SITE_NAME,
+  SITE_URL,
+  SOCIAL_LINKS,
+  absoluteUrl,
+} from "@/lib/site-config";
 
 type JsonLd = Record<string, unknown>;
 
@@ -19,6 +28,22 @@ export function buildOrganizationSchema(): JsonLd {
     url: SITE_URL,
     logo: absoluteUrl("/diqualia-logo.png"),
     description: SITE_DESCRIPTION,
+    email: CONTACT_EMAIL,
+    telephone: CONTACT_PHONE.tel,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: CONTACT_ADDRESS.street,
+      addressLocality: CONTACT_ADDRESS.city,
+      addressRegion: CONTACT_ADDRESS.region,
+      postalCode: CONTACT_ADDRESS.postalCode,
+      addressCountry: CONTACT_ADDRESS.country,
+    },
+    contactPoint: {
+      "@type": "ContactPoint",
+      contactType: "sales",
+      telephone: CONTACT_PHONE.tel,
+      email: CONTACT_EMAIL,
+    },
     ...(SOCIAL_LINKS.length ? { sameAs: [...SOCIAL_LINKS] } : {}),
   };
 }
