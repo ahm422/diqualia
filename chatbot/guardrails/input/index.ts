@@ -15,7 +15,7 @@ export type InputGuardResult =
   | { ok: true }
   | { ok: false; reason: string; message: string };
 
-export const MAX_INPUT_CHARS = 500;
+export const MAX_INPUT_CHARS = 1000;
 
 /** Imperative override verbs/actions that signal an attack. */
 const OVERRIDE_PATTERNS: RegExp[] = [

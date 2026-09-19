@@ -197,7 +197,7 @@ function ChatPanel({
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={onKeyDown}
               rows={2}
-              maxLength={500}
+              maxLength={1000}
               disabled={streaming}
               placeholder="Ask a question…"
               className="w-full resize-none border bg-transparent px-3 py-2 text-[13px] text-foreground outline-none"

@@ -140,20 +140,28 @@ export async function runRag(
   // context; general-knowledge answers (no context) skip price/stat checks.
   const groundNumbers = assembled.items.length > 0;
   let acc = "";
-  // Chars of `acc` already enqueued. Tokens are held back until a sentence
-  // boundary is reached so a guardrail cutoff always lands on a clean,
-  // complete sentence instead of mid-word.
+  // Chars of `acc` already enqueued. Tokens stream out incrementally at word
+  // boundaries so the response appears token-by-token; only guardrail-safe
+  // prefixes are ever sent, so a violation just stops further emission.
   let emitted = 0;
   let violation: string | null = null;
 
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
-      const flushCompletedSentences = () => {
+      const flushSafe = (force: boolean): void => {
         const pending = acc.slice(emitted);
-        const m = pending.match(/^([\s\S]*[.!?])(\s|$)/);
-        if (!m) return;
-        controller.enqueue(encoder.encode(m[1]));
-        emitted += m[1].length;
+        if (!pending) return;
+        const cut = force
+          ? pending.length
+          : (() => {
+              const ws = pending.search(/\s(?=\S)/);
+              return ws === -1 ? 0 : ws + 1;
+            })();
+        if (cut === 0) return;
+        const candidate = acc.slice(0, emitted + cut);
+        if (checkOutputStreaming(candidate, assembled.plainText, { groundNumbers })) return;
+        controller.enqueue(encoder.encode(pending.slice(0, cut)));
+        emitted += cut;
       };
 
       try {
@@ -161,7 +169,7 @@ export async function runRag(
           acc += token;
           violation = checkOutputStreaming(acc, assembled.plainText, { groundNumbers });
           if (violation) break;
-          flushCompletedSentences();
+          flushSafe(false);
         }
       } catch (err) {
         logger.count("llm_error", 1);
