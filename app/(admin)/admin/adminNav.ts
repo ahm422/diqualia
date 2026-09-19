@@ -1,7 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
   BookOpen,
-  Briefcase,
   Building2,
   House,
   Info,
@@ -103,29 +102,6 @@ export const ADMIN_NAV: NavGroup[] = [
     icon: Newspaper,
     children: [
       { href: "/admin/blog", label: "Posts", match: "prefix", permission: "cms.view" },
-    ],
-  },
-  {
-    id: "careers",
-    label: "Careers",
-    icon: Briefcase,
-    children: [
-      { href: "/admin/careers/hero", label: "Hero", permission: "cms.view" },
-      { href: "/admin/careers/culture", label: "Culture", permission: "cms.view" },
-      { href: "/admin/careers/benefits", label: "Benefits", permission: "cms.view" },
-      { href: "/admin/careers/apply", label: "Apply instructions", permission: "cms.view" },
-      {
-        href: "/admin/careers/openings",
-        label: "Job Openings",
-        match: "prefix",
-        permission: "careers.openings.manage",
-      },
-      {
-        href: "/admin/careers/applications",
-        label: "Applications",
-        match: "prefix",
-        permission: "careers.applications.view",
-      },
     ],
   },
   {
