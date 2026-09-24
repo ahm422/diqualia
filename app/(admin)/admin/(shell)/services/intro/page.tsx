@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/lib/auth/require-admin";
+import { requirePermission } from "@/lib/auth/require-admin";
 import { getDb } from "@/lib/cloudflare-env";
 import { AdminPageHeader } from "@/components/admin";
 
@@ -6,7 +6,7 @@ import { IntroEditor } from "./IntroEditor";
 
 export default async function ServicesIntroAdminPage() {
   const prisma = await getDb();
-  await requireAdmin();
+  await requirePermission("cms.view");
 
   const page = await prisma.servicesPage.findUnique({ where: { id: 1 } });
 
@@ -14,7 +14,7 @@ export default async function ServicesIntroAdminPage() {
     <div>
       <AdminPageHeader
         title="Page Intro"
-        description="Services page hero (headline, body, stats) and the gold contact strip at the bottom of /services."
+        description="Hero (headline, body, stats) at the top of /services, and the gold contact strip at the bottom."
         previewHref="/services"
       />
       <IntroEditor initial={page} />

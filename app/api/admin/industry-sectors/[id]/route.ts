@@ -6,7 +6,7 @@ import { requirePermissionApi } from "@/lib/auth/require-admin-api";
 import { getDb } from "@/lib/cloudflare-env";
 import { Prisma } from "@/lib/generated/prisma/client";
 import { industrySectorPatchSchema } from "@/lib/schemas/admin/industries";
-import { revalidateIndustrySector, revalidatePage } from "@/lib/revalidate-site";
+import { revalidateIndustrySector, revalidatePages, revalidateSitemap } from "@/lib/revalidate-site";
 
 function emptyToNull(value: string | null | undefined): string | null | undefined {
   if (value === undefined) return undefined;
@@ -16,7 +16,7 @@ function emptyToNull(value: string | null | undefined): string | null | undefine
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const prisma = await getDb();
-  const session = await requirePermissionApi("content.edit");
+  const session = await requirePermissionApi("cms.edit");
   if (session instanceof NextResponse) return session;
 
   const { id } = await params;
@@ -66,7 +66,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
   try {
     const sector = await prisma.industrySector.update({ where: { id: numId }, data });
 
-    revalidatePage("/industries");
+    revalidatePages("/", "/industries");
+    revalidateSitemap();
     revalidateIndustrySector(sector.slug);
     if (existing.slug !== sector.slug) {
       revalidateIndustrySector(existing.slug);
@@ -80,7 +81,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
 export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const prisma = await getDb();
-  const session = await requirePermissionApi("content.delete");
+  const session = await requirePermissionApi("cms.edit");
   if (session instanceof NextResponse) return session;
 
   const { id } = await params;
@@ -105,7 +106,8 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
     }
   }
 
-  revalidatePage("/industries");
+  revalidatePages("/", "/industries");
+  revalidateSitemap();
   revalidateIndustrySector(existing.slug);
   return NextResponse.json({ ok: true });
 }

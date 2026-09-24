@@ -13,7 +13,7 @@ export function AdminField({
         {label}
       </label>
       {children}
-      {error && <p className="mt-1 text-xs text-red-400">{error}</p>}
+      {error && <p className="mt-1 text-xs text-[var(--destructive)]">{error}</p>}
     </div>
   );
 }

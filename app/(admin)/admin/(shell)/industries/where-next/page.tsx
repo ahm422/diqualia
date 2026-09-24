@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/lib/auth/require-admin";
+import { requirePermission } from "@/lib/auth/require-admin";
 import { getDb } from "@/lib/cloudflare-env";
 import { AdminPageHeader } from "@/components/admin";
 
@@ -6,7 +6,7 @@ import { WhereNextEditor } from "./WhereNextEditor";
 
 export default async function IndustriesWhereNextAdminPage() {
   const prisma = await getDb();
-  await requireAdmin();
+  await requirePermission("cms.view");
 
   const page = await prisma.industriesPage.findUnique({ where: { id: 1 } });
 

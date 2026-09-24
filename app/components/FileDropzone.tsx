@@ -119,7 +119,7 @@ export function FileDropzone({
         )}
       </div>
       {error ? (
-        <p id={errorId} className="mt-2 text-[12px] text-red-400">
+        <p id={errorId} className="mt-2 text-[12px]" style={{ color: "var(--destructive)" }}>
           {error}
         </p>
       ) : null}

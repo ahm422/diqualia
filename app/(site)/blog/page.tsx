@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 
 import { Container } from "@/app/components/Container";
-import { getDb } from "@/lib/cloudflare-env";
+import { toCardData } from "@/lib/blog/card";
+import { listPublishedPosts } from "@/lib/blog/queries";
+
+import { EmptyState } from "./_components/EmptyState";
+import { LoadMoreList } from "./_components/LoadMoreList";
 
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: "Insights — DiQualia",
+  title: "Blog — DiQualia",
   description:
     "Research notes, points of view, and field observations from the DiQualia practice.",
 };
@@ -25,21 +28,8 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
   );
 }
 
-function formatDate(value: Date | null): string {
-  if (!value) return "";
-  return value.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-}
-
 export default async function BlogIndexPage() {
-  const prisma = await getDb();
-  const posts = await prisma.blogPost.findMany({
-    where: { status: "published" },
-    orderBy: { publishedAt: "desc" },
-  });
+  const posts = await listPublishedPosts();
 
   return (
     <div>
@@ -52,104 +42,73 @@ export default async function BlogIndexPage() {
           className="pointer-events-none absolute inset-0"
           style={{
             background:
-              "radial-gradient(ellipse 80% 60% at 20% 0%, color-mix(in oklab, var(--gold) 12%, transparent), transparent 55%), linear-gradient(color-mix(in oklab, var(--gold) 5%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in oklab, var(--gold) 5%, transparent) 1px, transparent 1px)",
-            backgroundSize: "auto, 72px 72px, 72px 72px",
-            opacity: 0.9,
+              "radial-gradient(ellipse 70% 60% at 15% 0%, color-mix(in oklab, var(--gold) 8%, transparent), transparent 60%)",
           }}
         />
-        <Container className="relative pb-16 pt-20 md:pb-20 md:pt-28">
-          <Eyebrow>Insights</Eyebrow>
+        <Container className="relative flex flex-col gap-4 pb-8 pt-14 md:pb-10 md:pt-20">
+          <Eyebrow>Blog</Eyebrow>
           <h1
-            className="mt-8 text-foreground"
+            className="text-foreground"
             style={{
               fontFamily: "var(--font-display)",
               fontWeight: 300,
-              lineHeight: 1.02,
-              fontSize: "clamp(2.6rem, 6vw, 4.8rem)",
+              lineHeight: 1.05,
+              fontSize: "clamp(2.2rem, 4.5vw, 3.4rem)",
             }}
           >
-            Field notes
-            <br />
+            Field notes{" "}
             <em className="text-primary" style={{ fontStyle: "italic" }}>
               from the practice.
             </em>
           </h1>
-          <p className="mt-8 max-w-[62ch] text-[15px] leading-8 text-muted-foreground">
-            Research observations, delivery lessons, and points of view — published when
-            they are ready.
+          <p className="max-w-[52ch] text-[15px] leading-8 text-muted-foreground">
+            Research observations, delivery lessons, and points of view — published
+            when they are ready.
           </p>
         </Container>
       </section>
 
-      <Container as="section" className="py-20">
+      <Container as="section" className="pb-16 pt-10 md:pb-20 md:pt-12">
         {posts.length === 0 ? (
-          <p className="text-[15px] leading-8" style={{ color: "var(--text-faint)" }}>
-            No published insights yet. Check back soon.
-          </p>
+          <EmptyState />
         ) : (
-          <ul className="divide-y" style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
-            {posts.map((post) => (
-              <li
-                key={post.id}
-                className="border-b py-10 first:pt-0"
-                style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}
-              >
-                <Link href={`/blog/${post.slug}`} className="group block">
-                  <div className="grid gap-8 md:grid-cols-[minmax(0,1fr)_220px] md:items-start">
-                    <div>
-                      {post.publishedAt ? (
-                        <time
-                          dateTime={post.publishedAt.toISOString()}
-                          className="text-[11px] tracking-[0.22em] uppercase"
-                          style={{ color: "var(--text-muted)" }}
-                        >
-                          {formatDate(post.publishedAt)}
-                        </time>
-                      ) : null}
-                      <h2
-                        className="mt-3 text-foreground transition-colors group-hover:text-primary"
-                        style={{
-                          fontFamily: "var(--font-display)",
-                          fontWeight: 300,
-                          fontSize: "clamp(1.5rem, 2.4vw, 2rem)",
-                          lineHeight: 1.2,
-                        }}
-                      >
-                        {post.title}
-                      </h2>
-                      <p className="mt-4 max-w-[68ch] text-[15px] leading-8 text-muted-foreground">
-                        {post.excerpt}
-                      </p>
-                      <span
-                        className="mt-5 inline-block text-[11px] tracking-[0.22em] uppercase"
-                        style={{ color: "var(--primary)" }}
-                      >
-                        Read →
-                      </span>
-                    </div>
-                    {post.coverImageUrl ? (
-                      <div
-                        className="relative aspect-[4/3] overflow-hidden"
-                        style={{
-                          border: "1px solid color-mix(in oklab, var(--border) 80%, transparent)",
-                        }}
-                      >
-                        <Image
-                          src={post.coverImageUrl}
-                          alt=""
-                          fill
-                          className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                          sizes="220px"
-                        />
-                      </div>
-                    ) : null}
-                  </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <LoadMoreList posts={posts.map(toCardData)} pageSize={8} />
         )}
       </Container>
+
+      <section
+        className="border-t"
+        style={{
+          borderColor: "color-mix(in oklab, var(--border) 80%, transparent)",
+          background:
+            "radial-gradient(ellipse 60% 120% at 100% 0%, color-mix(in oklab, var(--gold) 8%, transparent), transparent 60%)",
+        }}
+      >
+        <Container className="flex flex-col items-start gap-5 py-14 sm:flex-row sm:items-center sm:justify-between md:py-20">
+          <p
+            className="text-foreground"
+            style={{
+              fontFamily: "var(--font-display)",
+              fontWeight: 300,
+              fontSize: "clamp(1.4rem, 2.4vw, 2rem)",
+              lineHeight: 1.25,
+            }}
+          >
+            Looking for a point of view on your market?
+          </p>
+          <Link
+            href="/contact"
+            className="inline-flex shrink-0 items-center gap-2 rounded border px-7 py-3.5 text-[11px] tracking-[0.22em] uppercase transition-colors hover:border-[var(--gold)] hover:text-primary"
+            style={{
+              borderColor: "color-mix(in oklab, var(--border) 80%, transparent)",
+              color: "var(--text-muted)",
+            }}
+          >
+            Talk to us
+            <span aria-hidden>→</span>
+          </Link>
+        </Container>
+      </section>
     </div>
   );
 }

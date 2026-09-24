@@ -6,6 +6,21 @@ export type ServiceItemData = {
   order: number;
 };
 
+export type ServiceSectionData = {
+  id: number;
+  tabId: string;
+  eyebrow: string;
+  title: string;
+  body: string;
+  cardTitle: string | null;
+  cardBody: string | null;
+  overviewHtml: string | null;
+  ctaLabel: string | null;
+  ctaHref: string | null;
+  order: number;
+  items: ServiceItemData[];
+};
+
 export type GroupedCard = {
   groupLabel: string;
   title: string;

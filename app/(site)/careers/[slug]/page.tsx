@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import { cache } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Container } from "@/app/components/Container";
 import { CareerApplyForm } from "@/app/components/CareerApplyForm";
+import { CareerRoleCard } from "@/app/components/CareerRoleCard";
 import { Markdown } from "@/app/components/Markdown";
 import { ShareRoleButton } from "@/app/components/ShareRoleButton";
 import { Button } from "@/components/ui/button";
@@ -21,7 +23,7 @@ function asStringList(value: unknown): string[] {
     : [];
 }
 
-async function loadRole(slug: string) {
+const loadRole = cache(async (slug: string) => {
   try {
     const prisma = await getDb();
     const [opening, careerPage, related] = await Promise.all([
@@ -46,18 +48,37 @@ async function loadRole(slug: string) {
     console.error("[careers] loadRole failed:", err);
     return { opening: null, careerPage: null, related: [] };
   }
-}
+});
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const { opening } = await loadRole(slug);
   if (!opening) {
-    return { title: "Careers — DiQualia" };
+    return { title: "Careers" };
   }
+  const description = `${opening.department} · ${opening.location} · ${opening.type}`;
+  const canonical = `/careers/${opening.slug}`;
   return {
-    title: `${opening.title} — Careers — DiQualia`,
-    description: `${opening.department} · ${opening.location} · ${opening.type}`,
+    title: `${opening.title} — Careers`,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      title: `${opening.title} — Careers — DiQualia`,
+      description,
+      url: canonical,
+    },
   };
+}
+
+function SectionHeading({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      className="border-b pb-3 text-[11px] tracking-[0.22em] uppercase text-primary"
+      style={{ borderColor: "color-mix(in oklab, var(--border) 70%, transparent)" }}
+    >
+      {children}
+    </div>
+  );
 }
 
 function BulletList({ items }: { items: string[] }) {
@@ -65,7 +86,11 @@ function BulletList({ items }: { items: string[] }) {
     <ul className="mt-6 space-y-3 text-[13px] leading-7 text-muted-foreground">
       {items.map((item) => (
         <li key={item} className="flex items-start gap-3">
-          <span aria-hidden className="text-primary">
+          <span
+            aria-hidden
+            className="mt-[3px] inline-flex h-4 w-4 flex-none items-center justify-center text-[11px] text-primary"
+            style={{ background: "color-mix(in oklab, var(--gold) 12%, transparent)" }}
+          >
             →
           </span>
           <span>{item}</span>
@@ -94,6 +119,13 @@ export default async function JobOpeningPage({ params }: PageProps) {
   if (opening.remote) summary.push({ label: "Remote", value: opening.remote });
   if (opening.teamNote) summary.push({ label: "Team", value: opening.teamNote });
 
+  const metaChips = [
+    opening.location,
+    opening.type,
+    opening.seniority,
+    opening.remote,
+  ].filter((v): v is string => typeof v === "string" && v.trim().length > 0);
+
   return (
     <article>
       <header
@@ -117,7 +149,7 @@ export default async function JobOpeningPage({ params }: PageProps) {
             ← All roles
           </Link>
           <div className="mt-8 text-[11px] tracking-[0.22em] uppercase text-primary">
-            {opening.department} · {opening.location} · {opening.type}
+            {opening.department}
           </div>
           <h1
             className="mt-4 max-w-3xl text-foreground"
@@ -130,33 +162,50 @@ export default async function JobOpeningPage({ params }: PageProps) {
           >
             {opening.title}
           </h1>
+          <div className="mt-6 flex flex-wrap gap-2">
+            {metaChips.map((chip, i) => (
+              <span
+                key={`${chip}-${i}`}
+                className="border px-3 py-1.5 text-[10px] tracking-[0.18em] uppercase text-muted-foreground"
+                style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}
+              >
+                {chip}
+              </span>
+            ))}
+          </div>
+          <div className="mt-8 flex flex-wrap items-center gap-3">
+            <Button asChild variant="primary" size="sm">
+              <a href="#apply">Apply now</a>
+            </Button>
+            <ShareRoleButton title={opening.title} />
+          </div>
         </Container>
       </header>
 
       <Container className="grid grid-cols-1 gap-12 py-14 md:grid-cols-[minmax(0,1fr)_280px] md:gap-16 md:py-20">
         <div>
-          <div className="text-[11px] tracking-[0.22em] uppercase text-primary">About</div>
+          <SectionHeading>About</SectionHeading>
           <div className="mt-6">
             <Markdown source={opening.description} />
           </div>
 
           {responsibilities.length > 0 ? (
             <div className="mt-12">
-              <div className="text-[11px] tracking-[0.22em] uppercase text-primary">Responsibilities</div>
+              <SectionHeading>Responsibilities</SectionHeading>
               <BulletList items={responsibilities} />
             </div>
           ) : null}
 
           {requirements.length > 0 ? (
             <div className="mt-12">
-              <div className="text-[11px] tracking-[0.22em] uppercase text-primary">Requirements</div>
+              <SectionHeading>Requirements</SectionHeading>
               <BulletList items={requirements} />
             </div>
           ) : null}
 
           {niceToHave.length > 0 ? (
             <div className="mt-12">
-              <div className="text-[11px] tracking-[0.22em] uppercase text-primary">Nice-to-have</div>
+              <SectionHeading>Nice-to-have</SectionHeading>
               <BulletList items={niceToHave} />
             </div>
           ) : null}
@@ -215,32 +264,15 @@ export default async function JobOpeningPage({ params }: PageProps) {
             <div className="text-[11px] tracking-[0.22em] uppercase text-primary">Related roles</div>
             <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
               {related.map((role) => (
-                <Link
+                <CareerRoleCard
                   key={role.id}
-                  href={`/careers/${role.slug}`}
-                  className="group block border p-8 no-underline transition-colors"
-                  style={{
-                    borderColor: "color-mix(in oklab, var(--border) 80%, transparent)",
-                    background: "var(--bg-elev)",
-                  }}
-                >
-                  <div className="text-[10px] tracking-[0.22em] uppercase text-primary">
-                    {role.department} · {role.type}
-                  </div>
-                  <h2
-                    className="mt-4 text-foreground group-hover:text-primary"
-                    style={{
-                      fontFamily: "var(--font-display)",
-                      fontWeight: 500,
-                      fontSize: "clamp(1.35rem, 2.4vw, 1.75rem)",
-                      lineHeight: 1.2,
-                    }}
-                  >
-                    {role.title}
-                  </h2>
-                  <p className="mt-3 text-[13px] text-muted-foreground">{role.location}</p>
-                  <div className="mt-6 text-[11px] tracking-[0.22em] uppercase text-primary">View role →</div>
-                </Link>
+                  slug={role.slug}
+                  title={role.title}
+                  department={role.department}
+                  type={role.type}
+                  location={role.location}
+                  headingLevel="h2"
+                />
               ))}
             </div>
           </Container>

@@ -2,13 +2,29 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { cnicLast4 } from "@/lib/cnic";
 import { getEmail } from "@/lib/cloudflare-env";
+import { sendEmail } from "@/lib/email";
 import type { PrismaClient } from "@/lib/generated/prisma/client";
 import { Prisma } from "@/lib/generated/prisma/client";
 import { checkRateLimit, rateLimitResponse } from "@/lib/rateLimit";
 import type { CareerApplyFields } from "@/lib/schemas/public/career-apply";
 import type { getStorage } from "@/lib/storage";
 
-export const ALREADY_APPLIED_MESSAGE = "You have already applied for this role.";
+export const ALREADY_APPLIED_MESSAGE = "You've already applied for this role.";
+/** Where the "already applied" panel sends the applicant. No PII in the URL. */
+export const ALREADY_APPLIED_PORTAL_URL = "/portal/login?next=/portal";
+
+/**
+ * 409 JSON body for an unauthenticated duplicate-application attempt.
+ * `field` (when known) tells the client which input to flag inline.
+ */
+export function alreadyAppliedBody(field?: "cnic" | "email") {
+  return {
+    error: ALREADY_APPLIED_MESSAGE,
+    alreadyApplied: true as const,
+    portalUrl: ALREADY_APPLIED_PORTAL_URL,
+    ...(field ? { field } : {}),
+  };
+}
 
 export type DbClient = PrismaClient;
 export type StorageClient = ReturnType<typeof getStorage>;
@@ -75,7 +91,11 @@ export async function persistJobApplication({
   opening: { id: number; title: string };
   resumeKey: string;
   photoKey: string;
-}): Promise<{ ok: true; id: string } | { ok: false; status: 409 | 500; error: string }> {
+}): Promise<
+  | { ok: true; id: string }
+  | { ok: false; status: 409; error: string; existingId?: string; field?: "cnic" | "email" }
+  | { ok: false; status: 500; error: string }
+> {
   try {
     const application = await prisma.jobApplication.create({
       data: {
@@ -113,10 +133,76 @@ export async function persistJobApplication({
     return { ok: true, id: application.id };
   } catch (err) {
     if (isUniqueConstraintError(err)) {
-      return { ok: false, status: 409, error: ALREADY_APPLIED_MESSAGE };
+      const email = fields.email.trim().toLowerCase();
+      const cnicMatch = fields.cnic
+        ? await prisma.jobApplication.findFirst({
+            where: { jobOpeningId: opening.id, cnic: fields.cnic },
+            select: { id: true },
+          })
+        : null;
+      const emailMatch = cnicMatch
+        ? null
+        : await prisma.jobApplication.findFirst({
+            where: { jobOpeningId: opening.id, email },
+            select: { id: true },
+          });
+      const existing = cnicMatch ?? emailMatch;
+      const field = cnicMatch ? "cnic" : emailMatch ? "email" : undefined;
+      return {
+        ok: false,
+        status: 409,
+        error: ALREADY_APPLIED_MESSAGE,
+        ...(existing ? { existingId: existing.id } : {}),
+        ...(field ? { field } : {}),
+      };
     }
     console.error("[careers/apply] persist failed:", err);
     return { ok: false, status: 500, error: "Failed to save application" };
+  }
+}
+
+/**
+ * Portal account email for one submit: `portalPassword` is a string only when
+ * the account was just created (send credentials); `null` for a returning
+ * applicant (just point them at the portal). Best-effort — its own try/catch.
+ */
+async function sendApplicantCredentialsEmail(
+  mailer: SendEmail,
+  { email, password, openingTitle }: { email: string; password: string | null; openingTitle: string },
+) {
+  const portalUrl = "https://diqualia.com/portal/login";
+  try {
+    if (password) {
+      const subject = "Your DiQualia applicant portal account";
+      const html = `
+        <p>You can track <b>${esc(openingTitle)}</b> and any future applications in the DiQualia applicant portal.</p>
+        <p><b>Sign in:</b> <a href="${esc(portalUrl)}">${esc(portalUrl)}</a><br>
+        <b>Email:</b> ${esc(email)}<br>
+        <b>Temporary password:</b> <code>${esc(password)}</code></p>
+        <p>You&rsquo;ll be asked to set a new password on first sign-in.</p>
+      `;
+      const text = [
+        `Track your DiQualia applications in the applicant portal.`,
+        `Sign in: ${portalUrl}`,
+        `Email: ${email}`,
+        `Temporary password: ${password}`,
+        `You'll set a new password on first sign-in.`,
+      ].join("\n");
+      await sendEmail(mailer, { to: email, subject, html, text });
+    } else {
+      const subject = `New application received — ${openingTitle}`;
+      const html = `
+        <p>We received your application for <b>${esc(openingTitle)}</b>.</p>
+        <p>Sign in to the applicant portal to track it: <a href="${esc(portalUrl)}">${esc(portalUrl)}</a></p>
+      `;
+      const text = [
+        `We received your application for ${openingTitle}.`,
+        `Track it in the applicant portal: ${portalUrl}`,
+      ].join("\n");
+      await sendEmail(mailer, { to: email, subject, html, text });
+    }
+  } catch (err) {
+    console.error("[careers/apply] Credentials email failed:", err);
   }
 }
 
@@ -124,10 +210,13 @@ export async function sendApplicationEmails({
   fields,
   openingTitle,
   applicationId,
+  portalPassword,
 }: {
   fields: CareerApplyFields;
   openingTitle: string;
   applicationId: string;
+  /** New-account single-use password to email, or null for a returning applicant. */
+  portalPassword?: string | null;
 }) {
   try {
     const mailer = await getEmail();
@@ -164,9 +253,8 @@ export async function sendApplicationEmails({
         `Review: ${inboxUrl}`,
       ].join("\n");
 
-      await mailer.send({
+      await sendEmail(mailer, {
         to: process.env.ADMIN_EMAIL!,
-        from: { email: "noreply@diqualia.com", name: "DiQualia" },
         replyTo: fields.email,
         subject,
         html,
@@ -189,9 +277,8 @@ export async function sendApplicationEmails({
         `Reference: ${applicationId}`,
       ].join("\n");
 
-      await mailer.send({
+      await sendEmail(mailer, {
         to: fields.email,
-        from: { email: "noreply@diqualia.com", name: "DiQualia" },
         ...(process.env.ADMIN_EMAIL ? { replyTo: process.env.ADMIN_EMAIL } : {}),
         subject,
         html,
@@ -199,6 +286,14 @@ export async function sendApplicationEmails({
       });
     } catch (err) {
       console.error("[careers/apply] Applicant email failed:", err);
+    }
+
+    if (portalPassword !== undefined) {
+      await sendApplicantCredentialsEmail(mailer, {
+        email: fields.email,
+        password: portalPassword,
+        openingTitle,
+      });
     }
   } catch (err) {
     console.error("[careers/apply] Email send failed:", err);

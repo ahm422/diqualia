@@ -8,6 +8,13 @@ export const aboutHeroPatchSchema = z.object({
 });
 export type AboutHeroPatch = z.infer<typeof aboutHeroPatchSchema>;
 
+export const aboutBuiltForSectionPatchSchema = z.object({
+  eyebrow:       shortStr.optional(),
+  headlineLine1: z.string().min(1).max(300).optional(),
+  headlineLine2: z.string().min(1).max(300).optional(),
+});
+export type AboutBuiltForSectionPatch = z.infer<typeof aboutBuiltForSectionPatchSchema>;
+
 export const aboutBuiltForItemPatchSchema = z.object({
   title:       shortStr.optional(),
   description: longStr.optional(),

@@ -20,8 +20,8 @@ export async function seedCms(prisma: PrismaClient): Promise<void> {
       { href: "/process", label: "How We Work", order: 2, visible: true },
       { href: "/industries", label: "Industries", order: 3, visible: true },
       { href: "/story", label: "Story", order: 4, visible: true },
-      { href: "/blog", label: "Insights", order: 5, visible: true },
-      { href: "/careers", label: "Careers", order: 6, visible: true },
+      { href: "/blog", label: "Blog", order: 5, visible: true },
+      { href: "https://career.diqualia.com", label: "Careers", order: 6, visible: true },
     ],
   });
   console.log("NavItem ready (7)");
@@ -159,6 +159,23 @@ export async function seedCms(prisma: PrismaClient): Promise<void> {
     },
   });
   console.log("AboutHero ready");
+
+  // ─── AboutBuiltForSection ─────────────────────────────────────────────────
+  await prisma.aboutBuiltForSection.upsert({
+    where: { id: 1 },
+    create: {
+      id: 1,
+      eyebrow: "What we're built for",
+      headlineLine1: "Intelligence that compounds —",
+      headlineLine2: "not tactics that expire.",
+    },
+    update: {
+      eyebrow: "What we're built for",
+      headlineLine1: "Intelligence that compounds —",
+      headlineLine2: "not tactics that expire.",
+    },
+  });
+  console.log("AboutBuiltForSection ready");
 
   // ─── AboutBuiltForItem ────────────────────────────────────────────────────
   await prisma.aboutBuiltForItem.deleteMany();
@@ -906,8 +923,8 @@ export async function seedCms(prisma: PrismaClient): Promise<void> {
       { href: "/process", label: "How We Work", group: "primary", order: 2 },
       { href: "/industries", label: "Industries", group: "primary", order: 3 },
       { href: "/story", label: "Story", group: "primary", order: 4 },
-      { href: "/blog", label: "Insights", group: "primary", order: 5 },
-      { href: "/careers", label: "Careers", group: "primary", order: 6 },
+      { href: "/blog", label: "Blog", group: "primary", order: 5 },
+      { href: "https://career.diqualia.com", label: "Careers", group: "primary", order: 6 },
       { href: "/contact", label: "Contact", group: "secondary", order: 0 },
       { href: "/privacy", label: "Privacy", group: "secondary", order: 1 },
       { href: "/terms", label: "Terms", group: "secondary", order: 2 },

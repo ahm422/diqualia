@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { requireAdmin } from "@/lib/auth/require-admin";
+import { requirePermission } from "@/lib/auth/require-admin";
 import { getDb } from "@/lib/cloudflare-env";
 import { AdminPageHeader } from "@/components/admin";
 
@@ -12,7 +12,7 @@ export default async function EditBlogPostPage({
   params: Promise<{ id: string }>;
 }) {
   const prisma = await getDb();
-  await requireAdmin();
+  await requirePermission("cms.view");
 
   const { id } = await params;
   const post = await prisma.blogPost.findUnique({ where: { id } });
@@ -22,7 +22,12 @@ export default async function EditBlogPostPage({
     <div>
       <AdminPageHeader
         title="Edit post"
-        description={post.slug}
+        description={
+          post.status === "published"
+            ? `Live at /blog/${post.slug}`
+            : `Draft at slug “${post.slug}” — not shown on /blog until published.`
+        }
+        previewHref={post.status === "published" ? `/blog/${post.slug}` : "/blog"}
       />
       <BlogPostEditor initial={post} />
     </div>

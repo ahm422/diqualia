@@ -18,7 +18,9 @@ function getSystemTheme(): Theme {
 }
 
 function applyThemeToHtml(theme: Theme) {
-  document.documentElement.classList.toggle(DARK_CLASS, theme === "dark");
+  const d = document.documentElement;
+  d.classList.toggle(DARK_CLASS, theme === "dark");
+  d.style.colorScheme = theme === "dark" ? "dark" : "light";
 }
 
 function subscribeTheme(onStoreChange: () => void) {
@@ -40,7 +42,14 @@ function getStoredMode(): ThemeMode {
   return "system";
 }
 
-export function ThemeToggle() {
+export function ThemeToggle({
+  label,
+  className,
+}: {
+  /** When set, the control is a full-width labeled row (icon + text). */
+  label?: string;
+  className?: string;
+} = {}) {
   const mounted = useSyncExternalStore(
     () => () => {},
     () => true,
@@ -54,7 +63,11 @@ export function ThemeToggle() {
   }, [mode, mounted]);
 
   useEffect(() => {
-    applyThemeToHtml(effectiveTheme);
+    // Derive from live state, not the render-time `effectiveTheme` (whose server
+    // snapshot is always "light") so we never clobber the pre-paint inline script
+    // for a `system` + dark user on first mount.
+    const resolved: Theme = mode === "system" ? getSystemTheme() : mode;
+    applyThemeToHtml(resolved);
 
     const mq = window.matchMedia?.("(prefers-color-scheme: dark)");
     if (!mq) return;
@@ -66,7 +79,7 @@ export function ThemeToggle() {
 
     mq.addEventListener?.("change", handler);
     return () => mq.removeEventListener?.("change", handler);
-  }, [effectiveTheme, mode]);
+  }, [mode]);
 
   function toggle() {
     const next: Theme = effectiveTheme === "dark" ? "light" : "dark";
@@ -80,15 +93,37 @@ export function ThemeToggle() {
   }
 
   const pressed = effectiveTheme === "dark";
+  const ariaLabel = pressed ? "Switch to light theme" : "Switch to dark theme";
+  const icon = pressed ? (
+    <Moon aria-hidden size={14} className="shrink-0 text-primary" />
+  ) : (
+    <Sun aria-hidden size={14} className="shrink-0 text-primary" />
+  );
+
+  if (label) {
+    return (
+      <button
+        type="button"
+        onClick={toggle}
+        aria-pressed={pressed}
+        aria-label={ariaLabel}
+        className={className}
+      >
+        {icon}
+        {label}
+      </button>
+    );
+  }
 
   return (
     <Button
       type="button"
       onClick={toggle}
       aria-pressed={pressed}
-      aria-label={pressed ? "Switch to light theme" : "Switch to dark theme"}
+      aria-label={ariaLabel}
       variant="ghost"
       size="icon"
+      className={className}
     >
       {pressed ? <Moon aria-hidden className="text-primary" /> : <Sun aria-hidden className="text-primary" />}
       <span className="sr-only">{pressed ? "Dark theme" : "Light theme"}</span>

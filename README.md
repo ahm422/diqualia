@@ -72,6 +72,7 @@ are re-indexed automatically (D1 triggers + cron); no manual ingest step.
 
 See [`docs/DEPLOY-PHASE9.md`](docs/DEPLOY-PHASE9.md) and [`MIGRATION_D1_R2_WORKERS.md`](MIGRATION_D1_R2_WORKERS.md).
 
+<<<<<<< HEAD
 The chatbot Worker is deployed separately and must exist before the website,
 because the website's `CHATBOT` service binding points to it:
 
@@ -81,3 +82,19 @@ npm run deploy:all -- --site   # Vectorize index, D1 migrations, chatbot, then w
 ```
 
 Details: [`workers/chatbot/README.md`](workers/chatbot/README.md#first-time-production-setup).
+=======
+## Scheduled jobs
+
+| Job | Schedule | What it does |
+|-----|----------|---------------|
+| Stale career-application draft cleanup | Daily 03:00 UTC (`triggers.crons` in `wrangler.jsonc`) | Hard-deletes `career_application_drafts` rows with `status = 'in_progress'` and `updated_at` older than 30 days (no matching submitted application), including their R2 resume/photo objects. `status = 'completed'` drafts are never touched — their R2 keys are shared with the resulting `job_applications` row. See [`lib/careers/cleanup-drafts.ts`](lib/careers/cleanup-drafts.ts) and issue #102. |
+
+The Cron Trigger is wired via [`src/worker/custom-worker.ts`](src/worker/custom-worker.ts), which wraps OpenNext's generated `fetch` handler and adds `scheduled()` (OpenNext's Cloudflare adapter doesn't expose a hook for this). `wrangler.jsonc`'s `main` points here instead of directly at `.open-next/worker.js`.
+
+Dry-run / manual invocation (see the script's header comment for all flags):
+
+```bash
+npx tsx scripts/cleanup-stale-drafts.ts              # local D1, dry-run (default)
+npx tsx scripts/cleanup-stale-drafts.ts --remote --run
+```
+>>>>>>> c86113d2eefa528ae4e3f0a6882fbc3eb970be17

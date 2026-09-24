@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -7,6 +8,13 @@ import { Button } from "@/components/ui/button";
 import { getDb } from "@/lib/cloudflare-env";
 
 export const revalidate = 60;
+
+// Title / description / OG image are inherited from the root metadata; this just
+// pins an explicit self-referential canonical for the home route.
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+  openGraph: { url: "/" },
+};
 
 type HeroStat = { label: string; value: string };
 
@@ -137,6 +145,8 @@ export default async function Home() {
   const [
     hero,
     marqueeItems,
+    exploreSection,
+    exploreCards,
     whereNext,
     aboutHero,
     principles,
@@ -149,6 +159,11 @@ export default async function Home() {
   ] = await Promise.all([
     prisma.homeHero.findUnique({ where: { id: 1 } }),
     prisma.homeMarqueeItem.findMany({ orderBy: { order: "asc" } }),
+    prisma.homeExploreSection.findUnique({ where: { id: 1 } }),
+    prisma.homeExploreCard.findMany({
+      where: { visible: true },
+      orderBy: { order: "asc" },
+    }),
     prisma.homeWhereNext.findUnique({ where: { id: 1 } }),
     prisma.aboutHero.findUnique({ where: { id: 1 } }),
     prisma.aboutBuiltForItem.findMany({ orderBy: { order: "asc" } }),
@@ -330,6 +345,111 @@ export default async function Home() {
             })}
           </div>
         </div>
+      )}
+
+      {/* EXPLORE */}
+      {(exploreSection || exploreCards.length > 0) && (
+        <section
+          id="explore"
+          className="diq-sectionY relative"
+          style={{ background: "var(--diq_ink)" }}
+        >
+          <Container>
+            {exploreSection && (
+              <div className="diq-reveal">
+                <Eyebrow>{exploreSection.eyebrow}</Eyebrow>
+                <h2
+                  className="mt-6"
+                  style={{
+                    fontFamily: "var(--font-display)",
+                    fontSize: "clamp(2rem, 4.4vw, 3.4rem)",
+                    fontWeight: 500,
+                    color: "var(--diq_ivory)",
+                    lineHeight: 1.08,
+                    letterSpacing: "-0.03em",
+                  }}
+                >
+                  {exploreSection.headlineLine1}
+                  <br />
+                  {exploreSection.headlineLine2}
+                </h2>
+                <p
+                  className="mt-6 max-w-[62ch]"
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontSize: "clamp(15px, 1.5vw, 17px)",
+                    fontWeight: 300,
+                    color: "var(--muted-foreground)",
+                    lineHeight: 1.85,
+                  }}
+                >
+                  {exploreSection.body}
+                </p>
+              </div>
+            )}
+
+            {exploreCards.length > 0 && (
+              <div
+                className={`${exploreSection ? "mt-12" : ""} grid grid-cols-1 gap-px sm:grid-cols-2 xl:grid-cols-3`}
+                style={{ background: "var(--diq_border2)" }}
+              >
+                {exploreCards.map((card, i) => (
+                  <Link
+                    key={card.id}
+                    href={card.href}
+                    className="diq-homeCard diq-reveal group flex flex-col p-8 no-underline md:p-10"
+                    style={{ transitionDelay: `${i * 60}ms` }}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      {card.sectionLabel ? (
+                        <div
+                          style={{
+                            fontFamily: "var(--font-mono)",
+                            fontSize: 10,
+                            letterSpacing: "0.22em",
+                            textTransform: "uppercase",
+                            color: "var(--primary)",
+                          }}
+                        >
+                          {card.sectionLabel}
+                        </div>
+                      ) : (
+                        <span />
+                      )}
+                      <span
+                        className="diq-ghostNum"
+                        style={{ fontFamily: "var(--font-display)", fontSize: 22, lineHeight: 1 }}
+                      >
+                        {String(i + 1).padStart(2, "0")}
+                      </span>
+                    </div>
+                    <h3
+                      className="mt-5"
+                      style={{
+                        fontFamily: "var(--font-display)",
+                        fontSize: 22,
+                        fontWeight: 500,
+                        color: "var(--diq_ivory)",
+                        lineHeight: 1.25,
+                      }}
+                    >
+                      {card.title}
+                    </h3>
+                    <p className="mt-4 flex-1 text-[13px] leading-7" style={{ color: "var(--muted-foreground)" }}>
+                      {card.body}
+                    </p>
+                    <div
+                      className="mt-7 text-[11px] tracking-[0.22em] uppercase"
+                      style={{ color: "var(--primary)", fontFamily: "var(--font-mono)" }}
+                    >
+                      Open →
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </Container>
+        </section>
       )}
 
       {/* STATEMENT + PRINCIPLES */}

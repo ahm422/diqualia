@@ -6,9 +6,16 @@ import { getDb } from "@/lib/cloudflare-env";
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: "Story — DiQualia",
+  title: "Story",
   description:
     "DiQualia was built on the Double Experience — the deliberate convergence of deep human expertise and the precision of intelligent systems.",
+  alternates: { canonical: "/story" },
+  openGraph: {
+    title: "Story — DiQualia",
+    description:
+      "DiQualia was built on the Double Experience — the deliberate convergence of deep human expertise and the precision of intelligent systems.",
+    url: "/story",
+  },
 };
 
 function Eyebrow({ children, center }: { children: React.ReactNode; center?: boolean }) {

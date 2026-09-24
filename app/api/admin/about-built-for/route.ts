@@ -3,9 +3,9 @@ import "server-only";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { requireAdminApi, requirePermissionApi } from "@/lib/auth/require-admin-api";
+import { requirePermissionApi } from "@/lib/auth/require-admin-api";
 import { getDb } from "@/lib/cloudflare-env";
-import { revalidatePage } from "@/lib/revalidate-site";
+import { revalidatePages } from "@/lib/revalidate-site";
 
 const PostSchema = z.object({
   title: z.string().min(1).max(200),
@@ -14,7 +14,7 @@ const PostSchema = z.object({
 
 export async function GET() {
   const prisma = await getDb();
-  const session = await requireAdminApi();
+  const session = await requirePermissionApi("cms.view");
   if (session instanceof NextResponse) return session;
 
   const items = await prisma.aboutBuiltForItem.findMany({ orderBy: { order: "asc" } });
@@ -23,7 +23,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   const prisma = await getDb();
-  const session = await requirePermissionApi("content.create");
+  const session = await requirePermissionApi("cms.edit");
   if (session instanceof NextResponse) return session;
 
   let body: unknown;
@@ -45,6 +45,6 @@ export async function POST(request: Request) {
     data: { title: parsed.data.title, description: parsed.data.description, order: nextOrder },
   });
 
-  revalidatePage("/about");
+  revalidatePages("/", "/about");
   return NextResponse.json(item, { status: 201 });
 }

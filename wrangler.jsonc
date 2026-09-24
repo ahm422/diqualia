@@ -12,13 +12,24 @@
   //
   // Vars vs secrets (production):
   //   vars (wrangler.jsonc):     R2_PUBLIC_URL, NODE_ENV
+  //   NOTE: R2_PUBLIC_URL is a *runtime* var and is NOT visible to `next build`.
+  //   next.config.ts carries a static `**.r2.dev` image remotePattern fallback; if a
+  //   custom asset domain is ever used, also export R2_PUBLIC_URL in the build env
+  //   (CI: .gitea/workflows/ci.yml; deploy: prefix `npm run deploy`). Keep this value
+  //   and .env.example in sync.
   //   wrangler secret (required): JWT_SECRET, ADMIN_EMAIL
   //   bindings:                   EMAIL (send_email) — contact form via Cloudflare Email Service
   //                               CHATBOT (service) — diqualia-chatbot Worker (workers/chatbot)
   //                               from: noreply@diqualia.com (domain must be email-sending enabled)
   //   never long-lived secret:    ADMIN_PASSWORD — one-time seed only (scripts/seed-admin.ts)
   //   local preview only:         COOKIE_SECURE=false in .dev.vars
-  //   omitted until implemented:  CRON_SECRET (no cron handler in codebase)
+  //
+  // Cron Trigger (issue #102): daily stale career-application-draft cleanup
+  // (30-day retention on status='in_progress' drafts — see
+  // lib/careers/cleanup-drafts.ts). OpenNext's Cloudflare adapter only
+  // emits a fetch handler, so `main` points at src/worker/custom-worker.ts,
+  // which wraps .open-next/worker.js and adds scheduled(). No secret needed
+  // — it's a pure Cron Trigger, not an HTTP-triggerable endpoint.
   //
   // Phase 1 provisioning (issue #41); account: the owner's Cloudflare account
   // - d1 create diqualia-db: see database_id below
@@ -29,10 +40,14 @@
   "workers_dev": true,
   "compatibility_date": "2026-07-01",
   "compatibility_flags": ["nodejs_compat"],
-  "main": ".open-next/worker.js",
+  "main": "src/worker/custom-worker.ts",
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
+  },
+  "triggers": {
+    // Daily 03:00 UTC — stale career-application-draft cleanup (issue #102).
+    "crons": ["0 3 * * *"]
   },
   "d1_databases": [
     {

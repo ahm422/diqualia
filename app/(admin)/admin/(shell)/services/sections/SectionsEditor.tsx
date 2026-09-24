@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -12,6 +13,19 @@ import {
 
 import type { ServiceItem, ServiceSection } from "../types";
 import { useCan } from "@/app/(admin)/admin/AdminSessionProvider";
+
+// TipTap is heavy and client-only — keep it out of the shared admin bundle.
+const RichTextEditor = dynamic(
+  () => import("@/components/admin/RichTextEditor").then((m) => m.RichTextEditor),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="min-h-64 rounded border border-[var(--diq_border)] bg-[var(--diq_deep)] px-3 py-3 text-sm text-[var(--diq_mid)]">
+        Loading editor…
+      </div>
+    ),
+  },
+);
 
 export function SectionsEditor({ initial }: { initial: ServiceSection[] }) {
   const canCreate = useCan("content.create");
@@ -135,6 +149,7 @@ type SectionPanelProps = {
 
 function SectionPanel({ section, idx, total, isOpen, onToggle, onPatch, onMove, onDelete, onItemsChange }: SectionPanelProps) {
   const [saving, setSaving] = useState(false);
+  const [overviewHtml, setOverviewHtml] = useState(section.overviewHtml ?? "");
   const canDelete = useCan("content.delete");
   const canEdit = useCan("content.edit");
 
@@ -143,6 +158,8 @@ function SectionPanel({ section, idx, total, isOpen, onToggle, onPatch, onMove, 
     const inputs = document.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(`[data-section-field="${section.id}"]`);
     const data: Record<string, unknown> = {};
     inputs.forEach((el) => { data[el.name] = el.value || null; });
+    // RichTextEditor state isn't a DOM input picked up by the scrape above.
+    data.overviewHtml = overviewHtml || null;
     const res = await onPatch(data);
     if (res.ok) toast.success("Saved");
     else toast.error("Save failed — try again");
@@ -161,7 +178,7 @@ function SectionPanel({ section, idx, total, isOpen, onToggle, onPatch, onMove, 
           <button onClick={() => onMove(-1)} disabled={idx === 0} className="rounded px-1 text-[var(--diq_mid)] hover:text-foreground disabled:opacity-30 text-xs">↑</button>
           <button onClick={() => onMove(1)} disabled={idx === total - 1} className="rounded px-1 text-[var(--diq_mid)] hover:text-foreground disabled:opacity-30 text-xs">↓</button>
           {canDelete && (
-            <button onClick={onDelete} className="ml-2 text-xs text-red-400 hover:text-red-300">Delete</button>
+            <button onClick={onDelete} className="ml-2 text-xs text-[var(--destructive)] hover:opacity-80">Delete</button>
           )}
         </div>
       </div>
@@ -199,6 +216,24 @@ function SectionPanel({ section, idx, total, isOpen, onToggle, onPatch, onMove, 
               <label className="mb-1 block text-[11px] uppercase tracking-widest text-[var(--diq_mid)]">Card Body (optional)</label>
               <textarea name="cardBody" defaultValue={section.cardBody ?? ""} data-section-field={section.id} rows={2}
                 className="w-full resize-y rounded border border-[var(--diq_border)] bg-[var(--diq_deep)] px-2 py-1.5 text-sm focus:outline-none" />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="mb-1 block text-[11px] uppercase tracking-widest text-[var(--diq_mid)]">
+                Overview (optional, rich text — replaces the plain Body paragraph on /services)
+              </label>
+              <RichTextEditor value={overviewHtml} onChange={setOverviewHtml} placeholder="Formatted section overview…" />
+            </div>
+            <div>
+              <label className="mb-1 block text-[11px] uppercase tracking-widest text-[var(--diq_mid)]">CTA Label (optional)</label>
+              <input name="ctaLabel" defaultValue={section.ctaLabel ?? ""} data-section-field={section.id}
+                placeholder="Contact Us"
+                className="w-full rounded border border-[var(--diq_border)] bg-[var(--diq_deep)] px-2 py-1.5 text-sm focus:outline-none" />
+            </div>
+            <div>
+              <label className="mb-1 block text-[11px] uppercase tracking-widest text-[var(--diq_mid)]">CTA Href (optional — shows the button when set)</label>
+              <input name="ctaHref" defaultValue={section.ctaHref ?? ""} data-section-field={section.id}
+                placeholder="/contact"
+                className="w-full rounded border border-[var(--diq_border)] bg-[var(--diq_deep)] px-2 py-1.5 text-sm focus:outline-none" />
             </div>
           </div>
           <div className="flex items-center gap-3 mb-6">
@@ -336,7 +371,7 @@ function ItemsEditor({ section, onItemsChange }: { section: ServiceSection; onIt
               <button onClick={() => moveItem(item.id, -1)} disabled={idx === 0} className="text-[var(--diq_mid)] hover:text-foreground disabled:opacity-30 text-xs">↑</button>
               <button onClick={() => moveItem(item.id, 1)} disabled={idx === items.length - 1} className="text-[var(--diq_mid)] hover:text-foreground disabled:opacity-30 text-xs">↓</button>
               {canDelete && (
-                <button onClick={() => deleteItem(item.id)} className="ml-auto text-xs text-red-400 hover:text-red-300">Delete</button>
+                <button onClick={() => deleteItem(item.id)} className="ml-auto text-xs text-[var(--destructive)] hover:opacity-80">Delete</button>
               )}
             </div>
           </div>

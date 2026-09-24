@@ -3,7 +3,9 @@ import type { Metadata } from "next";
 import { Container } from "@/app/components/Container";
 
 export const metadata: Metadata = {
-  title: "Terms — DiQualia",
+  title: "Terms",
+  description: "Terms information for the DiQualia marketing site.",
+  alternates: { canonical: "/terms" },
 };
 
 export default function TermsPage() {

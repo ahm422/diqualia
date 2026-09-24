@@ -1,7 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
   BookOpen,
-  Briefcase,
   Building2,
   House,
   Info,
@@ -36,10 +35,11 @@ export const ADMIN_NAV: NavGroup[] = [
     label: "Home",
     icon: House,
     children: [
-      { href: "/admin/home/hero", label: "Hero" },
-      { href: "/admin/home/marquee", label: "Marquee" },
-      { href: "/admin/home/explore", label: "Explore Cards" },
-      { href: "/admin/home/where-next", label: "Where Next" },
+      { href: "/admin/home/hero", label: "Hero", permission: "cms.view" },
+      { href: "/admin/home/marquee", label: "Marquee", permission: "cms.view" },
+      { href: "/admin/home/explore?section=header", label: "Explore Header", permission: "cms.view" },
+      { href: "/admin/home/explore?section=cards", label: "Explore Cards", permission: "cms.view" },
+      { href: "/admin/home/where-next", label: "Where Next", permission: "cms.view" },
     ],
   },
   {
@@ -47,9 +47,10 @@ export const ADMIN_NAV: NavGroup[] = [
     label: "About",
     icon: Info,
     children: [
-      { href: "/admin/about/hero", label: "Hero" },
-      { href: "/admin/about/built-for", label: "Built-For Items" },
-      { href: "/admin/about/where-next", label: "Where Next" },
+      { href: "/admin/about/hero", label: "Hero", permission: "cms.view" },
+      { href: "/admin/about/built-for?section=header", label: "Built-For Header", permission: "cms.view" },
+      { href: "/admin/about/built-for?section=items", label: "Built-For Items", permission: "cms.view" },
+      { href: "/admin/about/where-next", label: "Where Next", permission: "cms.view" },
     ],
   },
   {
@@ -57,8 +58,9 @@ export const ADMIN_NAV: NavGroup[] = [
     label: "Services",
     icon: Layers,
     children: [
-      { href: "/admin/services/intro", label: "Page Intro" },
-      { href: "/admin/services/sections", label: "Sections & Items" },
+      { href: "/admin/services/intro?section=hero", label: "Intro Hero", permission: "cms.view" },
+      { href: "/admin/services/intro?section=cta", label: "Intro CTA", permission: "cms.view" },
+      { href: "/admin/services/sections", label: "Sections & Items", permission: "cms.view" },
     ],
   },
   {
@@ -66,9 +68,9 @@ export const ADMIN_NAV: NavGroup[] = [
     label: "How We Work",
     icon: ListOrdered,
     children: [
-      { href: "/admin/process/hero", label: "Hero" },
-      { href: "/admin/process/steps", label: "Steps" },
-      { href: "/admin/process/where-next", label: "Where Next" },
+      { href: "/admin/process/hero", label: "Hero", permission: "cms.view" },
+      { href: "/admin/process/steps", label: "Steps", permission: "cms.view" },
+      { href: "/admin/process/where-next", label: "Where Next", permission: "cms.view" },
     ],
   },
   {
@@ -76,9 +78,10 @@ export const ADMIN_NAV: NavGroup[] = [
     label: "Industries",
     icon: Building2,
     children: [
-      { href: "/admin/industries/hero", label: "Hero" },
-      { href: "/admin/industries/sectors", label: "Sectors" },
-      { href: "/admin/industries/where-next", label: "Where Next" },
+      { href: "/admin/industries/hero", label: "Hero", permission: "cms.view" },
+      { href: "/admin/industries/sectors?section=copy", label: "Sectors copy", permission: "cms.view" },
+      { href: "/admin/industries/sectors?section=tags", label: "Sector tags", permission: "cms.view" },
+      { href: "/admin/industries/where-next", label: "Where Next", permission: "cms.view" },
     ],
   },
   {
@@ -86,28 +89,19 @@ export const ADMIN_NAV: NavGroup[] = [
     label: "Story",
     icon: BookOpen,
     children: [
-      { href: "/admin/story/hero", label: "Hero" },
-      { href: "/admin/story/dx", label: "Double Experience" },
-      { href: "/admin/story/manifesto", label: "Manifesto" },
+      { href: "/admin/story/hero", label: "Hero", permission: "cms.view" },
+      { href: "/admin/story/dx?section=card1", label: "DX Card 1", permission: "cms.view" },
+      { href: "/admin/story/dx?section=card2", label: "DX Card 2", permission: "cms.view" },
+      { href: "/admin/story/dx?section=tagline", label: "DX Tagline", permission: "cms.view" },
+      { href: "/admin/story/manifesto", label: "Manifesto", permission: "cms.view" },
     ],
   },
   {
     id: "blog",
     label: "Blog",
     icon: Newspaper,
-    children: [{ href: "/admin/blog", label: "Posts", match: "prefix" }],
-  },
-  {
-    id: "careers",
-    label: "Careers",
-    icon: Briefcase,
     children: [
-      { href: "/admin/careers/hero", label: "Hero" },
-      { href: "/admin/careers/culture", label: "Culture" },
-      { href: "/admin/careers/benefits", label: "Benefits" },
-      { href: "/admin/careers/apply", label: "Apply instructions" },
-      { href: "/admin/careers/openings", label: "Job Openings", match: "prefix" },
-      { href: "/admin/careers/applications", label: "Applications", match: "prefix" },
+      { href: "/admin/blog", label: "Posts", match: "prefix", permission: "cms.view" },
     ],
   },
   {
@@ -115,11 +109,11 @@ export const ADMIN_NAV: NavGroup[] = [
     label: "Contact",
     icon: Mail,
     children: [
-      { href: "/admin/contact/hero", label: "Hero" },
-      { href: "/admin/contact/email-card", label: "Email Card" },
-      { href: "/admin/contact/what-to-include", label: "What to Include" },
-      { href: "/admin/contact/expectation", label: "Expectation" },
-      { href: "/admin/submissions", label: "Submissions" },
+      { href: "/admin/contact/hero", label: "Hero", permission: "cms.view" },
+      { href: "/admin/contact/email-card", label: "Email Card", permission: "cms.view" },
+      { href: "/admin/contact/what-to-include", label: "What to Include", permission: "cms.view" },
+      { href: "/admin/contact/expectation", label: "Expectation", permission: "cms.view" },
+      { href: "/admin/submissions", label: "Submissions", permission: "contact.view" },
     ],
   },
   {
@@ -127,9 +121,9 @@ export const ADMIN_NAV: NavGroup[] = [
     label: "Site-wide",
     icon: Settings,
     children: [
-      { href: "/admin/site-settings?section=site", label: "Site Settings" },
-      { href: "/admin/site-settings?section=nav", label: "Nav Items" },
-      { href: "/admin/site-settings?section=footer", label: "Footer" },
+      { href: "/admin/site-settings?section=site", label: "Site Settings", permission: "cms.edit" },
+      { href: "/admin/site-settings?section=nav", label: "Nav Items", permission: "cms.edit" },
+      { href: "/admin/site-settings?section=footer", label: "Footer", permission: "cms.edit" },
       { href: "/admin/settings/users", label: "Users", permission: "users.manage" },
       { href: "/admin/settings/roles", label: "Roles", permission: "roles.manage" },
     ],

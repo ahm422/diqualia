@@ -1,4 +1,5 @@
 import { redirectAdminSection } from "@/lib/admin/section-redirect";
+import { requirePermission } from "@/lib/auth/require-admin";
 
 const CONTACT_SECTIONS = {
   hero: "/admin/contact/hero",
@@ -12,6 +13,7 @@ export default async function ContactAdminRedirect({
 }: {
   searchParams: Promise<{ section?: string }>;
 }) {
+  await requirePermission("cms.view");
   const { section } = await searchParams;
   redirectAdminSection(CONTACT_SECTIONS, section, "hero");
 }

@@ -69,7 +69,7 @@ function StringListField({
           <button
             type="button"
             onClick={() => onChange(items.filter((_, i) => i !== idx))}
-            className="shrink-0 text-xs text-red-400 hover:text-red-300"
+            className="shrink-0 text-xs text-[var(--destructive)] hover:opacity-80"
           >
             Delete
           </button>
@@ -295,9 +295,9 @@ export function JobOpeningEditor({ initial }: Props) {
         </label>
         <div className="flex flex-wrap items-center gap-3 pt-2">
           {isNew ? (
-            <AdminSaveButton onClick={handleCreate} saving={creating} />
+            <AdminSaveButton onClick={handleCreate} saving={creating} permission="careers.openings.manage" />
           ) : (
-            <AdminSaveButton onClick={handleSave} saving={saving} />
+            <AdminSaveButton onClick={handleSave} saving={saving} permission="careers.openings.manage" />
           )}
           {!isNew && canDelete && (
             <Button

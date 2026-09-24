@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { shortStr, longStr, urlStr, labelStr, statStr } from "./shared";
+import { blogBodyStr } from "./blog";
 
 export const servicesPagePatchSchema = z.object({
   eyebrow:    shortStr.optional(),
@@ -25,6 +26,9 @@ export const serviceSectionPatchSchema = z.object({
   body:      longStr.optional(),
   cardTitle: shortStr.optional().nullable(),
   cardBody:  longStr.optional().nullable(),
+  overviewHtml: blogBodyStr.optional().nullable(),
+  ctaLabel:  labelStr.optional().nullable(),
+  ctaHref:   urlStr.optional().nullable(),
   order:     z.number().int().min(0).optional(),
 });
 export type ServiceSectionPatch = z.infer<typeof serviceSectionPatchSchema>;
@@ -36,6 +40,9 @@ export const serviceSectionPostSchema = z.object({
   body:      longStr,
   cardTitle: shortStr.optional(),
   cardBody:  longStr.optional(),
+  overviewHtml: blogBodyStr.optional().nullable(),
+  ctaLabel:  labelStr.optional().nullable(),
+  ctaHref:   urlStr.optional().nullable(),
 });
 export type ServiceSectionPost = z.infer<typeof serviceSectionPostSchema>;
 

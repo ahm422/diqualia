@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { checkRateLimit, rateLimitResponse } from "@/lib/rateLimit";
 import { getDb, getEmail } from "@/lib/cloudflare-env";
+import { sendEmail } from "@/lib/email";
 import { ContactBodySchema } from "@/lib/schemas/public/contact";
 
 function getClientIp(request: NextRequest) {
@@ -75,10 +76,9 @@ export async function POST(request: NextRequest) {
         message ?? "—",
       ].join("\n");
 
-      await mailer.send({
+      await sendEmail(mailer, {
         to: process.env.ADMIN_EMAIL!,
-        from: { email: "noreply@diqualia.com", name: "DiQualia" },
-        replyTo: email || undefined,
+        ...(email ? { replyTo: email } : {}),
         subject,
         html,
         text,

@@ -17,6 +17,11 @@ export function revalidatePage(path: (typeof SITE_PATHS)[number]) {
   revalidatePath(path);
 }
 
+/** Revalidate several public pages at once (e.g. content shown on both `/` and a dedicated page) */
+export function revalidatePages(...paths: (typeof SITE_PATHS)[number][]) {
+  for (const path of paths) revalidatePath(path);
+}
+
 /** Revalidate a dynamic blog post path (not in SITE_PATHS) */
 export function revalidateBlogPost(slug: string) {
   revalidatePath(`/blog/${slug}`);
@@ -37,4 +42,13 @@ export function revalidateSiteLayout() {
   for (const path of SITE_PATHS) {
     revalidatePath(path, "layout");
   }
+}
+
+/**
+ * Revalidate the generated sitemap. `app/sitemap.ts` is a cached Route Handler,
+ * so call this whenever a published/visible blog post, industry sector, or job
+ * opening is created, updated, or removed.
+ */
+export function revalidateSitemap() {
+  revalidatePath("/sitemap.xml");
 }

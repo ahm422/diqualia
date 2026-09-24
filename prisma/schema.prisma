@@ -80,6 +80,39 @@ model RefreshToken {
   @@map("refresh_tokens")
 }
 
+// ─── Applicant portal (/portal) ──────────────────────────────────────────────
+// Auth surface fully separate from the admin one: distinct cookie
+// (dq_portal_token), distinct signing secret (PORTAL_JWT_SECRET), aud "portal".
+// Applications link to accounts by lower-cased email (applicantUserId is a
+// convenience backfill, no FK).
+
+model ApplicantUser {
+  id                 String                  @id @default(uuid())
+  email              String                  @unique
+  name               String?
+  passwordHash       String                  @map("password_hash")
+  mustChangePassword Boolean                 @default(true) @map("must_change_password")
+  createdAt          DateTime                @default(now()) @map("created_at")
+  lastLoginAt        DateTime?               @map("last_login_at")
+  refreshTokens      ApplicantRefreshToken[]
+
+  @@map("applicant_users")
+}
+
+model ApplicantRefreshToken {
+  id              String        @id @default(uuid())
+  applicantUserId String        @map("applicant_user_id")
+  tokenHash       String        @map("token_hash")
+  expiresAt       DateTime      @map("expires_at")
+  revokedAt       DateTime?     @map("revoked_at")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  applicantUser   ApplicantUser @relation(fields: [applicantUserId], references: [id], onDelete: Cascade)
+
+  @@index([applicantUserId])
+  @@index([tokenHash])
+  @@map("applicant_refresh_tokens")
+}
+
 // ─── Global ──────────────────────────────────────────────────────────────────
 
 model SiteSettings {
@@ -184,6 +217,15 @@ model AboutHero {
   @@map("about_hero")
 }
 
+model AboutBuiltForSection {
+  id            Int    @id @default(1)
+  eyebrow       String
+  headlineLine1 String @map("headline_line1")
+  headlineLine2 String @map("headline_line2")
+
+  @@map("about_built_for_section")
+}
+
 model AboutBuiltForItem {
   id          Int    @id @default(autoincrement())
   title       String
@@ -239,6 +281,9 @@ model ServiceSection {
   body      String
   cardTitle String?       @map("card_title")
   cardBody  String?       @map("card_body")
+  overviewHtml String?    @map("overview_html")
+  ctaLabel  String?       @map("cta_label")
+  ctaHref   String?       @map("cta_href")
   items     ServiceItem[]
 
   @@map("service_sections")
@@ -476,15 +521,23 @@ model JobApplication {
   availableFrom       String?     @map("available_from")
   photoKey            String?     @map("photo_key")
   declarationAccepted Boolean     @default(false) @map("declaration_accepted")
+  applicantUserId     String?     @map("applicant_user_id")
   jobOpening          JobOpening? @relation(fields: [jobOpeningId], references: [id], onDelete: SetNull)
 
   @@unique([jobOpeningId, email], map: "job_applications_opening_email_key")
   @@unique([jobOpeningId, cnic], map: "job_applications_opening_cnic_key")
   @@index([jobOpeningId])
   @@index([status])
+  @@index([applicantUserId])
   @@map("job_applications")
 }
 
+// Stale-draft retention (issue #102): status = 'in_progress' drafts with
+// updatedAt older than 30 days (and no matching JobApplication) are
+// hard-deleted by the daily cleanup Cron Trigger — see
+// lib/careers/cleanup-drafts.ts. status = 'completed' drafts are retained
+// indefinitely (their resume/photo R2 keys are shared with the resulting
+// JobApplication row).
 model CareerApplicationDraft {
   token        String   @id
   jobOpeningId Int      @map("job_opening_id")
@@ -497,6 +550,7 @@ model CareerApplicationDraft {
   professional CareerApplicationDraftProfessional?
   other        CareerApplicationDraftOther?
 
+  @@index([status, updatedAt])
   @@map("career_application_drafts")
 }
 

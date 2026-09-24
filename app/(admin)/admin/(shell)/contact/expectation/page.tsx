@@ -1,4 +1,4 @@
-import { requireAdmin } from "@/lib/auth/require-admin";
+import { requirePermission } from "@/lib/auth/require-admin";
 import { getDb } from "@/lib/cloudflare-env";
 import { AdminPageHeader } from "@/components/admin";
 
@@ -6,7 +6,7 @@ import { ExpectationEditor } from "./ExpectationEditor";
 
 export default async function ContactExpectationAdminPage() {
   const prisma = await getDb();
-  await requireAdmin();
+  await requirePermission("cms.view");
 
   const contactPage = await prisma.contactPage.findUnique({ where: { id: 1 } });
 

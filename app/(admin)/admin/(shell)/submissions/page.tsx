@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import { requireAdmin } from "@/lib/auth/require-admin";
+import { requirePermission } from "@/lib/auth/require-admin";
 import { getDb } from "@/lib/cloudflare-env";
 import { AdminPageHeader } from "@/components/admin";
 
@@ -8,7 +8,7 @@ import { SubmissionsTable } from "./SubmissionsTable";
 
 export default async function SubmissionsPage() {
   const prisma = await getDb();
-  await requireAdmin();
+  await requirePermission("contact.view");
 
   const leads = await prisma.lead.findMany({
     orderBy: { createdAt: "desc" },
@@ -18,7 +18,7 @@ export default async function SubmissionsPage() {
     <div>
       <AdminPageHeader
         title="Submissions"
-        description="Form submissions from the contact page"
+        description="Inbox for contact-form submissions from /contact."
       />
       <Suspense fallback={<p className="text-sm text-[var(--diq_mid)]">Loading…</p>}>
         <SubmissionsTable initialLeads={leads} />

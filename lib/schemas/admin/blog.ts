@@ -9,7 +9,9 @@ export const blogSlugStr = z
 
 export const blogExcerptStr = z.string().min(1).max(500);
 
-export const blogBodyStr = z.string().min(1).max(50000);
+// Body is sanitized HTML (TipTap editor output), which runs ~2x the size of the
+// equivalent Markdown, so the cap is generous relative to the old 50k Markdown limit.
+export const blogBodyStr = z.string().min(1).max(100000);
 
 export const blogStatusEnum = z.enum(["draft", "published"]);
 

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { requireAdmin } from "@/lib/auth/require-admin";
+import { requirePermission } from "@/lib/auth/require-admin";
 import { getDb } from "@/lib/cloudflare-env";
 import { AdminPageHeader } from "@/components/admin";
 
@@ -12,7 +12,7 @@ export default async function EditJobOpeningPage({
   params: Promise<{ id: string }>;
 }) {
   const prisma = await getDb();
-  await requireAdmin();
+  await requirePermission("careers.openings.manage");
 
   const { id } = await params;
   const numId = parseInt(id, 10);
@@ -23,7 +23,15 @@ export default async function EditJobOpeningPage({
 
   return (
     <div>
-      <AdminPageHeader title="Edit opening" description={opening.slug} />
+      <AdminPageHeader
+        title="Edit opening"
+        description={
+          opening.visible
+            ? `Live at /careers/${opening.slug}`
+            : `Hidden — /careers/${opening.slug} 404s until visible.`
+        }
+        previewHref={opening.visible ? `/careers/${opening.slug}` : "/careers"}
+      />
       <JobOpeningEditor initial={opening} />
     </div>
   );

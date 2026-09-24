@@ -73,7 +73,7 @@ function StringListEditor({
             />
             <button
               onClick={() => remove(idx)}
-              className="shrink-0 pt-1 text-xs text-red-400 hover:text-red-300"
+              className="shrink-0 pt-1 text-xs text-[var(--destructive)] hover:opacity-80"
             >
               Delete
             </button>

@@ -26,7 +26,7 @@ const DeleteSchema = z.object({
 
 export async function POST(request: NextRequest) {
   // 1. Auth — returns 401 JSON if invalid; never redirects
-  const session = await requirePermissionApi("content.edit");
+  const session = await requirePermissionApi("cms.edit");
   if (session instanceof NextResponse) return session;
 
   // 2. Rate limit — 20 uploads per minute per admin
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const session = await requirePermissionApi("content.edit");
+  const session = await requirePermissionApi("cms.edit");
   if (session instanceof NextResponse) return session;
 
   let body: unknown;

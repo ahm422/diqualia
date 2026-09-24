@@ -1,9 +1,12 @@
 "use client";
 
-import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import Link from "next/link";
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { toast } from "sonner";
 
 import { FileDropzone } from "@/app/components/FileDropzone";
 import { Button } from "@/components/ui/button";
+import { CNIC_INPUT_RE, formatCnicInput } from "@/lib/cnic";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { fieldErrorsFromFlatten, readApiError, type FieldErrors } from "@/lib/public-form";
 import {
@@ -24,6 +27,7 @@ type SubmitState =
   | { status: "idle" }
   | { status: "submitting"; progress: number | null }
   | { status: "success"; id: string }
+  | { status: "already-applied"; portalUrl: string }
   | { status: "error"; message: string };
 
 type StepId = "personal" | "education" | "professional" | "other";
@@ -37,6 +41,10 @@ const STEPS: { id: StepId; label: string }[] = [
 
 const idleBorder = "color-mix(in oklab, var(--border) 80%, transparent)";
 const errorBorder = "color-mix(in oklab, var(--destructive) 75%, var(--border))";
+
+/** Cheap "is this a fully-formed address" gate before we hit the check endpoint. */
+const EMAIL_INPUT_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const DUP_CHECK_DEBOUNCE_MS = 400;
 
 const GENDER_LABELS: Record<(typeof GENDER_VALUES)[number], string> = {
   female: "Female",
@@ -148,18 +156,24 @@ function Field({
   label,
   htmlFor,
   error,
+  className,
   children,
 }: {
   label: string;
   htmlFor?: string;
   error?: string;
+  className?: string;
   children: ReactNode;
 }) {
   return (
-    <label className="block" htmlFor={htmlFor}>
+    <label className={`block ${className ?? ""}`} htmlFor={htmlFor}>
       <div className="text-[11px] tracking-[0.18em] uppercase text-muted-foreground">{label}</div>
       {children}
-      {error ? <p className="mt-2 text-[12px] text-red-400">{error}</p> : null}
+      {error ? (
+        <p className="mt-2 text-[12px]" style={{ color: "var(--destructive)" }}>
+          {error}
+        </p>
+      ) : null}
     </label>
   );
 }
@@ -255,6 +269,31 @@ export function CareerApplyForm({
   const [fields, setFields] = useState<FieldErrors>({});
   const [state, setState] = useState<SubmitState>({ status: "idle" });
 
+  // Live duplicate detection (Personal step). Kept in refs, not state: nothing
+  // here needs a re-render — the visible error rides on `fields.email` /
+  // `fields.cnic`, and this only gates progression + the one-shot toast.
+  const dupEmailRef = useRef(false);
+  const dupCnicRef = useRef(false);
+  const emailAbortRef = useRef<AbortController | null>(null);
+  const cnicAbortRef = useRef<AbortController | null>(null);
+  const emailReqIdRef = useRef(0);
+  const cnicReqIdRef = useRef(0);
+  const emailDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cnicDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const emailDebounce = emailDebounceRef;
+    const cnicDebounce = cnicDebounceRef;
+    const emailAbort = emailAbortRef;
+    const cnicAbort = cnicAbortRef;
+    return () => {
+      if (emailDebounce.current) clearTimeout(emailDebounce.current);
+      if (cnicDebounce.current) clearTimeout(cnicDebounce.current);
+      emailAbort.current?.abort();
+      cnicAbort.current?.abort();
+    };
+  }, []);
+
   useEffect(() => {
     const token = readStoredToken(jobOpeningId);
     if (!token) return;
@@ -285,7 +324,7 @@ export function CareerApplyForm({
         setDateOfBirth(String(personal.dateOfBirth ?? ""));
         setGender(String(personal.gender ?? ""));
         setMaritalStatus(String(personal.maritalStatus ?? ""));
-        setCnic(String(personal.cnic ?? ""));
+        setCnic(formatCnicInput(String(personal.cnic ?? "")));
         setNationality(String(personal.nationality ?? "Pakistan"));
         setCurrentAddress(String(personal.currentAddress ?? ""));
         setCity(String(personal.city ?? ""));
@@ -328,6 +367,63 @@ export function CareerApplyForm({
 
   function clearField(key: string) {
     setFields((prev) => (prev[key] ? { ...prev, [key]: "" } : prev));
+  }
+
+  /**
+   * Check one identifier against this opening. Called on blur (immediately) and
+   * after a debounce while typing, once the value is syntactically complete.
+   * Race-safe: aborts the prior in-flight request and drops any response whose
+   * request-id is no longer the latest for that field.
+   */
+  async function checkDuplicate(field: "email" | "cnic", rawValue?: string) {
+    const source = rawValue ?? (field === "email" ? email : cnic);
+    const complete =
+      field === "email" ? EMAIL_INPUT_RE.test(source.trim()) : CNIC_INPUT_RE.test(source);
+    if (!complete) return;
+    const value = field === "email" ? source.trim().toLowerCase() : source;
+
+    const abortRef = field === "email" ? emailAbortRef : cnicAbortRef;
+    const reqIdRef = field === "email" ? emailReqIdRef : cnicReqIdRef;
+    const dupRef = field === "email" ? dupEmailRef : dupCnicRef;
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    const reqId = ++reqIdRef.current;
+
+    const qs = new URLSearchParams({ openingId: String(jobOpeningId) });
+    qs.set(field, value);
+    try {
+      const res = await fetch(`/api/careers/apply/check?${qs.toString()}`, {
+        signal: controller.signal,
+      });
+      if (!res.ok) return;
+      const data = (await res.json()) as { email?: boolean; cnic?: boolean };
+      if (reqId !== reqIdRef.current) return; // a newer request has superseded this one
+      const hit = Boolean(data[field]);
+      if (hit && !dupRef.current) {
+        toast.warning(
+          `You've already applied to ${jobTitle} with this ${field === "email" ? "email" : "CNIC"}.`,
+        );
+      }
+      dupRef.current = hit;
+      if (hit) {
+        const message =
+          field === "email"
+            ? "You've already applied to this role with this email."
+            : "You've already applied to this role with this CNIC.";
+        setFields((prev) => ({ ...prev, [field]: message }));
+      }
+    } catch {
+      // aborted or offline — the submit-time unique constraint still catches it
+    }
+  }
+
+  function scheduleDuplicateCheck(field: "email" | "cnic", value: string) {
+    const ref = field === "email" ? emailDebounceRef : cnicDebounceRef;
+    if (ref.current) clearTimeout(ref.current);
+    ref.current = setTimeout(() => {
+      void checkDuplicate(field, value);
+    }, DUP_CHECK_DEBOUNCE_MS);
   }
 
   function applyResume(file: File | null) {
@@ -414,9 +510,19 @@ export function CareerApplyForm({
     if (parsedErr.fields.resume) setResumeError(parsedErr.fields.resume);
     if (parsedErr.fields.photo) setPhotoError(parsedErr.fields.photo);
     setState({ status: "error", message: parsedErr.message });
+    // Single choke point for every non-2xx response — no ad-hoc toasts at call sites.
+    toast.error(parsedErr.message);
   }
 
   async function savePersonal(): Promise<boolean> {
+    if (dupEmailRef.current || dupCnicRef.current) {
+      setState({
+        status: "error",
+        message: "Please use a different email or CNIC — this one already applied to this role.",
+      });
+      toast.error("This email or CNIC has already applied to this role.");
+      return false;
+    }
     const parsed = CareerApplyPersonalSchema.safeParse({
       name,
       email,
@@ -433,6 +539,7 @@ export function CareerApplyForm({
     if (!parsed.success) {
       setFields(fieldErrorsFromFlatten(parsed.error.flatten()));
       setState({ status: "error", message: "Please fix the highlighted fields." });
+      toast.error("Please fix the highlighted fields.");
       return false;
     }
     setFields({});
@@ -469,6 +576,7 @@ export function CareerApplyForm({
     if (!parsed.success) {
       setFields(fieldErrorsFromFlatten(parsed.error.flatten()));
       setState({ status: "error", message: "Please fix the highlighted fields." });
+      toast.error("Please fix the highlighted fields.");
       return false;
     }
     if (!draftToken) {
@@ -500,6 +608,7 @@ export function CareerApplyForm({
     if (!parsed.success) {
       setFields(fieldErrorsFromFlatten(parsed.error.flatten()));
       setState({ status: "error", message: "Please fix the highlighted fields." });
+      toast.error("Please fix the highlighted fields.");
       return false;
     }
     if (!draftToken) {
@@ -540,6 +649,7 @@ export function CareerApplyForm({
     setFields(nextFields);
     if (!parsed.success || fileErr || picErr || !declarationAccepted) {
       setState({ status: "error", message: "Please fix the highlighted fields." });
+      toast.error("Please fix the highlighted fields.");
       return false;
     }
     if (!draftToken) {
@@ -573,6 +683,29 @@ export function CareerApplyForm({
       website,
     });
     if (submitted.status < 200 || submitted.status >= 300) {
+      const body = submitted.json as {
+        alreadyApplied?: boolean;
+        portalUrl?: string;
+        field?: "email" | "cnic";
+      } | null;
+      if (submitted.status === 409 && body?.alreadyApplied) {
+        // Panel is the primary UI; also flag the offending input inline for a
+        // user who somehow bypassed the live check.
+        if (body.field === "email" || body.field === "cnic") {
+          const message =
+            body.field === "email"
+              ? "You've already applied to this role with this email."
+              : "You've already applied to this role with this CNIC.";
+          setFields((prev) => ({ ...prev, [body.field as "email" | "cnic"]: message }));
+          (body.field === "email" ? dupEmailRef : dupCnicRef).current = true;
+        }
+        setState({
+          status: "already-applied",
+          portalUrl: body.portalUrl ?? "/portal/login?next=/portal",
+        });
+        toast.warning("You've already applied for this role.");
+        return false;
+      }
       applyApiError(submitted.json);
       return false;
     }
@@ -584,6 +717,7 @@ export function CareerApplyForm({
     clearStoredToken(jobOpeningId);
     setDraftToken(null);
     setState({ status: "success", id });
+    toast.success(`Application submitted for ${jobTitle}`);
     return true;
   }
 
@@ -601,13 +735,13 @@ export function CareerApplyForm({
       if (!ok) return;
       if (step !== "other") {
         setState({ status: "idle" });
+        toast.success(`Saved — step ${stepIndex + 1} of ${STEPS.length}`);
         setStepIndex((index) => Math.min(index + 1, STEPS.length - 1));
       }
     } catch (caught) {
-      setState({
-        status: "error",
-        message: caught instanceof Error ? caught.message : "Submission failed",
-      });
+      const message = caught instanceof Error ? caught.message : "Submission failed";
+      setState({ status: "error", message });
+      toast.error(message);
     }
   }
 
@@ -620,32 +754,68 @@ export function CareerApplyForm({
 
   if (state.status === "success") {
     return (
-      <div className="border p-8 md:p-10" style={panelStyle} role="status" aria-live="polite">
-        <div className="text-[10px] tracking-[0.22em] uppercase text-primary">Received</div>
-        <p
-          className="mt-3 text-foreground"
-          style={{
-            fontFamily: "var(--font-display)",
-            fontWeight: 300,
-            fontStyle: "italic",
-            fontSize: "clamp(1.15rem, 2vw, 1.5rem)",
-            lineHeight: 1.3,
-          }}
-        >
-          We received your application for {jobTitle}.
-        </p>
-        <p className="mt-4 text-[13px] leading-7 text-muted-foreground">
-          The team will reply with next steps. Typical response is within 5–7 business days.
-        </p>
-        {state.id ? (
-          <p className="mt-4 text-[11px] text-muted-foreground">
-            Reference: <span className="font-mono">{state.id}</span>
+      <div className="diq-career-ctaFrame" role="status" aria-live="polite">
+        <div className="relative">
+          <div className="text-[10px] tracking-[0.22em] uppercase text-primary">Received</div>
+          <p
+            className="mt-3 text-foreground"
+            style={{
+              fontFamily: "var(--font-display)",
+              fontWeight: 300,
+              fontStyle: "italic",
+              fontSize: "clamp(1.15rem, 2vw, 1.5rem)",
+              lineHeight: 1.3,
+            }}
+          >
+            We received your application for {jobTitle}.
           </p>
-        ) : null}
-        <div className="mt-8">
-          <Button type="button" variant="primary" onClick={resetForm}>
-            Submit another
-          </Button>
+          <p className="mt-4 text-[13px] leading-7 text-muted-foreground">
+            The team will reply with next steps. Typical response is within 5–7 business days.
+          </p>
+          {state.id ? (
+            <p className="mt-4 text-[11px] text-muted-foreground">
+              Reference: <span className="font-mono">{state.id}</span>
+            </p>
+          ) : null}
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Button type="button" variant="primary" onClick={resetForm}>
+              Submit another
+            </Button>
+            <Button asChild variant="outline">
+              <Link href="/careers">Browse all roles</Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (state.status === "already-applied") {
+    return (
+      <div className="diq-career-ctaFrame" role="status" aria-live="polite">
+        <div className="relative">
+          <div className="text-[10px] tracking-[0.22em] uppercase text-primary">Already applied</div>
+          <p
+            className="mt-3 text-foreground"
+            style={{
+              fontFamily: "var(--font-display)",
+              fontWeight: 300,
+              fontStyle: "italic",
+              fontSize: "clamp(1.15rem, 2vw, 1.5rem)",
+              lineHeight: 1.3,
+            }}
+          >
+            You&rsquo;ve already applied for this role.
+          </p>
+          <p className="mt-4 text-[13px] leading-7 text-muted-foreground">
+            We have one application from you for {jobTitle} on file. Sign in to the applicant portal to
+            check its status — use the email and password sent when you first applied.
+          </p>
+          <div className="mt-8">
+            <Button asChild variant="primary">
+              <a href={state.portalUrl}>See your application</a>
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -673,8 +843,8 @@ export function CareerApplyForm({
         </div>
       ) : null}
 
-      <div className="mt-6 grid grid-cols-1 gap-4">
-        <div className="text-[11px] tracking-[0.18em] uppercase text-primary">Position</div>
+      <div className="mt-8 text-[11px] tracking-[0.18em] uppercase text-primary">Role details</div>
+      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Field label="Position">
           <input className={inputClass} style={{ borderColor: idleBorder }} value={jobTitle} readOnly />
         </Field>
@@ -691,26 +861,51 @@ export function CareerApplyForm({
         </Field>
       </div>
 
-      <ol className="mt-8 flex flex-wrap gap-2" aria-label="Application steps">
-        {STEPS.map((item, index) => {
-          const current = index === stepIndex;
-          return (
-            <li
-              key={item.id}
-              className="min-h-11 px-3 py-2 text-[11px] tracking-[0.18em] uppercase"
-              style={{
-                border: `1px solid ${current ? "var(--gold)" : idleBorder}`,
-                color: current ? "var(--gold)" : "var(--muted-foreground)",
-              }}
-              aria-current={current ? "step" : undefined}
-            >
-              {index + 1}. {item.label}
-            </li>
-          );
-        })}
-      </ol>
+      <div className="mt-8">
+        <div className="diq-career-progressTrack" aria-hidden>
+          <span
+            className="diq-career-progressFill"
+            style={{ width: `${((stepIndex + 1) / STEPS.length) * 100}%` }}
+          />
+        </div>
+        <p className="mt-3 text-[11px] tracking-[0.18em] uppercase text-muted-foreground">
+          Step {stepIndex + 1} of {STEPS.length} — {step.label}
+        </p>
+        <ol className="diq-career-stepper mt-4" aria-label="Application steps">
+          {STEPS.map((item, index) => {
+            const current = index === stepIndex;
+            const done = index < stepIndex;
+            return (
+              <li key={item.id} className="contents">
+                {index > 0 ? (
+                  <span
+                    aria-hidden
+                    className="diq-career-stepBar"
+                    data-state={done || current ? "done" : undefined}
+                  />
+                ) : null}
+                <span className="flex items-center gap-2">
+                  <span
+                    className="diq-career-stepDot"
+                    data-state={done ? "done" : current ? "current" : undefined}
+                    aria-current={current ? "step" : undefined}
+                  >
+                    {done ? "✓" : index + 1}
+                  </span>
+                  <span
+                    className="hidden text-[10px] tracking-[0.18em] uppercase sm:inline"
+                    style={{ color: current ? "var(--gold)" : "var(--muted-foreground)" }}
+                  >
+                    {item.label}
+                  </span>
+                </span>
+              </li>
+            );
+          })}
+        </ol>
+      </div>
 
-      <div className="mt-8 grid grid-cols-1 gap-4">
+      <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
         {step.id === "personal" ? (
           <>
             <Field label="Name" htmlFor="apply-name" error={fields.name}>
@@ -792,14 +987,19 @@ export function CareerApplyForm({
               <input
                 value={cnic}
                 onChange={(e) => {
-                  setCnic(e.target.value);
+                  const next = formatCnicInput(e.target.value);
+                  setCnic(next);
                   clearField("cnic");
+                  dupCnicRef.current = false;
+                  scheduleDuplicateCheck("cnic", next);
                 }}
+                onBlur={() => void checkDuplicate("cnic")}
                 className={inputClass}
                 style={controlStyle("cnic")}
-                placeholder="xxxxx-xxxxxxx-x"
+                placeholder="12345-1234567-8"
                 maxLength={15}
                 inputMode="numeric"
+                aria-invalid={Boolean(fields.cnic)}
               />
             </Field>
             <Field label="Email" htmlFor="apply-email" error={fields.email}>
@@ -807,9 +1007,13 @@ export function CareerApplyForm({
                 id="apply-email"
                 value={email}
                 onChange={(e) => {
-                  setEmail(e.target.value);
+                  const next = e.target.value;
+                  setEmail(next);
                   clearField("email");
+                  dupEmailRef.current = false;
+                  scheduleDuplicateCheck("email", next);
                 }}
+                onBlur={() => void checkDuplicate("email")}
                 className={inputClass}
                 style={controlStyle("email")}
                 placeholder="you@company.com"
@@ -835,7 +1039,7 @@ export function CareerApplyForm({
                 aria-invalid={Boolean(fields.phone)}
               />
             </Field>
-            <Field label="Current address" error={fields.currentAddress}>
+            <Field label="Current address" error={fields.currentAddress} className="sm:col-span-2">
               <textarea
                 value={currentAddress}
                 onChange={(e) => {
@@ -944,7 +1148,7 @@ export function CareerApplyForm({
                 maxLength={200}
               />
             </Field>
-            <Field label="Cover note (optional)">
+            <Field label="Cover note (optional)" className="sm:col-span-2">
               <textarea
                 value={coverNote}
                 onChange={(e) => setCoverNote(e.target.value)}
@@ -959,7 +1163,7 @@ export function CareerApplyForm({
 
         {step.id === "other" ? (
           <>
-            <Field label="Key skills" error={fields.keySkills}>
+            <Field label="Key skills" error={fields.keySkills} className="sm:col-span-2">
               <textarea
                 value={keySkills}
                 onChange={(e) => {
@@ -1035,7 +1239,7 @@ export function CareerApplyForm({
                 emptyLabel={photoUploaded ? "Photo already on file — drop to replace" : "Drop a photo here"}
               />
             </div>
-            <label className="flex items-start gap-3 text-[13px] leading-7 text-muted-foreground">
+            <label className="flex items-start gap-3 text-[13px] leading-7 text-muted-foreground sm:col-span-2">
               <input
                 type="checkbox"
                 className="mt-1 size-4 shrink-0"
@@ -1052,7 +1256,9 @@ export function CareerApplyForm({
               </span>
             </label>
             {fields.declarationAccepted ? (
-              <p className="text-[12px] text-red-400">{fields.declarationAccepted}</p>
+              <p className="text-[12px] sm:col-span-2" style={{ color: "var(--destructive)" }}>
+                {fields.declarationAccepted}
+              </p>
             ) : null}
           </>
         ) : null}
@@ -1087,7 +1293,11 @@ export function CareerApplyForm({
       ) : null}
 
       {state.status === "error" ? (
-        <p className="mt-6 text-[13px] leading-7 text-red-400" role="alert">
+        <p
+          className="mt-6 text-[13px] leading-7"
+          style={{ color: "var(--destructive)" }}
+          role="alert"
+        >
           {state.message}
         </p>
       ) : state.status === "idle" ? (

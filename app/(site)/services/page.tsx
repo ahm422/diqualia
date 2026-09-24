@@ -6,14 +6,21 @@ import { Container } from "@/app/components/Container";
 import { Button } from "@/components/ui/button";
 import { getDb } from "@/lib/cloudflare-env";
 
+import { ServiceSection } from "./ServiceSection";
+
 export const revalidate = 60;
 
-import { ServicesAccordion } from "./ServicesAccordion";
-
 export const metadata: Metadata = {
-  title: "Services — DiQualia",
+  title: "Services",
   description:
     "Six core intelligence services — built on deep research, designed to move B2B pipeline from invisible to inevitable.",
+  alternates: { canonical: "/services" },
+  openGraph: {
+    title: "Services — DiQualia",
+    description:
+      "Six core intelligence services — built on deep research, designed to move B2B pipeline from invisible to inevitable.",
+    url: "/services",
+  },
 };
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
@@ -64,7 +71,7 @@ export default async function ServicesPage() {
 
   if (!page) notFound();
 
-  const accordionSections = sections.map((section, i) => ({
+  const serviceSections = sections.map((section, i) => ({
     id: section.id,
     tabId: section.tabId,
     eyebrow: section.eyebrow,
@@ -72,6 +79,9 @@ export default async function ServicesPage() {
     body: section.body,
     cardTitle: section.cardTitle,
     cardBody: section.cardBody,
+    overviewHtml: section.overviewHtml,
+    ctaLabel: section.ctaLabel,
+    ctaHref: section.ctaHref,
     order: section.order,
     displayNum: (i + 1).toString().padStart(2, "0"),
     items: section.items.map((item) => ({
@@ -128,12 +138,9 @@ export default async function ServicesPage() {
           <div className="pb-2">
             <p className="text-[15px] leading-8 text-muted-foreground">{page.body}</p>
 
-            <div
-              className="mt-8 grid grid-cols-2 gap-px"
-              style={{ background: "color-mix(in oklab, var(--border) 100%, transparent)" }}
-            >
+            <div className="mt-8 flex flex-wrap gap-x-12 gap-y-6">
               {stats.map((s) => (
-                <div key={s.label} className="bg-card p-6">
+                <div key={s.label}>
                   <div
                     className="text-[28px] leading-none"
                     style={{ fontFamily: "var(--font-display)", fontWeight: 300, color: "var(--primary)" }}
@@ -150,7 +157,10 @@ export default async function ServicesPage() {
         </Container>
       </section>
 
-      <ServicesAccordion sections={accordionSections} />
+      {/* SERVICES — every service rendered fully inline, server-rendered. */}
+      {serviceSections.map((section) => (
+        <ServiceSection key={section.tabId} section={section} displayNum={section.displayNum} />
+      ))}
 
       {/* INTELLIGENCE PROCESS STRIP */}
       <section className="border-b" style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
@@ -168,7 +178,7 @@ export default async function ServicesPage() {
             The DiQualia Intelligence Process
           </h2>
 
-          <div className="mt-12 grid grid-cols-1 gap-px md:grid-cols-3 xl:grid-cols-5" style={{ background: "color-mix(in oklab, var(--border) 100%, transparent)" }}>
+          <div className="mt-12 max-w-[72ch] space-y-10">
             {[
               ["Step One", "01", "Sector Immersion", "We spend the first week doing nothing but learning your industry — its language, rhythms, buyers, and dynamics. No strategy until we know your market deeply."],
               ["Step Two", "02", "Buyer Mapping", "We identify and profile your ideal buyers — building precise, evidence-based profiles that inform every piece of outreach and content we create."],
@@ -176,39 +186,46 @@ export default async function ServicesPage() {
               ["Step Four", "04", "Execution", "With intelligence in hand, we execute — campaigns, content, outreach, and enablement tools — all grounded in research, all calibrated to your exact market."],
               ["Step Five", "05", "Optimise & Scale", "We measure what matters, learn from every signal, and continuously refine the intelligence engine — making your pipeline grow smarter and stronger every week."],
             ].map(([tag, num, title, body]) => (
-              <div key={num} className="p-8" style={{ background: "var(--bg-elev)" }}>
+              <div key={num}>
                 <div className="text-[10px] tracking-[0.22em] uppercase" style={{ color: "var(--gold)" }}>{tag}</div>
-                <div
-                  className="diq-ghostNum mt-4 text-[36px] leading-none"
-                  style={{ fontFamily: "var(--font-display)", fontWeight: 300 }}
+                <h3
+                  className="mt-2 text-foreground"
+                  style={{
+                    fontFamily: "var(--font-display)",
+                    fontWeight: 400,
+                    fontSize: "clamp(1.25rem, 2.2vw, 1.65rem)",
+                    lineHeight: 1.2,
+                  }}
                 >
-                  {num}
-                </div>
-                <div className="mt-4 text-[13px] tracking-[0.06em] text-foreground">{title}</div>
-                <p className="mt-3 text-[12px] leading-7" style={{ color: "var(--text-muted)" }}>{body}</p>
+                  {num} · {title}
+                </h3>
+                <p className="mt-3 text-[15px] leading-8" style={{ color: "var(--text-muted)" }}>{body}</p>
               </div>
             ))}
           </div>
         </Container>
       </section>
 
-      {/* ENGAGEMENT MODELS */}
+      {/* ENGAGEMENT MODELS — two-column editorial index (distinct from the
+         stacked service blocks): sticky heading rail + ruled item list. */}
       <section className="border-b" style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
-        <Container className="py-20">
-          <Eyebrow>How We Engage</Eyebrow>
-          <h2
-            className="mt-4 text-foreground"
-            style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 300,
-              fontSize: "clamp(2rem, 3.6vw, 3.1rem)",
-              lineHeight: 1.1,
-            }}
-          >
-            Choose Your Intelligence Model
-          </h2>
+        <Container className="grid gap-10 py-20 md:grid-cols-[minmax(0,340px)_minmax(0,1fr)] md:gap-16">
+          <div className="md:sticky md:top-[calc(var(--diq-stickyTop)+2rem)] md:self-start">
+            <Eyebrow>How We Engage</Eyebrow>
+            <h2
+              className="mt-4 text-foreground"
+              style={{
+                fontFamily: "var(--font-display)",
+                fontWeight: 300,
+                fontSize: "clamp(2rem, 3.6vw, 3.1rem)",
+                lineHeight: 1.1,
+              }}
+            >
+              Choose Your Intelligence Model
+            </h2>
+          </div>
 
-          <div className="mt-12 grid grid-cols-1 gap-px md:grid-cols-3" style={{ background: "color-mix(in oklab, var(--border) 100%, transparent)" }}>
+          <div className="max-w-[72ch]">
             {[
               [
                 "Intelligence Starter",
@@ -255,67 +272,67 @@ export default async function ServicesPage() {
                 "Discuss Retainer",
                 false,
               ],
-            ].map(([tag, title, desc, items, cta, featured]) => (
+            ].map(([tag, title, desc, items, cta, featured], i) => (
               <div
                 key={title as string}
-                className="relative p-10"
-                style={{
-                  background: featured ? "var(--bg-elev)" : "var(--bg)",
-                  borderTop: featured ? "2px solid var(--gold)" : "2px solid transparent",
-                }}
+                className={i > 0 ? "mt-10 border-t pt-10" : ""}
+                style={i > 0 ? { borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" } : undefined}
               >
-                {featured ? (
-                  <div
-                    className="absolute right-6 top-6 px-3 py-1 text-[10px] tracking-[0.18em] uppercase"
-                    style={{ background: "var(--gold)", color: "var(--ink)" }}
-                  >
-                    Most Popular
-                  </div>
-                ) : null}
-                <div className="text-[10px] tracking-[0.22em] uppercase" style={{ color: "var(--gold)" }}>{tag}</div>
-                <div
-                  className="mt-4 text-[22px] text-foreground"
-                  style={{ fontFamily: "var(--font-display)", fontWeight: 400, lineHeight: 1.2 }}
+                <div className="text-[10px] tracking-[0.22em] uppercase" style={{ color: "var(--gold)" }}>
+                  {tag as string}
+                  {featured ? " — Most popular" : ""}
+                </div>
+                <h3
+                  className="mt-2 text-foreground"
+                  style={{
+                    fontFamily: "var(--font-display)",
+                    fontWeight: 400,
+                    fontSize: "clamp(1.4rem, 2.6vw, 2rem)",
+                    lineHeight: 1.2,
+                  }}
                 >
-                  {title}
-                </div>
-                <p className="mt-4 text-[12px] leading-7" style={{ color: "var(--text-muted)" }}>{desc}</p>
-                <div className="mt-7 border-t pt-6" style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
-                  <ul className="space-y-3 text-[12px]" style={{ color: "color-mix(in oklab, var(--text) 70%, var(--bg))" }}>
-                    {(items as string[]).map((x) => (
-                      <li key={x} className="flex items-center gap-3">
-                        <span aria-hidden style={{ color: "var(--gold)" }}>✓</span>
-                        <span>{x}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <Button asChild variant="secondary" className="mt-8 w-full">
-                  <a href="/contact">{cta}</a>
-                </Button>
+                  {title as string}
+                </h3>
+                <p className="mt-3 text-[15px] leading-8" style={{ color: "var(--text-muted)" }}>{desc as string}</p>
+                <p
+                  className="mt-4 text-[13px] leading-8"
+                  style={{ color: "color-mix(in oklab, var(--text) 70%, var(--bg))" }}
+                >
+                  {(items as string[]).join(" · ")}
+                </p>
+                <a
+                  href="/contact"
+                  className="mt-5 inline-block border-b-2 pb-0.5 text-[13px] tracking-[0.06em] no-underline"
+                  style={{ borderBottomColor: "var(--gold)", color: "var(--foreground)" }}
+                >
+                  {cta as string} →
+                </a>
               </div>
             ))}
           </div>
         </Container>
       </section>
 
-      {/* WHY DIQUALIA GRID */}
+      {/* WHY DIQUALIA — two-column layout with a sticky heading rail and a
+         ruled two-up reason grid; set apart as the closing summary block. */}
       <section className="border-b" style={{ background: "var(--bg-elev)", borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}>
-        <Container className="py-20">
-          <Eyebrow>Why DiQualia</Eyebrow>
-          <h2
-            className="mt-4 text-foreground"
-            style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 300,
-              fontSize: "clamp(2rem, 3.6vw, 3.1rem)",
-              lineHeight: 1.1,
-            }}
-          >
-            Not a Marketing Agency. A Marketing Intelligence Unit.
-          </h2>
+        <Container className="grid gap-10 py-20 md:grid-cols-[minmax(0,340px)_minmax(0,1fr)] md:gap-16">
+          <div className="md:sticky md:top-[calc(var(--diq-stickyTop)+2rem)] md:self-start">
+            <Eyebrow>Why DiQualia</Eyebrow>
+            <h2
+              className="mt-4 text-foreground"
+              style={{
+                fontFamily: "var(--font-display)",
+                fontWeight: 300,
+                fontSize: "clamp(2rem, 3.6vw, 3.1rem)",
+                lineHeight: 1.1,
+              }}
+            >
+              Not a Marketing Agency. A Marketing Intelligence Unit.
+            </h2>
+          </div>
 
-          <div className="mt-12 grid grid-cols-1 gap-px md:grid-cols-3" style={{ background: "color-mix(in oklab, var(--border) 100%, transparent)" }}>
+          <div className="grid gap-x-10 sm:grid-cols-2">
             {[
               ["R", "Research Before Everything", "Every service begins with deep, unhurried research into your market. We never launch before we understand your sector as well as you do — often better."],
               ["N", "Niche B2B Specialists", "We work exclusively in niche B2B industries — not mass markets, not B2C, not general marketing. Deep specialisation is how we move markets."],
@@ -324,24 +341,23 @@ export default async function ServicesPage() {
               ["I", "Intelligence That Compounds", "The intelligence we build doesn't expire after a campaign. It compounds — each engagement making the next one faster, sharper, and more effective."],
               ["T", "Transparent Reporting", "Weekly reports, clear metrics, honest assessments. No vanity numbers. Only the metrics that actually matter to your business."],
             ].map(([icon, title, body]) => (
-              <div key={icon} className="p-10" style={{ background: "var(--bg-elev)" }}>
-                <div
-                  className="flex h-10 w-10 items-center justify-center border text-[16px]"
+              <div
+                key={icon}
+                className="mt-8 border-t pt-8 first:mt-0 sm:[&:nth-child(-n+2)]:mt-0"
+                style={{ borderColor: "color-mix(in oklab, var(--border) 80%, transparent)" }}
+              >
+                <h3
+                  className="text-foreground"
                   style={{
-                    borderColor: "color-mix(in oklab, var(--border) 80%, transparent)",
-                    color: "var(--gold)",
                     fontFamily: "var(--font-display)",
+                    fontWeight: 400,
+                    fontSize: "clamp(1.25rem, 2.2vw, 1.65rem)",
+                    lineHeight: 1.2,
                   }}
                 >
-                  {icon}
-                </div>
-                <div
-                  className="mt-5 text-[16px] text-foreground"
-                  style={{ fontFamily: "var(--font-display)", fontWeight: 400 }}
-                >
                   {title}
-                </div>
-                <p className="mt-3 text-[12px] leading-7" style={{ color: "var(--text-muted)" }}>{body}</p>
+                </h3>
+                <p className="mt-3 text-[15px] leading-8" style={{ color: "var(--text-muted)" }}>{body}</p>
               </div>
             ))}
           </div>

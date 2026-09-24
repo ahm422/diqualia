@@ -2,12 +2,12 @@ import "server-only";
 
 import { NextResponse } from "next/server";
 
-import { requireAdminApi } from "@/lib/auth/require-admin-api";
+import { requirePermissionApi } from "@/lib/auth/require-admin-api";
 import { getDb } from "@/lib/cloudflare-env";
 
 export async function GET(request: Request) {
   const prisma = await getDb();
-  const session = await requireAdminApi();
+  const session = await requirePermissionApi("contact.view");
   if (session instanceof NextResponse) return session;
 
   const { searchParams } = new URL(request.url);

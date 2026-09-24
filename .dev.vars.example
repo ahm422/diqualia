@@ -4,6 +4,9 @@
 # For seed tooling, see .env.example
 
 JWT_SECRET=your-jwt-secret-here
+# Applicant portal (/portal) — signs portal JWTs; MUST differ from JWT_SECRET so an
+# admin token can never satisfy the portal or vice-versa. wrangler secret put for prod.
+PORTAL_JWT_SECRET=your-portal-jwt-secret-here
 # Bootstrap seed identity + contact/careers notification recipient (not a login allowlist)
 ADMIN_EMAIL=admin@example.com
 # Set false for local HTTP preview (wrangler.jsonc sets NODE_ENV=production)

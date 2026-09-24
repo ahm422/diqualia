@@ -15,6 +15,9 @@
   /* Fluid layout primitives — no max-width cap; gutters are the only side inset */
   --diq-max: none;
   --diq-gutter: clamp(1.25rem, 4vw, 5rem);
+  /* Upper bound for blog imagery (cover + in-body). Kept below the reading
+     measure so pictures stay a supporting element, never a banner. */
+  --diq-blog-media: 640px;
   /* Named exception — nav/footer collapse. Tailwind breakpoints are min-width;
      var() cannot be used in @media, so queries stay at 960px and must not be mapped to lg (1024). */
   --breakpoint-nav: 960px;
@@ -83,6 +86,18 @@
 
   --destructive: #b91c1c;
   --destructive-foreground: #ffffff;
+
+  /* Portal status tones — semantic only, never the brand accent.
+     Consumed by portal _components (StatusBadge / StatusStepper / StatCard).
+     base = border + text (target AA >= 4.5:1 on --card); -tint = fill. */
+  --status-neutral: var(--diq_mid);
+  --status-neutral-tint: color-mix(in oklab, var(--diq_mid) 10%, var(--card));
+  --status-progress: #9a6212;
+  --status-progress-tint: color-mix(in oklab, #c8801f 14%, var(--card));
+  --status-positive: color-mix(in oklab, var(--green) 70%, var(--ink));
+  --status-positive-tint: color-mix(in oklab, var(--green) 14%, var(--card));
+  --status-negative: var(--destructive);
+  --status-negative-tint: color-mix(in oklab, var(--destructive) 12%, var(--card));
 
   --border: color-mix(in oklab, var(--ink) 14%, transparent);
   --input: color-mix(in oklab, var(--ink) 18%, transparent);
@@ -188,6 +203,11 @@ html.dark {
 
   --destructive: #ef4444;
   --destructive-foreground: #0b0b0c;
+
+  /* Portal status tones — only the two whose light base fails contrast on the
+     dark --card (--obsidian); neutral/negative and every -tint recompute. */
+  --status-progress: #e0a94a;
+  --status-positive: color-mix(in oklab, var(--green) 42%, var(--paper));
 
   --border: color-mix(in oklab, var(--gold) 16%, transparent);
   --input: color-mix(in oklab, var(--gold) 22%, transparent);
@@ -609,6 +629,45 @@ html.dark .diq-logoDark {
   margin-top: 2px;
 }
 
+.diq-fContact {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 16px;
+  font-style: normal;
+}
+
+.diq-fContact a {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: clamp(10px, 2.2vw, 11px);
+  letter-spacing: clamp(0.5px, 0.3vw, 1px);
+  color: var(--diq_mid);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.diq-fSocial {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.diq-fSocial a {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: clamp(10px, 2.2vw, 11px);
+  letter-spacing: clamp(2px, 0.55vw, 3px);
+  text-transform: uppercase;
+  color: var(--diq_mid);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.diq-fContact a:hover,
+.diq-fSocial a:hover {
+  color: var(--gold);
+}
+
 .diq-fLinks {
   display: flex;
   gap: 28px;
@@ -804,109 +863,6 @@ html.dark .diq-proseMuted {
   color: color-mix(in oklab, var(--paper) 88%, var(--mist));
 }
 
-.diq-serviceTabsProgressTrack {
-  height: 2px;
-  width: 100%;
-  background: color-mix(in oklab, var(--border) 80%, transparent);
-}
-.diq-serviceTabsProgress {
-  height: 2px;
-  background: var(--primary);
-  transition: width 0.35s ease;
-}
-@media (prefers-reduced-motion: reduce) {
-  .diq-serviceTabsProgress {
-    transition: none;
-  }
-}
-
-.diq-serviceTabsTrack {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: stretch;
-  position: relative;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  -webkit-overflow-scrolling: touch;
-}
-.diq-serviceTabsTrack::-webkit-scrollbar {
-  display: none;
-}
-.diq-serviceTabsTrack::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 1px;
-  background: color-mix(in oklab, var(--border) 90%, transparent);
-  pointer-events: none;
-}
-.diq-serviceTab {
-  flex: 1 1 0;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
-  padding: 14px 10px 12px;
-  background: transparent;
-  border: none;
-  border-radius: 0;
-  color: var(--muted-foreground);
-  text-align: left;
-  cursor: pointer;
-  position: relative;
-  letter-spacing: 0.1em;
-}
-.diq-serviceTabNum {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  color: color-mix(in oklab, var(--primary) 70%, var(--muted-foreground));
-}
-.diq-serviceTabLabel {
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.diq-serviceTab:hover {
-  color: var(--foreground);
-  opacity: 1;
-}
-.diq-serviceTab:hover .diq-serviceTabNum {
-  color: var(--primary);
-}
-.diq-serviceTab[aria-selected="true"] {
-  color: var(--primary);
-}
-.diq-serviceTab[aria-selected="true"] .diq-serviceTabNum {
-  color: var(--primary);
-}
-.diq-serviceTab[aria-selected="true"]::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 2px;
-  background: var(--primary);
-  z-index: 1;
-}
-.diq-serviceTabsArrow:hover {
-  border-color: var(--primary);
-  color: var(--primary);
-}
-.diq-serviceTab:focus-visible,
-.diq-serviceTabsArrow:focus-visible {
-  outline: 2px solid color-mix(in oklab, var(--gold) 70%, #ffffff);
-  outline-offset: 3px;
-}
-
 .diq-sectionY {
   padding-top: var(--diq-sectionY);
   padding-bottom: var(--diq-sectionY);
@@ -1023,6 +979,7 @@ html.dark .diq-proseMuted {
 .diq-markdown a {
   color: var(--gold);
   text-decoration: underline;
+  text-decoration-color: var(--gold);
   text-underline-offset: 3px;
 }
 .diq-markdown a:hover {
@@ -1070,13 +1027,362 @@ html.dark .diq-proseMuted {
   border-top: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
 }
 .diq-markdown img {
+  display: block;
   max-width: 100%;
   height: auto;
-  margin: 1.5em 0;
+  margin: 1.5em auto;
+  border-radius: 6px;
 }
 .diq-markdown strong {
   color: var(--foreground);
   font-weight: 600;
+}
+.diq-markdown u {
+  text-underline-offset: 3px;
+}
+.diq-markdown s,
+.diq-markdown del {
+  color: var(--text-muted);
+}
+.diq-markdown table {
+  width: 100%;
+  margin: 1.5em 0;
+  border-collapse: collapse;
+  font-size: 0.92em;
+}
+.diq-markdown th,
+.diq-markdown td {
+  padding: 0.5em 0.75em;
+  border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
+  text-align: left;
+  vertical-align: top;
+}
+.diq-markdown th {
+  font-weight: 600;
+  color: var(--foreground);
+  background: color-mix(in oklab, var(--gold) 8%, transparent);
+}
+/* Editor marks: highlight + author-set cell backgrounds. */
+.diq-markdown mark {
+  background-color: color-mix(in oklab, var(--gold) 30%, transparent);
+  color: inherit;
+  padding: 0.06em 0.22em;
+  border-radius: 2px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+.diq-markdown th[style*="background"],
+.diq-markdown td[style*="background"] {
+  background-clip: padding-box;
+}
+/* --- Colour composition for links & author-set text colours -----------------
+   TipTap serialises a coloured link as `<a><span style="color:…"><strong>…`,
+   i.e. the Color mark is a *carrier* nested inside the link. These rules hold in
+   both the public render and the `.tiptap` editor (both use `.diq-markdown`).
+   Real element selectors — not `:where()` — so they clear the single-class tag
+   rules above (`.diq-markdown a`, `.diq-markdown strong`, …) on specificity. */
+
+/* 1. A formatting mark wrapped in a link keeps the link's colour instead of
+      snapping to its own theme colour. */
+.diq-markdown a :is(strong, em, u, s, del, code) {
+  color: inherit;
+}
+
+/* 2. An author-set colour carrier always wins — for its whole subtree,
+      including a nested or wrapping strong/em/s/u/code/link, and whether the
+      carrier sits inside or outside the link. `text-align` is unaffected
+      (it doesn't inherit a `color`). */
+.diq-markdown [style*="color"] :is(strong, em, u, s, del, code, a),
+.diq-markdown :is(strong, em, u, s, del, a, th, td, li, p)[style*="color"] {
+  color: inherit;
+}
+
+/* 3. The link underline follows the carrier's colour rather than staying gold:
+      drop the link's own underline and let the nested carrier paint it. */
+.diq-markdown a:has(> [style*="color"]) {
+  text-decoration: none;
+}
+.diq-markdown a > [style*="color"] {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Admin rich-text editor (RichTextEditor.tsx) */
+.diq-rte .tiptap {
+  outline: none;
+  color: var(--diq_ivory);
+}
+.diq-rte .tiptap p.is-editor-empty:first-child::before,
+.diq-rte .tiptap .is-empty[data-placeholder]::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  color: var(--diq_mid);
+  pointer-events: none;
+}
+.diq-rte .tiptap .selectedCell {
+  background: color-mix(in oklab, var(--gold) 14%, transparent);
+}
+.diq-rte .tiptap img.ProseMirror-selectednode {
+  outline: 2px solid var(--gold);
+}
+/* Mirror the published <mark> treatment so the editing surface is WYSIWYG. */
+.diq-rte .tiptap mark {
+  background-color: color-mix(in oklab, var(--gold) 30%, transparent);
+  color: inherit;
+  padding: 0.06em 0.22em;
+  border-radius: 2px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+/* ============================
+   Blog: long-form article + cards + reading progress
+   ============================ */
+
+.diq-longform .diq-markdown {
+  font-size: 17px;
+  line-height: 1.75;
+  max-width: 68ch;
+  margin-inline: auto;
+}
+.diq-longform .diq-markdown :is(h2, h3) {
+  scroll-margin-top: 6rem;
+}
+.diq-longform .diq-markdown blockquote {
+  margin: 1.9em 0;
+}
+.diq-longform .diq-markdown hr {
+  margin: 3em 0;
+}
+.diq-longform .diq-markdown ul,
+.diq-longform .diq-markdown ol {
+  margin: 1.2em 0;
+}
+.diq-longform .diq-markdown figure {
+  margin: 2em 0;
+}
+/* Keep in-body images a modest band so article copy stays the focus. */
+.diq-longform .diq-markdown :is(img, figure img) {
+  max-height: 460px;
+  width: auto;
+  margin-inline: auto;
+}
+.diq-longform .diq-markdown figure figcaption {
+  margin-top: 0.6em;
+  font-size: 0.85em;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* Blog post article — copy fills the column; imagery floats to the side so
+   text flows around it rather than being split by a full-width picture. */
+.diq-article.diq-longform .diq-markdown {
+  max-width: none;
+  margin-inline: 0;
+  font-size: clamp(1.0625rem, 0.25vw + 1rem, 1.1875rem);
+  line-height: 1.8;
+}
+.diq-article.diq-longform .diq-markdown > * {
+  overflow-wrap: break-word;
+}
+.diq-article.diq-longform .diq-markdown::after {
+  content: "";
+  display: block;
+  clear: both;
+}
+.diq-article.diq-longform .diq-markdown p {
+  margin: 1.5em 0;
+}
+/* Only full-width blocks clear floats; headings/paragraphs wrap around them. */
+.diq-article.diq-longform .diq-markdown :is(hr, pre, table, blockquote) {
+  clear: both;
+}
+.diq-article.diq-longform .diq-markdown :is(h2, h3) {
+  scroll-margin-top: calc(var(--diq-stickyTop) + 1.5rem);
+}
+.diq-article.diq-longform .diq-markdown h2 {
+  margin: 2.4em 0 0.7em;
+  font-size: clamp(1.6rem, 2.6vw, 2.1rem);
+  letter-spacing: -0.01em;
+}
+.diq-article.diq-longform .diq-markdown h2::after {
+  content: "";
+  display: block;
+  width: 2.5rem;
+  height: 1px;
+  margin-top: 0.5rem;
+  background: color-mix(in oklab, var(--gold) 50%, transparent);
+}
+.diq-article.diq-longform .diq-markdown h3 {
+  margin: 2em 0 0.5em;
+  font-size: clamp(1.25rem, 2vw, 1.5rem);
+}
+.diq-article.diq-longform .diq-markdown blockquote {
+  margin: 2.5em 0;
+  padding: 0.2em 0 0.2em 1.5rem;
+  border-left: 3px solid color-mix(in oklab, var(--gold) 60%, transparent);
+  font-size: 1.15em;
+  line-height: 1.6;
+  color: var(--foreground);
+}
+.diq-article.diq-longform .diq-markdown blockquote p {
+  margin: 0.5em 0;
+}
+.diq-article.diq-longform .diq-markdown :is(ul, ol) {
+  margin: 2em 0;
+  padding-left: 1.4em;
+}
+.diq-article.diq-longform .diq-markdown li {
+  margin: 0.5em 0;
+  padding-left: 0.25em;
+}
+.diq-article.diq-longform .diq-markdown li::marker {
+  color: var(--gold);
+}
+.diq-article.diq-longform .diq-markdown hr {
+  width: 4rem;
+  margin: 3em 0;
+  border-top: 1px solid color-mix(in oklab, var(--gold) 45%, transparent);
+}
+.diq-article.diq-longform .diq-markdown figcaption {
+  margin-top: 0.7em;
+  font-size: 0.85em;
+  color: var(--text-muted);
+  text-align: left;
+}
+/* Side-floated media so body copy wraps around it instead of a full-width
+   picture splitting the article. Three shapes reach here:
+   - a bare <img> (TipTap editor output — a direct child of .diq-markdown)
+   - <p><img></p>  (legacy Markdown posts — marked wraps lone images)
+   - <figure>      (reserved for captioned media) */
+.diq-article.diq-longform .diq-markdown > img,
+.diq-article.diq-longform .diq-markdown p:has(> img),
+.diq-article.diq-longform .diq-markdown figure {
+  float: right;
+  width: min(42%, 360px);
+  margin: 0.4em 0 1.25rem 2rem;
+}
+/* Alternate sides for consecutive bare images. */
+.diq-article.diq-longform .diq-markdown > img:nth-of-type(even) {
+  float: left;
+  margin: 0.4em 2rem 1.25rem 0;
+}
+.diq-article.diq-longform .diq-markdown img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+.diq-article.diq-longform .diq-markdown > img {
+  max-height: 28rem;
+}
+.diq-article.diq-longform .diq-markdown p:has(> img) img,
+.diq-article.diq-longform .diq-markdown figure img {
+  display: block;
+  width: 100%;
+  max-height: none;
+  object-fit: contain;
+  margin: 0;
+}
+/* Small screens: no float — image stacks full-width, as before. */
+@media (max-width: 639px) {
+  .diq-article.diq-longform .diq-markdown > img,
+  .diq-article.diq-longform .diq-markdown > img:nth-of-type(even),
+  .diq-article.diq-longform .diq-markdown p:has(> img),
+  .diq-article.diq-longform .diq-markdown figure {
+    float: none;
+    width: 100%;
+    max-width: 100%;
+    margin: 1.75em auto;
+  }
+}
+.diq-article.diq-longform .diq-markdown pre {
+  max-width: 100%;
+  margin: 2em 0;
+  border-radius: 8px;
+  background: color-mix(in oklab, var(--gold) 4%, var(--bg-elev));
+}
+/* Wide content scrolls inside its own track instead of pushing the page. */
+.diq-article.diq-longform .diq-markdown pre {
+  overflow-x: auto;
+}
+.diq-article.diq-longform .diq-markdown table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.diq-postAdjacent {
+  border-color: color-mix(in oklab, var(--border) 80%, transparent);
+  background: color-mix(in oklab, var(--card) 70%, transparent);
+  transition: border-color 0.25s ease, background-color 0.25s ease;
+}
+.diq-postAdjacent:hover,
+.diq-postAdjacent:focus-visible {
+  border-color: color-mix(in oklab, var(--gold) 45%, transparent);
+  background: var(--card);
+}
+
+.diq-blog-progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 2px;
+  transform: scaleX(0);
+  transform-origin: left;
+  background: var(--gold);
+  /* Above the fixed nav (.diq-nav z-index: 200), below the mobile sheet (240). */
+  z-index: 210;
+  pointer-events: none;
+  transition: none;
+}
+
+/* Editorial index rows: one fixed thumbnail size + copy, uniform height.
+   Same layout at every breakpoint — image never alternates sides. */
+.diq-blog-row {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  column-gap: 1rem;
+  align-items: start;
+}
+@media (min-width: 640px) {
+  .diq-blog-row {
+    grid-template-columns: 240px minmax(0, 1fr);
+    column-gap: 1.75rem;
+  }
+}
+.diq-blog-row:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--gold) 70%, transparent);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+.diq-blog-row__media {
+  background: color-mix(in oklab, var(--gold) 4%, var(--card));
+  transition: border-color 0.25s ease;
+}
+.diq-blog-row:hover .diq-blog-row__media {
+  border-color: color-mix(in oklab, var(--gold) 45%, transparent);
+}
+
+.diq-blog-card__img {
+  transition: transform 0.55s ease;
+}
+.diq-blog-row:hover .diq-blog-card__img,
+.diq-blog-row:focus-visible .diq-blog-card__img,
+.diq-blog-card:hover .diq-blog-card__img,
+.diq-blog-card:focus-visible .diq-blog-card__img {
+  transform: scale(1.03);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .diq-blog-row__media,
+  .diq-blog-card__img,
+  .diq-blog-row:hover .diq-blog-card__img,
+  .diq-blog-card:hover .diq-blog-card__img,
+  .diq-postAdjacent img {
+    transition: none;
+    transform: none;
+  }
 }
 
 /* ============================
@@ -1451,6 +1757,249 @@ a.diq-homeCard:focus-visible {
   }
 }
 
+/* ============================
+   Careers
+   ============================ */
+
+.diq-career-wash {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 60% 50% at 82% -4%,
+    color-mix(in oklab, var(--gold) 12%, transparent),
+    transparent 60%
+  );
+}
+
+.diq-career-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(color-mix(in oklab, var(--gold) 6%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in oklab, var(--gold) 6%, transparent) 1px, transparent 1px);
+  background-size: 72px 72px;
+  opacity: 0.3;
+  mask-image: linear-gradient(180deg, #000 0%, transparent 82%);
+}
+
+/* Role card — shared by the listing grid and the "related roles" strip */
+.diq-career-roleCard {
+  position: relative;
+  display: block;
+  padding: clamp(24px, 3vw, 34px);
+  border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
+  background: var(--card);
+  text-decoration: none;
+  overflow: hidden;
+  transition:
+    border-color 0.3s ease,
+    background 0.3s ease;
+}
+.diq-career-roleCard::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--gold);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 0.3s ease;
+}
+.diq-career-roleCard:hover,
+.diq-career-roleCard:focus-visible {
+  border-color: color-mix(in oklab, var(--gold) 55%, transparent);
+  background: color-mix(in oklab, var(--gold) 5%, var(--card));
+}
+.diq-career-roleCard:hover::before,
+.diq-career-roleCard:focus-visible::before {
+  transform: scaleY(1);
+}
+.diq-career-roleCard:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--gold) 70%, #ffffff);
+  outline-offset: -2px;
+}
+.diq-career-roleArrow {
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+.diq-career-roleCard:hover .diq-career-roleArrow,
+.diq-career-roleCard:focus-visible .diq-career-roleArrow {
+  transform: translateX(4px);
+}
+
+/* Benefit card */
+.diq-career-benefit {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 20px;
+  border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
+  background: color-mix(in oklab, var(--card) 60%, transparent);
+  transition:
+    border-color 0.3s ease,
+    background 0.3s ease;
+}
+.diq-career-benefit:hover {
+  border-color: color-mix(in oklab, var(--gold) 45%, transparent);
+  background: color-mix(in oklab, var(--gold) 5%, var(--card));
+}
+
+/* "How we hire" timeline — adapted from .diq-homeProcess */
+.diq-career-process {
+  display: grid;
+  grid-template-columns: 1fr;
+  position: relative;
+  padding-left: 24px;
+}
+.diq-career-processStep {
+  position: relative;
+  padding: 8px 0 32px 36px;
+  border-left: 1px solid color-mix(in oklab, var(--border) 90%, transparent);
+}
+.diq-career-processStep:last-child {
+  padding-bottom: 0;
+}
+.diq-career-processNum {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in oklab, var(--border) 90%, transparent);
+  background: var(--card);
+  color: var(--gold);
+  font-family: var(--font-display), ui-serif, serif;
+  font-size: 18px;
+  font-weight: 500;
+  margin-left: -61px;
+}
+@media (min-width: 1024px) {
+  .diq-career-process {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0 20px;
+    padding-left: 0;
+  }
+  .diq-career-process::before {
+    content: "";
+    position: absolute;
+    top: 24px;
+    left: 6%;
+    right: 6%;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in oklab, var(--border) 100%, transparent),
+      transparent
+    );
+  }
+  .diq-career-processStep {
+    border-left: none;
+    padding: 0;
+  }
+  .diq-career-processNum {
+    margin-left: 0;
+  }
+}
+
+/* Framed CTA — adapted from .diq-homeCtaFrame */
+.diq-career-ctaFrame {
+  position: relative;
+  padding: clamp(32px, 6vw, 64px) clamp(20px, 4vw, 40px);
+  border: 1px solid color-mix(in oklab, var(--border) 80%, transparent);
+  background: color-mix(in oklab, var(--card) 55%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--gold) 10%, transparent);
+  overflow: hidden;
+}
+.diq-career-ctaFrame::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(80vw, 720px);
+  height: min(50vw, 360px);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse,
+    color-mix(in oklab, var(--gold) 10%, transparent) 0%,
+    transparent 70%
+  );
+}
+
+/* Apply-form stepper */
+.diq-career-stepper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.diq-career-stepDot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border: 1px solid color-mix(in oklab, var(--border) 90%, transparent);
+  background: var(--card);
+  color: var(--muted-foreground);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 12px;
+  transition:
+    border-color 0.25s ease,
+    color 0.25s ease,
+    background 0.25s ease;
+}
+.diq-career-stepDot[data-state="current"] {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: color-mix(in oklab, var(--gold) 8%, var(--card));
+}
+.diq-career-stepDot[data-state="done"] {
+  border-color: color-mix(in oklab, var(--gold) 55%, transparent);
+  color: var(--gold);
+}
+.diq-career-stepBar {
+  flex: 1;
+  height: 1px;
+  background: color-mix(in oklab, var(--border) 90%, transparent);
+}
+.diq-career-stepBar[data-state="done"] {
+  background: color-mix(in oklab, var(--gold) 55%, transparent);
+}
+.diq-career-progressTrack {
+  height: 2px;
+  width: 100%;
+  background: color-mix(in oklab, var(--border) 90%, transparent);
+  overflow: hidden;
+}
+.diq-career-progressFill {
+  display: block;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--gold) 55%, transparent),
+    var(--gold)
+  );
+  transition: width 0.4s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .diq-career-roleCard,
+  .diq-career-roleCard::before,
+  .diq-career-roleArrow,
+  .diq-career-benefit,
+  .diq-career-stepDot,
+  .diq-career-progressFill {
+    transition: none !important;
+  }
+}
+
 @media (max-width: 960px) {
   .diq-hero {
     padding-block: var(--diq-heroTop) clamp(56px, 8vw, 80px);
@@ -1471,3 +2020,5 @@ a.diq-homeCard:focus-visible {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+
