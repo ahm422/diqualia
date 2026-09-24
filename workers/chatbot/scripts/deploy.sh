@@ -32,10 +32,18 @@ done
 step() { printf '\n\033[1m▶ %s\033[0m\n' "$1"; }
 
 step "Checking Cloudflare login"
-if ! npx wrangler whoami >/dev/null 2>&1; then
-  echo "Not logged in. Run: npx wrangler login" >&2
+ACCOUNT_ID="$(grep -oE '"account_id": *"[0-9a-f]+"' wrangler.jsonc | grep -oE '[0-9a-f]{32}')"
+if ! whoami_out="$(npx wrangler whoami 2>&1)"; then
+  echo "Not logged in. Run: npx wrangler login (or set CLOUDFLARE_API_TOKEN)" >&2
   exit 1
 fi
+if ! grep -q "$ACCOUNT_ID" <<<"$whoami_out"; then
+  echo "The logged-in Cloudflare user has no access to account $ACCOUNT_ID (from wrangler.jsonc)." >&2
+  echo "Log in with the DiQualia account: npx wrangler logout && npx wrangler login" >&2
+  exit 1
+fi
+grep -m1 -iE "logged in|api token" <<<"$whoami_out" || true
+echo "Account: $ACCOUNT_ID"
 
 step "Vectorize index: $INDEX"
 if npx wrangler vectorize get "$INDEX" --json >/dev/null 2>&1; then
