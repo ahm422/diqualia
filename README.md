@@ -96,3 +96,11 @@ Dry-run / manual invocation (see the script's header comment for all flags):
 npx tsx scripts/cleanup-stale-drafts.ts              # local D1, dry-run (default)
 npx tsx scripts/cleanup-stale-drafts.ts --remote --run
 ```
+
+## Troubleshooting
+
+In production, a server render error only shows up in the browser as a generic `500` / "Minified React error #441" with a `digest` value. To see the real exception, open **Workers & Pages → `diqualia-web` → Logs** in the Cloudflare dashboard and search for that digest, or stream the logs live with:
+
+```bash
+npx wrangler tail diqualia-web
+```
