@@ -14,6 +14,7 @@
   //   vars (wrangler.jsonc):     R2_PUBLIC_URL, NODE_ENV
   //   wrangler secret (required): JWT_SECRET, ADMIN_EMAIL
   //   bindings:                   EMAIL (send_email) — contact form via Cloudflare Email Service
+  //                               CHATBOT (service) — diqualia-chatbot Worker (workers/chatbot)
   //                               from: noreply@diqualia.com (domain must be email-sending enabled)
   //   never long-lived secret:    ADMIN_PASSWORD — one-time seed only (scripts/seed-admin.ts)
   //   local preview only:         COOKIE_SECURE=false in .dev.vars
@@ -66,6 +67,15 @@
   "send_email": [
     {
       "name": "EMAIL"
+    }
+  ],
+  // Website chatbot — separate Worker (workers/chatbot) with Workers AI,
+  // Vectorize, D1 and Durable Objects. Deploy diqualia-chatbot first.
+  // Local dev: run `npm run dev` in workers/chatbot alongside `npm run dev` here.
+  "services": [
+    {
+      "binding": "CHATBOT",
+      "service": "diqualia-chatbot"
     }
   ],
   "vars": {

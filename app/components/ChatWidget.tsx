@@ -235,7 +235,27 @@ export function ChatWidget() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const launcherRef = useRef<HTMLButtonElement>(null);
   const wasOpen = useRef(false);
+  const historyLoaded = useRef(false);
   const isNavCollapsed = useIsNavCollapsed();
+
+  // Restore this browser session's conversation (stored by the chatbot
+  // Worker) the first time the panel opens.
+  useEffect(() => {
+    if (!open || historyLoaded.current) return;
+    historyLoaded.current = true;
+    let cancelled = false;
+    fetch("/api/chat", { method: "GET" })
+      .then((res) => (res.ok ? (res.json() as Promise<{ messages?: ChatMessage[] }>) : null))
+      .then((data) => {
+        const restored = data?.messages ?? [];
+        if (cancelled || restored.length === 0) return;
+        setMessages((current) => (current.length === 0 ? restored : current));
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -270,6 +290,7 @@ export function ChatWidget() {
     setMessages([]);
     setError(null);
     setInput("");
+    void fetch("/api/chat", { method: "DELETE" }).catch(() => {});
   }
 
   async function sendUserText(raw: string) {
@@ -286,7 +307,8 @@ export function ChatWidget() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: nextMessages }),
+        // History lives server-side per session; only the new message is sent.
+        body: JSON.stringify({ message: text }),
       });
 
       if (!res.ok) {

@@ -22,6 +22,8 @@ const eslintConfig = defineConfig([
     ".vercel/**",
     ".open-next/**",
     ".wrangler/**",
+    // Standalone Workers (own tsconfig/typecheck)
+    "workers/**",
   ]),
 ]);
 

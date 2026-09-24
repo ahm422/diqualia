@@ -28,15 +28,12 @@
     "cf:e2e": "tsx scripts/e2e-preview.ts",
     "cf:e2e:rbac": "tsx scripts/e2e-rbac.ts",
     "test:career-apply": "tsx --test lib/schemas/public/career-apply.test.ts",
-    "kb:ingest": "tsx chatbot/rag/ingestion/cli.ts",
-    "kb:eval": "tsx chatbot/tests/evaluate.ts"
+    "chatbot:dev": "npm --prefix workers/chatbot run dev",
+    "chatbot:deploy": "npm --prefix workers/chatbot run deploy:all"
   },
   "dependencies": {
-    "@langchain/openai": "^1.5.10",
-    "@langchain/qdrant": "^1.0.3",
     "@prisma/adapter-d1": "^7.8.0",
     "@prisma/client": "^7.7.0",
-    "@qdrant/js-client-rest": "^1.19.0",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-select": "^2.3.7",
@@ -48,7 +45,6 @@
     "clsx": "^2.1.1",
     "dotenv": "^17.4.1",
     "jose": "^6.2.3",
-    "langchain": "^1.5.10",
     "lucide-react": "^1.7.0",
     "marked": "^18.0.9",
     "next": "^16.2.11",
