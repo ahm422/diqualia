@@ -939,7 +939,7 @@ async function main() {
   const { getPlatformProxy } = await import("wrangler");
   const { createPrismaClient } = await import("../lib/prisma-core");
 
-  const { env, dispose } = await getPlatformProxy<Env>({ persist: true, remoteBindings: false });
+  const { env, dispose } = await getPlatformProxy<Env>();
   const prisma = createPrismaClient(env.DB);
 
   try {

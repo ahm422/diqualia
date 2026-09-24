@@ -1,7 +1,7 @@
 /**
  * Automatic knowledge-base sync.
  *
- * D1 triggers (migration 0011) append a row to kb_sync_outbox on every
+ * D1 triggers (migration 0018) append a row to kb_sync_outbox on every
  * INSERT / UPDATE / DELETE of a public CMS table. The cron trigger calls
  * KbSync every minute; when the outbox has rows it re-runs the incremental
  * ingestion and then clears the rows it covered. Changes that land while a

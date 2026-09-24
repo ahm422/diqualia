@@ -46,6 +46,23 @@ function str(value: unknown): string {
   return value === null || value === undefined ? "" : String(value);
 }
 
+/** HTML (admin rich-text fields) → plain text for embedding. */
+function htmlToText(value: unknown): string {
+  return str(value)
+    .replace(/<(script|style)[^>]*>[\s\S]*?<\/\1>/gi, " ")
+    .replace(/<\/(p|div|h[1-6]|li|tr|br)\s*>|<br\s*\/?>/gi, "\n")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n\s*\n+/g, "\n\n")
+    .trim();
+}
+
 /** D1 DATETIME text ("YYYY-MM-DD HH:MM:SS" or ISO) → ISO string. */
 function isoOrNull(value: unknown): string | null {
   if (!value) return null;
@@ -61,6 +78,7 @@ async function loadDbDocuments(db: D1Database): Promise<KbDocument[]> {
     db.prepare(`SELECT * FROM home_hero WHERE id = 1`),
     db.prepare(`SELECT * FROM about_hero WHERE id = 1`),
     db.prepare(`SELECT * FROM about_built_for_items ORDER BY "order"`),
+    db.prepare(`SELECT * FROM about_built_for_section WHERE id = 1`),
     db.prepare(`SELECT * FROM services_page WHERE id = 1`),
     db.prepare(`SELECT * FROM service_sections ORDER BY "order"`),
     db.prepare(`SELECT * FROM service_items ORDER BY section_id, "order"`),
@@ -78,6 +96,7 @@ async function loadDbDocuments(db: D1Database): Promise<KbDocument[]> {
     homeHero,
     aboutHero,
     builtForItems,
+    builtForSection,
     servicesPage,
     sectionRows,
     itemRows,
@@ -150,6 +169,20 @@ async function loadDbDocuments(db: D1Database): Promise<KbDocument[]> {
       body: `${str(ah.headline)}. ${str(ah.body)}`,
     });
   }
+  const bfs = one(builtForSection);
+  if (bfs) {
+    docs.push({
+      id: "about:built-for-section",
+      contentType: "about",
+      title: "What DiQualia is built for",
+      section: "Built for",
+      sourceUrl: "https://www.diqualia.com/about",
+      status: "published",
+      visibility: "public",
+      updatedAt: null,
+      body: `${str(bfs.eyebrow)}: ${str(bfs.headline_line1)} ${str(bfs.headline_line2)}`,
+    });
+  }
   for (const item of builtForItems ?? []) {
     docs.push({
       id: `about:built-for:${str(item.id)}`,
@@ -194,6 +227,7 @@ async function loadDbDocuments(db: D1Database): Promise<KbDocument[]> {
       section.card_title && section.card_body
         ? `${str(section.card_title)} — ${str(section.card_body)}`
         : str(section.card_title) || str(section.card_body),
+      htmlToText(section.overview_html),
     ]
       .filter(Boolean)
       .join(" ");

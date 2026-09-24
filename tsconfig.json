@@ -11,8 +11,7 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "react-jsx",
-    "incremental": true,
+    "jsx": "react-jsx",git 
     "plugins": [
       {
         "name": "next"
@@ -30,5 +29,5 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", "scripts", "src/worker"]
+  "exclude": ["node_modules", "scripts", "src/worker", "workers"]
 }

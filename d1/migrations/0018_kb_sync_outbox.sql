@@ -226,6 +226,20 @@ BEGIN
   INSERT INTO kb_sync_outbox (table_name, op) VALUES ('blog_posts', 'delete');
 END;
 
+-- about_built_for_section (added on main in 0014)
+CREATE TRIGGER IF NOT EXISTS kb_sync_about_built_for_section_insert AFTER INSERT ON "about_built_for_section"
+BEGIN
+  INSERT INTO kb_sync_outbox (table_name, op) VALUES ('about_built_for_section', 'insert');
+END;
+CREATE TRIGGER IF NOT EXISTS kb_sync_about_built_for_section_update AFTER UPDATE ON "about_built_for_section"
+BEGIN
+  INSERT INTO kb_sync_outbox (table_name, op) VALUES ('about_built_for_section', 'update');
+END;
+CREATE TRIGGER IF NOT EXISTS kb_sync_about_built_for_section_delete AFTER DELETE ON "about_built_for_section"
+BEGIN
+  INSERT INTO kb_sync_outbox (table_name, op) VALUES ('about_built_for_section', 'delete');
+END;
+
 -- Vectors previously lived in Qdrant. Reset ingestion state so the first
 -- sync re-embeds everything into Vectorize, and queue that first sync.
 DELETE FROM kb_documents;

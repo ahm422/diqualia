@@ -72,7 +72,6 @@ are re-indexed automatically (D1 triggers + cron); no manual ingest step.
 
 See [`docs/DEPLOY-PHASE9.md`](docs/DEPLOY-PHASE9.md) and [`MIGRATION_D1_R2_WORKERS.md`](MIGRATION_D1_R2_WORKERS.md).
 
-<<<<<<< HEAD
 The chatbot Worker is deployed separately and must exist before the website,
 because the website's `CHATBOT` service binding points to it:
 
@@ -82,7 +81,7 @@ npm run deploy:all -- --site   # Vectorize index, D1 migrations, chatbot, then w
 ```
 
 Details: [`workers/chatbot/README.md`](workers/chatbot/README.md#first-time-production-setup).
-=======
+
 ## Scheduled jobs
 
 | Job | Schedule | What it does |
@@ -97,4 +96,3 @@ Dry-run / manual invocation (see the script's header comment for all flags):
 npx tsx scripts/cleanup-stale-drafts.ts              # local D1, dry-run (default)
 npx tsx scripts/cleanup-stale-drafts.ts --remote --run
 ```
->>>>>>> c86113d2eefa528ae4e3f0a6882fbc3eb970be17

@@ -27,11 +27,6 @@
     "cf:d1:local": "wrangler d1 execute diqualia-db --local",
     "cf:e2e": "tsx scripts/e2e-preview.ts",
     "cf:e2e:rbac": "tsx scripts/e2e-rbac.ts",
-<<<<<<< HEAD
-    "test:career-apply": "tsx --test lib/schemas/public/career-apply.test.ts",
-    "chatbot:dev": "npm --prefix workers/chatbot run dev",
-    "chatbot:deploy": "npm --prefix workers/chatbot run deploy:all"
-=======
     "cf:e2e:portal": "tsx scripts/e2e-portal.ts",
     "email:test": "tsx scripts/send-test-email.ts",
     "test:auth-session": "tsx --test lib/auth/session.test.ts",
@@ -43,8 +38,9 @@
     "test:apply-check": "tsx --test lib/careers/apply-check.test.ts",
     "test:portal-status": "tsx --test lib/portal/status.test.ts",
     "test:portal-format": "tsx --test lib/portal/format.test.ts",
-    "test:reading-time": "tsx --test lib/blog/reading-time.test.ts"
->>>>>>> c86113d2eefa528ae4e3f0a6882fbc3eb970be17
+    "test:reading-time": "tsx --test lib/blog/reading-time.test.ts",
+    "chatbot:dev": "npm --prefix workers/chatbot run dev",
+    "chatbot:deploy": "npm --prefix workers/chatbot run deploy:all"
   },
   "dependencies": {
     "@prisma/adapter-d1": "^7.8.0",
@@ -91,6 +87,6 @@
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
     "typescript": "^5",
-    "wrangler": "^4.106.0"
+    "wrangler": "^4.138.0"
   }
 }

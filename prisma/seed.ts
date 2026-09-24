@@ -13,7 +13,7 @@ async function main() {
     throw new Error("ADMIN_EMAIL and ADMIN_PASSWORD must be set to seed the admin user");
   }
 
-  const { env, dispose } = await getPlatformProxy<Env>({ persist: true, remoteBindings: false });
+  const { env, dispose } = await getPlatformProxy<Env>();
   const prisma = createPrismaClient(env.DB);
 
   try {
