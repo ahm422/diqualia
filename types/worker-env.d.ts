@@ -8,8 +8,8 @@ declare global {
     R2_PUBLIC_URL: string;
     /** Cloudflare Email Service binding (wrangler send_email → EMAIL) */
     EMAIL?: SendEmail;
-    /** Workers AI binding (wrangler ai → AI) */
-    AI: Ai;
+    /** diqualia-chatbot Worker (service binding) — workers/chatbot */
+    CHATBOT?: Fetcher;
   }
 }
 

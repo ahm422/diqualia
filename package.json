@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "bash scripts/ensure-ipv6-loopback.sh && NODE_OPTIONS='--dns-result-order=ipv4first' next dev -H 127.0.0.1",
+    "dev:host": "bash scripts/ensure-ipv6-loopback.sh && NODE_OPTIONS='--dns-result-order=ipv4first' next dev -H 0.0.0.0",
     "build": "opennextjs-cloudflare build",
     "preview": "bash scripts/ensure-ipv6-loopback.sh && opennextjs-cloudflare preview -- --ip 127.0.0.1",
     "deploy": "opennextjs-cloudflare build && wrangler deploy",
@@ -37,7 +38,9 @@
     "test:apply-check": "tsx --test lib/careers/apply-check.test.ts",
     "test:portal-status": "tsx --test lib/portal/status.test.ts",
     "test:portal-format": "tsx --test lib/portal/format.test.ts",
-    "test:reading-time": "tsx --test lib/blog/reading-time.test.ts"
+    "test:reading-time": "tsx --test lib/blog/reading-time.test.ts",
+    "chatbot:dev": "npm --prefix workers/chatbot run dev",
+    "chatbot:deploy": "npm --prefix workers/chatbot run deploy:all"
   },
   "dependencies": {
     "@prisma/adapter-d1": "^7.8.0",
@@ -64,7 +67,7 @@
     "jose": "^6.2.3",
     "lucide-react": "^1.7.0",
     "marked": "^18.0.9",
-    "next": "16.2.10",
+    "next": "^16.2.11",
     "prisma": "^7.7.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
@@ -84,6 +87,6 @@
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
     "typescript": "^5",
-    "wrangler": "^4.106.0"
+    "wrangler": "^4.138.0"
   }
 }

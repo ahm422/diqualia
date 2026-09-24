@@ -1,0 +1,98 @@
+{
+	"$schema": "./node_modules/wrangler/config-schema.json",
+	// DiQualia website chatbot — 100% Cloudflare:
+	//   Workers AI  → generation (Llama 3.3 70B), embeddings (bge-m3), reranking (bge-reranker-base)
+	//   Vectorize   → semantic index (diqualia-kb, 1024 dims, cosine)
+	//   D1          → same diqualia-db as the website (CMS source of truth + kb_* tables)
+	//   Durable Objects → ChatSession (per-visitor history), KbSync (single-flight re-indexing)
+	//   Cron        → drains kb_sync_outbox every minute (filled by D1 triggers on CMS writes)
+	//   Rate Limiting → per-IP chat limit
+	//
+	// Not publicly reachable: the website Worker (diqualia-web) calls it through
+	// a service binding (CHATBOT). Keep workers_dev false and no routes.
+	//
+	// Deploy:  npm run deploy:all            (creates missing resources, migrates D1, deploys)
+	//          npm run deploy:all -- --site  (then deploys the website too)
+	// Resources this config expects (deploy:all creates them if missing):
+	//   Vectorize  diqualia-kb  — 1024 dims, cosine, metadata indexes: visibility, status
+	//   D1         diqualia-db  — shared with the website; migrations in d1/migrations
+	//   Durable Objects, AI, Rate Limiting, crons — created automatically by `wrangler deploy`
+	"name": "diqualia-chatbot",
+	"account_id": "YOUR_CLOUDFLARE_ACCOUNT_ID",
+	"main": "src/index.ts",
+	"compatibility_date": "2026-09-24",
+	"workers_dev": false,
+	"preview_urls": false,
+	// Readable stack traces in Workers Logs.
+	"upload_source_maps": true,
+	"observability": {
+		"enabled": true,
+		"head_sampling_rate": 1,
+		"traces": {
+			"enabled": true
+		}
+	},
+	"ai": {
+		"binding": "AI"
+	},
+	"vectorize": [
+		{
+			// Created by deploy:all (or npm run vectorize:create). Metadata indexes
+			// must exist before the first sync inserts vectors.
+			"binding": "VECTORIZE",
+			"index_name": "diqualia-kb",
+			"remote": true
+		}
+	],
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "diqualia-db",
+			"database_id": "YOUR_D1_DATABASE_ID",
+			"migrations_dir": "../../d1/migrations"
+		}
+	],
+	"durable_objects": {
+		"bindings": [
+			{
+				"name": "CHAT_SESSION",
+				"class_name": "ChatSession"
+			},
+			{
+				"name": "KB_SYNC",
+				"class_name": "KbSync"
+			}
+		]
+	},
+	"migrations": [
+		{
+			"tag": "v1",
+			"new_sqlite_classes": [
+				"ChatSession",
+				"KbSync"
+			]
+		}
+	],
+	"ratelimits": [
+		{
+			"name": "CHAT_LIMITER",
+			"namespace_id": "1101",
+			"simple": {
+				"limit": 12,
+				"period": 60
+			}
+		}
+	],
+	"triggers": {
+		// Every minute: sync pending CMS changes (no-op when the outbox is empty).
+		// Every 6 hours: full hash reconcile (catches hardcoded-copy changes after deploys).
+		"crons": [
+			"* * * * *",
+			"0 */6 * * *"
+		]
+	},
+	"vars": {
+		// Optional: set to an AI Gateway id for caching/analytics on Workers AI calls.
+		"AI_GATEWAY_ID": ""
+	}
+}
