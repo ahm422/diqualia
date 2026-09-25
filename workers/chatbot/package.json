@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "build": "tsc --noEmit",
     "dev": "wrangler dev --persist-to ../../.wrangler/state --test-scheduled",
     "deploy": "wrangler deploy",
     "deploy:all": "bash scripts/deploy.sh",
