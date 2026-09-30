@@ -29,7 +29,7 @@ export function EmailCardEditor({ initial }: { initial: ContactPageData }) {
         <AdminInput value={emailType} onChange={setEmailType} placeholder="Email" />
       </AdminField>
       <AdminField label="Email address">
-        <AdminInput value={email} onChange={setEmail} placeholder="intel@diqualia.com" />
+        <AdminInput value={email} onChange={setEmail} placeholder="info@diqualia.com" />
       </AdminField>
       <AdminField label="Copy below email">
         <AdminTextarea value={emailCopy} onChange={setEmailCopy} rows={3} placeholder="Tell us your niche…" />

@@ -249,7 +249,7 @@ export async function seedCms(prisma: PrismaClient): Promise<void> {
       ctaBody: "Every engagement begins with a no-cost discovery call — 30 minutes, no pitch, just research.",
       ctaBtn1Label: "Contact",
       ctaBtn1Href: "/contact",
-      ctaEmailHref: "intel@diqualia.com",
+      ctaEmailHref: "info@diqualia.com",
     },
     update: {
       eyebrow: "Our Intelligence Services",
@@ -268,7 +268,7 @@ export async function seedCms(prisma: PrismaClient): Promise<void> {
       ctaBody: "Every engagement begins with a no-cost discovery call — 30 minutes, no pitch, just research.",
       ctaBtn1Label: "Contact",
       ctaBtn1Href: "/contact",
-      ctaEmailHref: "intel@diqualia.com",
+      ctaEmailHref: "info@diqualia.com",
     },
   });
   console.log("ServicesPage ready");
@@ -670,7 +670,7 @@ export async function seedCms(prisma: PrismaClient): Promise<void> {
       body: "Every engagement begins with a no-cost discovery call — 30 minutes, no pitch, just research. We'll map your market, clarify your buyer reality, and outline what an intelligence-first engagement would produce.",
       emailLabel: "Primary contact",
       emailType: "Email",
-      email: "intel@diqualia.com",
+      email: "info@diqualia.com",
       emailCopy: `Tell us your niche, your offer, and what "qualified pipeline" means for your team — we'll reply with next steps.`,
       whatToIncludeItems: [
         "Your niche and the buyer you sell to (role + industry)",
@@ -689,7 +689,7 @@ export async function seedCms(prisma: PrismaClient): Promise<void> {
       body: "Every engagement begins with a no-cost discovery call — 30 minutes, no pitch, just research. We'll map your market, clarify your buyer reality, and outline what an intelligence-first engagement would produce.",
       emailLabel: "Primary contact",
       emailType: "Email",
-      email: "intel@diqualia.com",
+      email: "info@diqualia.com",
       emailCopy: `Tell us your niche, your offer, and what "qualified pipeline" means for your team — we'll reply with next steps.`,
       whatToIncludeItems: [
         "Your niche and the buyer you sell to (role + industry)",

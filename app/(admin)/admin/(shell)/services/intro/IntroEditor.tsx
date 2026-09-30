@@ -94,7 +94,7 @@ function CtaBlock({ initial }: { initial: ServicesPageData }) {
       <div className="grid gap-4 sm:grid-cols-2">
         <AdminField label="Button Label"><AdminInput value={f.ctaBtn1Label} onChange={set("ctaBtn1Label")} placeholder="Contact" /></AdminField>
         <AdminField label="Button Href"><AdminInput value={f.ctaBtn1Href} onChange={set("ctaBtn1Href")} placeholder="/contact" /></AdminField>
-        <AdminField label="Email (mailto)"><AdminInput value={f.ctaEmailHref} onChange={set("ctaEmailHref")} placeholder="intel@diqualia.com" /></AdminField>
+        <AdminField label="Email (mailto)"><AdminInput value={f.ctaEmailHref} onChange={set("ctaEmailHref")} placeholder="info@diqualia.com" /></AdminField>
       </div>
       <AdminSaveButton onClick={() => save(f)} saving={saving} />
     </AdminSection>
