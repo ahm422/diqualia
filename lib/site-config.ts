@@ -24,7 +24,7 @@ export const CONTACT_PHONE = {
 } as const;
 
 /** Primary inbound email — rendered as a `mailto:` and fed to the Organization node. */
-export const CONTACT_EMAIL = "intel@diqualia.com";
+export const CONTACT_EMAIL = "info@diqualia.com";
 
 /**
  * Registered office. Structured parts feed the schema.org `PostalAddress`;

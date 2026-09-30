@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { Container } from "@/app/components/Container";
+import { CONTACT_EMAIL } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   title: "Terms",
@@ -16,8 +17,8 @@ export default function TermsPage() {
       </h1>
       <p className="mt-6 text-sm leading-8" style={{ color: "var(--text-muted)" }}>
         This is a placeholder terms page for the DiQualia marketing site. For contractual enquiries, email{" "}
-        <a href="mailto:intel@diqualia.com" style={{ color: "var(--gold)" }}>
-          intel@diqualia.com
+        <a href={`mailto:${CONTACT_EMAIL}`} style={{ color: "var(--gold)" }}>
+          {CONTACT_EMAIL}
         </a>
         .
       </p>
