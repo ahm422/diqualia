@@ -55,3 +55,6 @@ next-env.d.ts
 # cloudflare local dev state
 .wrangler/
 .open-next/
+
+# Wrangler local secrets
+.dev.vars
