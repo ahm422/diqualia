@@ -7,7 +7,7 @@
  * The live app still sends through the binding (lib/email.ts).
  *
  * DANGER: sends real mail. Requires `diqualia.com` onboarded for Email Sending
- * (SPF/DKIM/DMARC verified) — see docs/DEPLOY-108.md. Remove or lock this script
+ * (SPF/DKIM/DMARC verified). Remove or lock this script
  * (and the `email:test` npm script) before shipping.
  *
  * Env (via .env / .dev.vars / shell):

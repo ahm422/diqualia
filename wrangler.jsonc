@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   // ── Phase 8 deployment config (issue #55) ───────────────────────────────────
-  // Full cutover runbook: docs/DEPLOY-PHASE9.md
+  // Deployment: see README.md
   //
   // Confirmed (Phase 1/4 — do not change unless reprovisioning):
   //   account_id, database_name, database_id, bucket_name, R2_PUBLIC_URL

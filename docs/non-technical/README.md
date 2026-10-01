@@ -12,6 +12,3 @@ Plain-language guides for the DiQualia team — no jargon, no code.
 
 Screenshots go in [`images/`](./images/) — placeholders in the guides are marked
 `_[screenshot: …]_` and should be filled in on the live site at handoff.
-
-Business discovery material is kept in
-[`reference/`](./reference/CLIENT-FUNCTIONALITY-QUESTIONNAIRE.md).

@@ -6,7 +6,7 @@ import "server-only";
  * logs the message id so sends are confirmable in `wrangler tail`.
  *
  * Delivery only works once `diqualia.com` is onboarded for Cloudflare Email
- * Sending (SPF/DKIM/DMARC verified) — see docs/DEPLOY-108.md.
+ * Sending (SPF/DKIM/DMARC verified).
  */
 import { EMAIL_FROM, type OutboundEmail } from "./email-shared";
 

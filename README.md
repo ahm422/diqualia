@@ -1,106 +1,132 @@
 # DiQualia
 
-Marketing site (Next.js on Cloudflare Workers via OpenNext) with **D1**, **R2**, **Workers**, and **Cloudflare Email Service**. Admin auth is custom JWT (`jose`) + `bcryptjs`. The website chatbot is a separate, Cloudflare-only Worker (`workers/chatbot/`, see [`workers/chatbot/README.md`](workers/chatbot/README.md)).
+The website and content-management platform for **DiQualia**. It is a marketing
+site with a built-in admin panel, a careers and applicant portal, a blog, and an
+AI website assistant. Everything runs on Cloudflare's edge.
+
+## Features
+
+- **Public website.** Home, About, Services, How We Work, Industries, Story,
+  Blog, Careers and Contact pages. Light and dark themes, responsive down to
+  mobile, with SEO metadata, a sitemap and structured data.
+- **Admin panel (`/admin`).** Staff can edit almost every headline, section,
+  image, the navigation and the footer without a developer. The panel also
+  covers:
+  - Blog posts, written in a rich-text editor and saved as drafts or published.
+  - Job openings.
+  - Contact enquiries and job applications.
+  - Admin users, with role-based permissions.
+- **Careers and applicant portal (`/portal`).** Candidates apply through a
+  multi-step form with CV upload and duplicate-application checks. Each applicant
+  gets a private portal account where they can follow the status of their
+  application.
+- **AI website assistant.** A chat widget that answers visitors' questions using
+  the site's own published content. It runs as a separate Cloudflare Worker and
+  re-indexes automatically when content changes.
+- **Email notifications.** Enquiry and application emails are sent through
+  Cloudflare Email Service.
+- **Scheduled maintenance.** A daily job removes abandoned application drafts
+  and their uploaded files.
+
+## Tech stack
+
+| Area | Technology |
+|------|------------|
+| Framework | [Next.js](https://nextjs.org) (App Router), React, TypeScript |
+| Hosting | Cloudflare Workers via [OpenNext](https://opennext.js.org/cloudflare) |
+| Database | Cloudflare D1 (SQLite) with Prisma |
+| File storage | Cloudflare R2 |
+| Email | Cloudflare Email Service |
+| Auth | JWT sessions (`jose`) + `bcryptjs`, role-based access control |
+| AI assistant | Workers AI, Vectorize, Durable Objects |
+| UI | Tailwind CSS, Radix UI, TipTap rich-text editor |
+
+## Project structure
+
+```
+app/              Next.js routes: public site, /admin, /portal and API routes
+components/       Shared UI components
+lib/              Business logic, validation schemas, auth and helpers
+prisma/           Prisma schema and seed data
+d1/migrations/    D1 database migrations
+src/worker/       Custom Worker entry (adds the scheduled cleanup job)
+workers/chatbot/  The AI website assistant (separate Cloudflare Worker)
+scripts/          Database, seeding and test tooling
+docs/             Plain-language guides for site owners and staff
+```
 
 ## Getting started
 
-### 1) Configure local secrets
+**Requirements:** Node.js 20+ and npm. Running the Worker build and the AI
+assistant also needs a Cloudflare account.
 
 ```bash
-cp .env.example .env          # ADMIN_EMAIL, ADMIN_PASSWORD (seed only)
-cp .dev.vars.example .dev.vars # JWT_SECRET, ADMIN_EMAIL, COOKIE_SECURE=false
+# 1. Install dependencies
 npm install
-```
 
-Worker bindings (D1 `DB`, R2, `EMAIL`) live in [`wrangler.jsonc`](wrangler.jsonc). Contact notifications use `env.EMAIL.send` from `noreply@diqualia.com` (no Resend keys).
+# 2. Create local config from the examples and fill in your own values
+cp .env.example .env
+cp .dev.vars.example .dev.vars
 
-### 2) Local D1 + admin seed
-
-```bash
+# 3. Create the local database and an admin user
 npm run db:migrate
 npm run db:seed:admin
-# optional CMS from existing scratch/export.json:
-# npm run db:import:local -- --force
+
+# 4. Start the site
+npm run dev        # fast UI development at http://127.0.0.1:3000
 ```
 
-### 3) Run frontend
+To run the full Cloudflare Worker locally, with the database, storage and email
+bindings, build it and use the preview server:
 
 ```bash
-npm run dev       # http://127.0.0.1:3000 (fast UI iteration; no Worker bindings)
-# OR authoritative Worker path:
 npm run build
-npm run preview   # http://127.0.0.1:8787
+npm run preview    # http://127.0.0.1:8787
 ```
 
-Network-accessible dev server:
+To run the AI assistant alongside the site, start it in a second terminal. It
+needs `npx wrangler login`, because Workers AI and Vectorize always run remotely:
 
 ```bash
-npx next dev -H 0.0.0.0   # → http://localhost:3000
+cd workers/chatbot && npm install
+cd ../.. && npm run chatbot:dev
 ```
 
-### 4) Run the chatbot Worker (second terminal)
+> **Never commit real secrets.** `.env` and `.dev.vars` are git-ignored. Only
+> the `*.example` files belong in the repository.
 
-```bash
-cd workers/chatbot && npm install   # first time only
-npm run chatbot:dev                 # from the repo root; shares local D1 with the site
-```
+## Useful scripts
 
-The site reaches it through the `CHATBOT` service binding. Workers AI and
-Vectorize always run remotely, so `wrangler login` is required. CMS changes
-are re-indexed automatically (D1 triggers + cron); no manual ingest step.
+| Command | What it does |
+|---------|--------------|
+| `npm run dev` | Next.js dev server |
+| `npm run build` / `npm run preview` | Build and run the Cloudflare Worker locally |
+| `npm run lint` | ESLint |
+| `npm run db:migrate` | Apply D1 migrations to the local database |
+| `npm run db:seed:admin` | Create the first admin user locally |
+| `npm run test:*` | Unit tests (e.g. `test:cnic`, `test:career-apply`, `test:portal-status`) |
+| `npm run cf:e2e:rbac` / `cf:e2e:portal` | End-to-end permission and portal tests against the local preview |
 
-## API
+## Deployment
 
-| Method | Endpoint | Purpose |
-| --- | --- | --- |
-| POST | `/api/chat` | Chatbot (`{"message":"..."}`, streamed `text/plain`; history kept per browser session) |
-| GET | `/api/chat` | Current session's conversation (`{"messages":[...]}`) |
-| DELETE | `/api/chat` | Clear the current session's conversation |
+The site deploys to Cloudflare Workers with `npm run deploy`. Before you deploy
+to your own account:
 
-## Stack
+1. In `wrangler.jsonc` and `workers/chatbot/wrangler.jsonc`, replace the
+   placeholders with your own values:
+   - `YOUR_CLOUDFLARE_ACCOUNT_ID`
+   - `YOUR_D1_DATABASE_ID`
+   - `pub-your-r2-bucket-id.r2.dev`
 
-| Area | Implementation |
-|------|----------------|
-| App | Next.js + OpenNext Cloudflare |
-| Database | Cloudflare D1 + Prisma D1 adapter |
-| Storage | Cloudflare R2 |
-| Email | Cloudflare Email Service (`send_email` → `EMAIL`) |
-| Auth | Custom JWT (`jose`) + `bcryptjs` + RBAC |
-| AI | Workers AI (Llama 3.3 70B, bge-m3, bge-reranker) + Vectorize + Durable Objects — `workers/chatbot` |
+   Also change the domain in `routes`. The same R2 URL is used in
+   `.env.example` and the CI workflow.
+2. Set the production secrets with `wrangler secret put`.
 
-## Deploy
+The AI assistant Worker must be deployed first, because the website connects to
+it through a service binding (`npm run chatbot:deploy`).
 
-See [`docs/DEPLOY-PHASE9.md`](docs/DEPLOY-PHASE9.md) and [`MIGRATION_D1_R2_WORKERS.md`](MIGRATION_D1_R2_WORKERS.md).
+## Documentation
 
-The chatbot Worker is deployed separately and must exist before the website,
-because the website's `CHATBOT` service binding points to it:
-
-```bash
-cd workers/chatbot && npm install && npx wrangler login
-npm run deploy:all -- --site   # Vectorize index, D1 migrations, chatbot, then website
-```
-
-Details: [`workers/chatbot/README.md`](workers/chatbot/README.md#first-time-production-setup).
-
-## Scheduled jobs
-
-| Job | Schedule | What it does |
-|-----|----------|---------------|
-| Stale career-application draft cleanup | Daily 03:00 UTC (`triggers.crons` in `wrangler.jsonc`) | Hard-deletes `career_application_drafts` rows with `status = 'in_progress'` and `updated_at` older than 30 days (no matching submitted application), including their R2 resume/photo objects. `status = 'completed'` drafts are never touched — their R2 keys are shared with the resulting `job_applications` row. See [`lib/careers/cleanup-drafts.ts`](lib/careers/cleanup-drafts.ts) and issue #102. |
-
-The Cron Trigger is wired via [`src/worker/custom-worker.ts`](src/worker/custom-worker.ts), which wraps OpenNext's generated `fetch` handler and adds `scheduled()` (OpenNext's Cloudflare adapter doesn't expose a hook for this). `wrangler.jsonc`'s `main` points here instead of directly at `.open-next/worker.js`.
-
-Dry-run / manual invocation (see the script's header comment for all flags):
-
-```bash
-npx tsx scripts/cleanup-stale-drafts.ts              # local D1, dry-run (default)
-npx tsx scripts/cleanup-stale-drafts.ts --remote --run
-```
-
-## Troubleshooting
-
-In production, a server render error only shows up in the browser as a generic `500` / "Minified React error #441" with a `digest` value. To see the real exception, open **Workers & Pages → `diqualia-web` → Logs** in the Cloudflare dashboard and search for that digest, or stream the logs live with:
-
-```bash
-npx wrangler tail diqualia-web
-```
+Plain-language guides for site owners and staff are in [`docs/`](docs/README.md):
+a product overview, a website tour, the admin guide, the applicant portal guide,
+and an FAQ.
